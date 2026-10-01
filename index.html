@@ -225,9 +225,9 @@ const FOOD = {
    Reemplaza SOLO estas tres constantes.
    Usa la URL del proyecto y la Publishable/anon key. Nunca uses service_role.
 ============================== */
-const SUPABASE_URL='PEGA_AQUI_TU_SUPABASE_URL';
-const SUPABASE_ANON_KEY='PEGA_AQUI_TU_SUPABASE_ANON_KEY';
-const SUPABASE_ADMIN_EMAIL='PEGA_AQUI_TU_CORREO_ADMIN';
+const SUPABASE_URL='https://qgmlmtmtthqwjvgmvmpe.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnbWxtdG10dGhxd2p2Z212bXBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4NTgyOTgsImV4cCI6MjEwNjQzNDI5OH0.3O14bG0rRHqLXmyF175wXApUsO6Vz-EfS_tBKskG8ys';
+const SUPABASE_ADMIN_EMAIL='rociadmin@hotmail.com';
 let supabaseClient=null,adminSession=null,cloudSyncTimer=null,cloudReady=false;
 function supabaseConfigured(){
   return /^https:\/\/.+\.supabase\.co$/i.test(SUPABASE_URL)
