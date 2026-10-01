@@ -140,7 +140,7 @@ hr{border:0;border-top:1px solid var(--line);margin:14px 0}
   <div class="drawer-foot" id="cartFoot"></div>
 </aside>
 <div class="modal" id="summaryModal"><div class="modal-head"><strong>Resumen de tu pedido</strong><button class="icon-btn" data-close-modal="summaryModal" aria-label="Cerrar"></button></div><div class="modal-body" id="summaryBody"></div></div>
-<div class="modal" id="pinModal"><div class="modal-head"><strong>Acceso de administrador</strong><button class="icon-btn" data-close-modal="pinModal" aria-label="Cerrar"></button></div><div class="modal-body"><div class="section-card"><div class="field"><label>PIN</label><input class="input" type="password" inputmode="numeric" maxlength="12" id="pinInput" placeholder="Ingresa tu PIN"></div><button class="btn full" id="pinSubmit"></button></div></div></div>
+<div class="modal" id="pinModal"><div class="modal-head"><strong>Acceso de administrador</strong><button class="icon-btn" data-close-modal="pinModal" aria-label="Cerrar"></button></div><div class="modal-body"><div class="section-card"><div class="field"><label>Correo</label><input class="input" type="email" autocomplete="username" id="adminEmailInput" placeholder="correo@ejemplo.com"></div><div class="field"><label>Contraseña</label><input class="input" type="password" autocomplete="current-password" id="adminPasswordInput" placeholder="Ingresa tu contraseña"></div><button class="btn full" id="pinSubmit"></button><div class="small muted" style="margin-top:10px">El acceso se valida con Supabase Auth. Usa el correo y contraseña creados en Authentication.</div></div></div></div>
 <div class="modal admin-modal" id="adminModal"><div class="modal-head"><strong>Panel de administración</strong><button class="icon-btn" data-close-modal="adminModal" aria-label="Cerrar"></button></div><div class="modal-body"><div class="admin-layout"><nav class="admin-tabs" id="adminTabs"></nav><section class="admin-content" id="adminContent"></section></div></div></div>
 <div class="toast-wrap" id="toastWrap"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -222,17 +222,15 @@ const FOOD = {
 
 /* ==============================
    SUPABASE
-   Reemplaza SOLO estas tres constantes.
-   Usa la URL del proyecto y la Publishable/anon key. Nunca uses service_role.
+   Pega la URL del proyecto y la Publishable/anon key.
+   Nunca uses service_role dentro de este archivo.
 ============================== */
-const SUPABASE_URL='https://qgmlmtmtthqwjvgmvmpe.supabase.co/rest/v1/';
+const SUPABASE_URL='https://qgmlmtmthqwjvgmvmpe.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnbWxtdG10dGhxd2p2Z212bXBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4NTgyOTgsImV4cCI6MjEwNjQzNDI5OH0.3O14bG0rRHqLXmyF175wXApUsO6Vz-EfS_tBKskG8ys';
-const SUPABASE_ADMIN_EMAIL='rociadmin@hotmail.com';
 let supabaseClient=null,adminSession=null,cloudSyncTimer=null,cloudReady=false;
 function supabaseConfigured(){
   return /^https:\/\/.+\.supabase\.co$/i.test(SUPABASE_URL)
-    && !SUPABASE_ANON_KEY.includes('PEGA_AQUI')
-    && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(SUPABASE_ADMIN_EMAIL);
+    && !SUPABASE_ANON_KEY.includes('https://qgmlmtmthqwjvgmvmpe.supabase.co');
 }
 
 /* ==============================
@@ -243,6 +241,7 @@ const defaults={
  config:{
   businessName:'Sazón Manzanillo',tagline:'Comida preparada al momento',logo:'',whatsapp:'5213141234567',adminPin:'1234',deliveryEnabled:true,
   origin:{address:'Centro, Manzanillo, Colima, México',lat:19.0522,lng:-104.3158},
+  map:{provider:'carto',apiKey:'',style:'voyager',attribution:'OpenStreetMap contributors, CARTO'},
   payments:[{id:'pay1',title:'Transferencia bancaria',data:'CLABE 012345678901234567'},{id:'pay2',title:'Depósito en tienda de conveniencia',data:'Referencia 1234567890'}],
   shipping:{base:35,perKm:8,margin:20,rounding:5,freeFrom:600,roundTrip:false,vehicle:'moto',fuel:'Magna',efficiency:{moto:28,auto:13,truck:9,bike:9999},fuelPrice:{Magna:24.5,Premium:26.4,'Diésel':25.9}},
   design:{primary:'#c62828',secondary:'#fff3f3',accent:'#ffb300',text:'#232323',card:'#ffffff',siteBg:'#f7f7f9',bgType:'solid',grad1:'#f7f7f9',grad2:'#fff0e6',gradAngle:135,bgImage:'',bgOpacity:.18,pattern:true,patternOpacity:.055,iconColor:'#c62828',iconSize:72,font:'Inter',rounded:true}
@@ -379,7 +378,41 @@ function renderSummary(){const items=cartItems(),pay=state.config.payments.find(
 /* ==============================
    MAP, GEOCODING & ROUTING
 ============================== */
-function initClientMap(){if(!document.getElementById('clientMap')||typeof L==='undefined')return;const center=checkout.lat!=null?[checkout.lat,checkout.lng]:[state.config.origin.lat,state.config.origin.lng];if(clientMap){clientMap.remove();clientMap=null}clientMap=L.map('clientMap').setView(center,13);L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd',attribution:'OpenStreetMap contributors, CARTO'}).addTo(clientMap);customerMarker=L.marker(center,{draggable:true}).addTo(clientMap);customerMarker.on('dragend',async e=>{const ll=e.target.getLatLng();checkout.lat=ll.lat;checkout.lng=ll.lng;await computeClientRoute()});clientMap.on('click',e=>{customerMarker.setLatLng(e.latlng);checkout.lat=e.latlng.lat;checkout.lng=e.latlng.lng;computeClientRoute()})}
+
+function mapSettings(){
+  state.config.map=state.config.map||{provider:'carto',apiKey:'',style:'voyager',attribution:'OpenStreetMap contributors, CARTO'};
+  if(!state.config.map.style)state.config.map.style='voyager';
+  return state.config.map;
+}
+function cartoTileUrl(){
+  const m=mapSettings();
+  const key=(m.apiKey||'').trim();
+  const style=['voyager','light_all','dark_all'].includes(m.style)?m.style:'voyager';
+  if(!key)return '';
+  return `https://basemaps.cartocdn.com/rastertiles/${style}/{z}/{x}/{y}{r}.png?key=${encodeURIComponent(key)}`;
+}
+function mapConfigured(){return !!cartoTileUrl()}
+function showMapConfigNeeded(containerId){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  el.innerHTML=`<div class="empty-state" style="height:100%;min-height:220px;display:grid;place-items:center;padding:24px;text-align:center"><div>${UI.map}<strong style="display:block;margin:8px 0">Falta configurar CARTO</strong><span class="small muted">En Administración, Negocio, CARTO pega tu API key para activar los mapas.</span></div></div>`;
+}
+function addConfiguredTileLayer(map,containerId){
+  const url=cartoTileUrl();
+  if(!url){showMapConfigNeeded(containerId);return false}
+  try{
+    L.tileLayer(url,{
+      maxZoom:20,
+      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attribution/">CARTO</a>'
+    }).addTo(map);
+    return true;
+  }catch(e){
+    showMapConfigNeeded(containerId);
+    return false;
+  }
+}
+
+function initClientMap(){if(!document.getElementById('clientMap')||typeof L==='undefined')return;const center=checkout.lat!=null?[checkout.lat,checkout.lng]:[state.config.origin.lat,state.config.origin.lng];if(clientMap){clientMap.remove();clientMap=null}clientMap=L.map('clientMap').setView(center,13);if(!addConfiguredTileLayer(clientMap,'clientMap')){clientMap.remove();clientMap=null;return;}customerMarker=L.marker(center,{draggable:true}).addTo(clientMap);customerMarker.on('dragend',async e=>{const ll=e.target.getLatLng();checkout.lat=ll.lat;checkout.lng=ll.lng;await computeClientRoute()});clientMap.on('click',e=>{customerMarker.setLatLng(e.latlng);checkout.lat=e.latlng.lat;checkout.lng=e.latlng.lng;computeClientRoute()})}
 async function geocodeAddress(address,target){if(!address.trim()){toast('Escribe una dirección.','error');return}try{const url=`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`;const r=await fetch(url,{headers:{'Accept':'application/json'}});if(!r.ok)throw new Error();const d=await r.json();if(!d.length)throw new Error();const lat=Number(d[0].lat),lng=Number(d[0].lon);if(target==='client'){checkout.lat=lat;checkout.lng=lng;checkout.address=d[0].display_name;document.getElementById('clientAddress').value=checkout.address;if(customerMarker)customerMarker.setLatLng([lat,lng]);if(clientMap)clientMap.setView([lat,lng],15);await computeClientRoute()}else if(target==='origin'){state.config.origin={address:d[0].display_name,lat,lng};save();renderAdminPane('business');toast('Origen actualizado.','ok')}else if(target==='trip'){document.getElementById('tripDestination').value=d[0].display_name;setTripDestination(lat,lng)}}catch(e){toast('No se pudo geocodificar la dirección. Puedes marcar el punto manualmente en el mapa.','error')}}
 function haversine(a,b,c,d){const R=6371,toRad=x=>x*Math.PI/180,da=toRad(c-a),db=toRad(d-b),q=Math.sin(da/2)**2+Math.cos(toRad(a))*Math.cos(toRad(c))*Math.sin(db/2)**2;return 2*R*Math.atan2(Math.sqrt(q),Math.sqrt(1-q))}
 async function routeDistance(aLat,aLng,bLat,bLng){try{const u=`https://router.project-osrm.org/route/v1/driving/${aLng},${aLat};${bLng},${bLat}?overview=full&geometries=geojson`;const r=await fetch(u);if(!r.ok)throw new Error();const d=await r.json();if(!d.routes?.length)throw new Error();return {km:d.routes[0].distance/1000,geo:d.routes[0].geometry}}catch(e){return {km:haversine(aLat,aLng,bLat,bLng)*1.3,geo:null,fallback:true}}}
@@ -411,25 +444,33 @@ const adminTabs=[['products','Productos',UI.products],['design','Personalizació
 let activeAdmin='products',editingProductId=null;
 async function openAdmin(){
   if(adminSession&&supabaseClient){renderAdmin();openModal('adminModal');return}
-  document.getElementById('pinInput').value='';
+  const email=document.getElementById('adminEmailInput');
+  const pass=document.getElementById('adminPasswordInput');
+  if(email)email.value=localStorage.getItem('foodCatalogAdminEmail')||'';
+  if(pass)pass.value='';
   openModal('pinModal');
+  setTimeout(()=>email?.focus(),80);
 }
 async function checkPin(){
-  const pin=document.getElementById('pinInput').value.trim();
-  if(supabaseConfigured()&&supabaseClient){
-    if(!/^\d{6,12}$/.test(pin)){toast('El PIN debe tener entre 6 y 12 dígitos.','error');return}
-    const btn=document.getElementById('pinSubmit');btn.disabled=true;
-    try{
-      const {data,error}=await supabaseClient.auth.signInWithPassword({email:SUPABASE_ADMIN_EMAIL,password:pin});
-      if(error)throw error;
-      adminSession=data.session;
-      closeModal('pinModal');renderAdmin();openModal('adminModal');toast('Acceso administrativo iniciado.','ok');
-    }catch(e){toast('PIN incorrecto o usuario administrador no configurado.','error')}
-    finally{btn.disabled=false}
-    return;
-  }
-  if(pin===state.config.adminPin){closeModal('pinModal');renderAdmin();openModal('adminModal')}
-  else toast('PIN incorrecto.','error');
+  if(!supabaseConfigured()||!supabaseClient){toast('Configura primero la URL y la clave pública de Supabase.','error');return}
+  const email=document.getElementById('adminEmailInput').value.trim().toLowerCase();
+  const password=document.getElementById('adminPasswordInput').value;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Escribe un correo válido.','error');return}
+  if(password.length<6){toast('La contraseña debe tener al menos 6 caracteres.','error');return}
+  const btn=document.getElementById('pinSubmit');btn.disabled=true;
+  try{
+    const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+    if(error)throw error;
+    const {data:isAdmin,error:adminError}=await supabaseClient.rpc('is_catalog_admin');
+    if(adminError||isAdmin!==true){
+      await supabaseClient.auth.signOut();
+      throw new Error('Esta cuenta no tiene permisos de administrador.');
+    }
+    adminSession=data.session;
+    localStorage.setItem('foodCatalogAdminEmail',email);
+    closeModal('pinModal');renderAdmin();openModal('adminModal');toast('Acceso administrativo iniciado.','ok');
+  }catch(e){toast(e?.message||'No se pudo iniciar sesión.','error')}
+  finally{btn.disabled=false}
 }
 function renderAdmin(){document.getElementById('adminTabs').innerHTML=adminTabs.map(([id,label,ico])=>`<button class="tab-btn ${activeAdmin===id?'active':''}" data-tab="${id}">${ico}<span>${label}</span></button>`).join('');renderAdminPane(activeAdmin)}
 function renderAdminPane(id){activeAdmin=id;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));const c=document.getElementById('adminContent');if(id==='products')renderProductsAdmin(c);if(id==='design')renderDesignAdmin(c);if(id==='business')renderBusinessAdmin(c);if(id==='trip')renderTripAdmin(c);if(id==='orders')renderOrdersAdmin(c)}
@@ -443,11 +484,11 @@ function renderDesignAdmin(c){const d=state.config.design;c.innerHTML=`<div clas
 function bindDesignAdmin(){document.querySelectorAll('[data-palette]').forEach(b=>b.onclick=()=>{const p=palettes[Number(b.dataset.palette)],d=state.config.design;[d.primary,d.secondary,d.accent,d.text,d.card]=p.slice(1);d.iconColor=d.primary;save();applyDesign();renderDesignAdmin(document.getElementById('adminContent'))});document.querySelectorAll('[data-design]').forEach(i=>i.oninput=e=>{state.config.design[e.target.dataset.design]=e.target.value;save();applyDesign()});const ids=['bgType','grad1','grad2','gradAngle','bgOpacity','pattern','patternOpacity','fontSelect','iconSize','rounded'];ids.forEach(id=>{const el=document.getElementById(id);if(!el)return;const evt=el.type==='range'||el.type==='color'?'input':'change';el.addEventListener(evt,()=>{const d=state.config.design;if(id==='pattern'||id==='rounded')d[id]=el.checked;else if(id==='fontSelect')d.font=el.value;else if(id==='iconSize')d.iconSize=Number(el.value);else if(id==='gradAngle')d.gradAngle=Number(el.value);else if(id==='bgOpacity'||id==='patternOpacity')d[id]=Number(el.value);else d[id]=el.value;save();applyDesign()})});document.getElementById('bgImage').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{state.config.design.bgImage=r.result;state.config.design.bgType='image';save();applyDesign();renderDesignAdmin(document.getElementById('adminContent'))};r.readAsDataURL(f)};document.getElementById('resetDesign').onclick=()=>{state.config.design=deepClone(defaults.config.design);save();applyDesign();renderDesignAdmin(document.getElementById('adminContent'));renderHeader()}}
 function renderBusinessAdmin(c){const cfg=state.config;c.innerHTML=`<div class="section-card"><h3>Identidad</h3><div class="admin-grid two"><div class="field"><label>Nombre del negocio</label><input class="input" id="bizName" value="${esc(cfg.businessName)}"></div><div class="field"><label>Eslogan</label><input class="input" id="bizTagline" value="${esc(cfg.tagline)}"></div></div><div class="field"><label>Logo</label><label class="btn secondary" for="bizLogo">${UI.upload}<span>Subir logo</span></label><input class="hidden" id="bizLogo" type="file" accept="image/*"></div><button class="btn" id="saveIdentity">${UI.save}<span>Guardar identidad</span></button></div><div class="section-card"><h3>WhatsApp y acceso</h3><div class="admin-grid two"><div class="field"><label>Número de WhatsApp</label><input class="input" id="bizWhatsapp" value="${esc(cfg.whatsapp)}"></div><div class="field"><label>Nuevo PIN</label><input class="input" id="bizPin" type="password" value="${esc(cfg.adminPin)}"></div></div><button class="btn" id="saveAccess">${UI.save}<span>Guardar</span></button></div><div class="section-card"><h3>Métodos de pago</h3><div id="paymentAdmin">${cfg.payments.map(p=>`<div class="admin-grid two" style="margin-bottom:8px"><input class="input" data-pay-title="${p.id}" value="${esc(p.title)}"><div class="row"><input class="input" data-pay-data="${p.id}" value="${esc(p.data)}"><button class="icon-btn" data-pay-delete="${p.id}">${UI.trash}</button></div></div>`).join('')}</div><div class="toolbar"><button class="btn secondary" id="addPayment">${UI.plus}<span>Agregar método</span></button><button class="btn" id="savePayments">${UI.save}<span>Guardar métodos</span></button></div></div><div class="section-card"><h3>Origen del negocio</h3><div class="field"><label>Dirección</label><input class="input" id="originAddress" value="${esc(cfg.origin.address)}"></div><button class="btn secondary" id="geocodeOrigin">${UI.pin}<span>Ubicar dirección</span></button><div class="small muted" style="margin:8px 0">También puedes dar clic en el mapa o mover el marcador.</div><div id="originMap" class="map"></div><label class="row" style="margin-top:10px"><input type="checkbox" id="deliveryEnabled" ${cfg.deliveryEnabled?'checked':''}><span>Activar envío a domicilio</span></label></div>`;bindBusinessAdmin();setTimeout(initOriginMap,100)}
 function bindBusinessAdmin(){document.getElementById('saveIdentity').onclick=()=>{state.config.businessName=document.getElementById('bizName').value.trim()||defaults.config.businessName;state.config.tagline=document.getElementById('bizTagline').value.trim();save();renderHeader();toast('Identidad guardada.','ok')};document.getElementById('bizLogo').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{state.config.logo=r.result;save();renderHeader()};r.readAsDataURL(f)};document.getElementById('saveAccess').onclick=()=>{const w=document.getElementById('bizWhatsapp').value.replace(/\D/g,''),p=document.getElementById('bizPin').value.trim();if(!w||!p){toast('Completa WhatsApp y PIN.','error');return}state.config.whatsapp=w;state.config.adminPin=p;save();toast('Datos de acceso guardados.','ok')};document.getElementById('addPayment').onclick=()=>{state.config.payments.push({id:uid('pay'),title:'Nuevo método',data:'Dato para copiar'});save();renderBusinessAdmin(document.getElementById('adminContent'))};document.getElementById('savePayments').onclick=()=>{state.config.payments.forEach(p=>{p.title=document.querySelector(`[data-pay-title="${p.id}"]`)?.value.trim()||p.title;p.data=document.querySelector(`[data-pay-data="${p.id}"]`)?.value.trim()||p.data});save();toast('Métodos guardados.','ok')};document.querySelectorAll('[data-pay-delete]').forEach(b=>b.onclick=()=>{state.config.payments=state.config.payments.filter(p=>p.id!==b.dataset.payDelete);save();renderBusinessAdmin(document.getElementById('adminContent'))});document.getElementById('geocodeOrigin').onclick=()=>geocodeAddress(document.getElementById('originAddress').value,'origin');document.getElementById('deliveryEnabled').onchange=e=>{state.config.deliveryEnabled=e.target.checked;save()}}
-function initOriginMap(){if(!document.getElementById('originMap')||typeof L==='undefined')return;if(originMap){originMap.remove();originMap=null}const o=state.config.origin;originMap=L.map('originMap').setView([o.lat,o.lng],14);L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd',attribution:'OpenStreetMap contributors, CARTO'}).addTo(originMap);originMarker=L.marker([o.lat,o.lng],{draggable:true}).addTo(originMap);const set=e=>{const ll=e.latlng||e.target.getLatLng();state.config.origin.lat=ll.lat;state.config.origin.lng=ll.lng;save()};originMap.on('click',e=>{originMarker.setLatLng(e.latlng);set(e)});originMarker.on('dragend',set)}
+function initOriginMap(){if(!document.getElementById('originMap')||typeof L==='undefined')return;if(originMap){originMap.remove();originMap=null}const o=state.config.origin;originMap=L.map('originMap').setView([o.lat,o.lng],14);if(!addConfiguredTileLayer(originMap,'originMap')){originMap.remove();originMap=null;return;}originMarker=L.marker([o.lat,o.lng],{draggable:true}).addTo(originMap);const set=e=>{const ll=e.latlng||e.target.getLatLng();state.config.origin.lat=ll.lat;state.config.origin.lng=ll.lng;save()};originMap.on('click',e=>{originMarker.setLatLng(e.latlng);set(e)});originMarker.on('dragend',set)}
 function renderTripAdmin(c){const s=state.config.shipping;c.innerHTML=`<div class="section-card"><h3>Ruta y distancia</h3><div class="field"><label>Origen</label><input class="input" value="${esc(state.config.origin.address)}" disabled></div><div class="field"><label>Destino</label><input class="input" id="tripDestination" placeholder="Escribe una dirección"></div><button class="btn secondary" id="tripGeocode">${UI.pin}<span>Buscar destino</span></button><div class="small muted" style="margin:8px 0">También puedes dar clic en el mapa para fijar el destino.</div><div id="tripMap" class="map"></div><label class="row" style="margin-top:10px"><input type="checkbox" id="roundTrip" ${s.roundTrip?'checked':''}><span>Ida y vuelta</span></label></div><div class="section-card"><h3>Vehículo y combustible</h3><div class="field"><label>Vehículo</label><select class="select" id="vehicle"><option value="moto" ${s.vehicle==='moto'?'selected':''}>Moto</option><option value="auto" ${s.vehicle==='auto'?'selected':''}>Auto</option><option value="truck" ${s.vehicle==='truck'?'selected':''}>Camioneta</option><option value="bike" ${s.vehicle==='bike'?'selected':''}>Bicicleta u otro</option></select></div><div class="admin-grid two">${[['Moto','moto',UI.moto],['Auto','auto',UI.car],['Camioneta','truck',UI.truck],['Bicicleta u otro','bike',UI.bike]].map(([lab,key,ico])=>`<div class="field"><label class="row">${ico}<span>${lab} km/l</span></label><input class="input" type="number" step="0.1" data-eff="${key}" value="${s.efficiency[key]}"></div>`).join('')}</div><div class="field"><label>Combustible</label><select class="select" id="fuelType">${['Magna','Premium','Diésel'].map(f=>`<option ${s.fuel===f?'selected':''}>${f}</option>`).join('')}</select></div><div class="admin-grid two">${['Magna','Premium','Diésel'].map(f=>`<div class="field"><label>${f} precio por litro</label><input class="input" type="number" step="0.01" data-fuel="${f}" value="${s.fuelPrice[f]}"></div>`).join('')}</div></div><div class="section-card"><h3>Tarifa de envío</h3><div class="admin-grid two"><div class="field"><label>Costo base</label><input class="input" id="shipBase" type="number" step="0.01" value="${s.base}"></div><div class="field"><label>Tarifa por km</label><input class="input" id="shipPerKm" type="number" step="0.01" value="${s.perKm}"></div><div class="field"><label>Margen de ganancia</label><input class="input" id="shipMargin" type="number" step="0.1" value="${s.margin}"></div><div class="field"><label>Redondeo</label><input class="input" id="shipRound" type="number" step="1" value="${s.rounding}"></div><div class="field"><label>Envío gratis desde</label><input class="input" id="shipFree" type="number" step="1" value="${s.freeFrom}"></div></div></div><div class="section-card"><h3>Resultado</h3><div class="result-grid"><div class="metric"><strong id="resKm">0.00 km</strong><span>Distancia</span></div><div class="metric"><strong id="resLiters">0.00 l</strong><span>Litros</span></div><div class="metric"><strong id="resFuel">${money(0)}</strong><span>Costo combustible</span></div><div class="metric"><strong id="resSuggested">${money(0)}</strong><span>Envío sugerido</span></div></div><div class="toolbar" style="margin-top:12px"><button class="btn" id="useRate">${UI.save}<span>Usar esta tarifa</span></button></div></div>`;bindTripAdmin();setTimeout(initTripMap,100)}
 let tripKm=0;
 function bindTripAdmin(){document.getElementById('tripGeocode').onclick=()=>geocodeAddress(document.getElementById('tripDestination').value,'trip');document.getElementById('roundTrip').onchange=e=>{state.config.shipping.roundTrip=e.target.checked;save();recalcTrip()};document.querySelectorAll('[data-eff]').forEach(i=>i.oninput=e=>{state.config.shipping.efficiency[e.target.dataset.eff]=Number(e.target.value)||0;recalcTrip()});document.querySelectorAll('[data-fuel]').forEach(i=>i.oninput=e=>{state.config.shipping.fuelPrice[e.target.dataset.fuel]=Number(e.target.value)||0;recalcTrip()});document.getElementById('vehicle').onchange=e=>{state.config.shipping.vehicle=e.target.value;recalcTrip()};document.getElementById('fuelType').onchange=e=>{state.config.shipping.fuel=e.target.value;recalcTrip()};['shipBase','shipPerKm','shipMargin','shipRound','shipFree'].forEach(id=>document.getElementById(id).oninput=recalcTrip);document.getElementById('useRate').onclick=()=>{const s=state.config.shipping;s.base=Number(document.getElementById('shipBase').value)||0;s.perKm=Number(document.getElementById('shipPerKm').value)||0;s.margin=Number(document.getElementById('shipMargin').value)||0;s.rounding=Number(document.getElementById('shipRound').value)||0;s.freeFrom=Number(document.getElementById('shipFree').value)||0;save();toast('Tarifa de envío guardada.','ok')}}
-function initTripMap(){if(!document.getElementById('tripMap')||typeof L==='undefined')return;if(tripMap){tripMap.remove();tripMap=null}const o=state.config.origin;tripMap=L.map('tripMap').setView([o.lat,o.lng],13);L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:20,subdomains:'abcd',attribution:'OpenStreetMap contributors, CARTO'}).addTo(tripMap);tripOriginMarker=L.marker([o.lat,o.lng]).addTo(tripMap);tripMap.on('click',e=>setTripDestination(e.latlng.lat,e.latlng.lng))}
+function initTripMap(){if(!document.getElementById('tripMap')||typeof L==='undefined')return;if(tripMap){tripMap.remove();tripMap=null}const o=state.config.origin;tripMap=L.map('tripMap').setView([o.lat,o.lng],13);if(!addConfiguredTileLayer(tripMap,'tripMap')){tripMap.remove();tripMap=null;return;}tripOriginMarker=L.marker([o.lat,o.lng]).addTo(tripMap);tripMap.on('click',e=>setTripDestination(e.latlng.lat,e.latlng.lng))}
 async function setTripDestination(lat,lng){if(!tripMap)return;if(tripDestMarker)tripDestMarker.setLatLng([lat,lng]);else tripDestMarker=L.marker([lat,lng],{draggable:true}).addTo(tripMap);tripDestMarker.on('dragend',e=>{const ll=e.target.getLatLng();setTripDestination(ll.lat,ll.lng)});const o=state.config.origin,res=await routeDistance(o.lat,o.lng,lat,lng);tripKm=res.km;if(tripRouteLayer){tripMap.removeLayer(tripRouteLayer);tripRouteLayer=null}if(res.geo){tripRouteLayer=L.geoJSON(res.geo).addTo(tripMap);tripMap.fitBounds(tripRouteLayer.getBounds(),{padding:[20,20]})}recalcTrip();if(res.fallback)toast('La ruta no respondió. Se usa una estimación de respaldo.','error')}
 function recalcTrip(){const s=state.config.shipping,km=tripKm*(document.getElementById('roundTrip')?.checked?2:1),veh=document.getElementById('vehicle')?.value||s.vehicle,fuel=document.getElementById('fuelType')?.value||s.fuel,eff=Number(document.querySelector(`[data-eff="${veh}"]`)?.value)||s.efficiency[veh],price=Number(document.querySelector(`[data-fuel="${fuel}"]`)?.value)||s.fuelPrice[fuel],liters=veh==='bike'?0:km/Math.max(eff,.1),fuelCost=liters*price,base=Number(document.getElementById('shipBase')?.value)||0,per=Number(document.getElementById('shipPerKm')?.value)||0,margin=Number(document.getElementById('shipMargin')?.value)||0,round=Number(document.getElementById('shipRound')?.value)||0;let suggested=(base+km*per+fuelCost)*(1+margin/100);if(round>0)suggested=Math.ceil(suggested/round)*round;document.getElementById('resKm').textContent=`${km.toFixed(2)} km`;document.getElementById('resLiters').textContent=`${liters.toFixed(2)} l`;document.getElementById('resFuel').textContent=money(fuelCost);document.getElementById('resSuggested').textContent=money(suggested)}
 function renderOrdersAdmin(c){c.innerHTML=`<div class="section-card"><h3>Historial de pedidos</h3><div class="table-wrap"><table class="admin-table"><thead><tr><th>Folio</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>${state.orders.length?state.orders.map(o=>`<tr><td>${esc(o.folio)}</td><td>${esc(new Date(o.date).toLocaleString('es-MX'))}</td><td>${esc(o.customer.name)}</td><td>${money(o.total)}</td><td><span class="status-badge status-${o.status}">${o.status==='pendiente'?UI.pending:o.status==='pagado'?UI.paid:UI.delivered}<span>${o.status}</span></span></td><td><div class="row"><select class="select" data-order-status="${o.id}"><option value="pendiente" ${o.status==='pendiente'?'selected':''}>Pendiente</option><option value="pagado" ${o.status==='pagado'?'selected':''}>Pagado</option><option value="entregado" ${o.status==='entregado'?'selected':''}>Entregado</option></select><button class="icon-btn" data-reprint="${o.id}">${UI.download}</button></div></td></tr>`).join(''):`<tr><td colspan="6">Todavía no hay pedidos.</td></tr>`}</tbody></table></div></div><div class="section-card"><h3>Respaldo</h3><div class="toolbar"><button class="btn" id="exportJson">${UI.download}<span>Exportar JSON</span></button><label class="btn secondary" for="importJson">${UI.upload}<span>Importar JSON</span></label><input class="hidden" id="importJson" type="file" accept="application/json"></div></div>`;document.querySelectorAll('[data-order-status]').forEach(s=>s.onchange=e=>{const o=state.orders.find(x=>x.id===e.target.dataset.orderStatus);if(o){o.status=e.target.value;save();renderOrdersAdmin(document.getElementById('adminContent'))}});document.querySelectorAll('[data-reprint]').forEach(b=>b.onclick=()=>reprintOrder(b.dataset.reprint));document.getElementById('exportJson').onclick=exportJson;document.getElementById('importJson').onchange=importJson}
@@ -458,27 +499,16 @@ function importJson(e){const f=e.target.files[0];if(!f)return;const r=new FileRe
 /* ==============================
    SUPABASE: ADMIN, PEDIDOS Y SEGURIDAD
 ============================== */
-async function changeAdminPin(){
-  if(!supabaseClient||!adminSession){toast('Inicia sesión como administrador.','error');return}
-  const a=document.getElementById('newAdminPin')?.value.trim()||'';
-  const b=document.getElementById('confirmAdminPin')?.value.trim()||'';
-  if(!/^\d{6,12}$/.test(a)){toast('El nuevo PIN debe tener entre 6 y 12 dígitos.','error');return}
-  if(a!==b){toast('Los PIN no coinciden.','error');return}
-  const {error}=await supabaseClient.auth.updateUser({password:a});
-  if(error){toast('No se pudo cambiar el PIN.','error');return}
-  document.getElementById('newAdminPin').value='';
-  document.getElementById('confirmAdminPin').value='';
-  toast('PIN actualizado.','ok');
-}
 async function adminSignOut(){
   if(supabaseClient)await supabaseClient.auth.signOut();
   adminSession=null;closeModal('adminModal');toast('Sesión administrativa cerrada.','ok');
 }
 function renderBusinessAdmin(c){
-  const cfg=state.config;
+  const cfg=state.config,m=mapSettings(),email=adminSession?.user?.email||'';
   c.innerHTML=`<div class="section-card"><h3>Identidad</h3><div class="admin-grid two"><div class="field"><label>Nombre del negocio</label><input class="input" id="bizName" value="${esc(cfg.businessName)}"></div><div class="field"><label>Eslogan</label><input class="input" id="bizTagline" value="${esc(cfg.tagline)}"></div></div><div class="field"><label>Logo</label><label class="btn secondary" for="bizLogo">${UI.upload}<span>Subir logo</span></label><input class="hidden" id="bizLogo" type="file" accept="image/*"></div><button class="btn" id="saveIdentity">${UI.save}<span>Guardar identidad</span></button></div>
-  <div class="section-card"><h3>WhatsApp</h3><div class="field"><label>Número de WhatsApp internacional sin signo de suma</label><input class="input" id="bizWhatsapp" value="${esc(cfg.whatsapp)}"></div><button class="btn" id="saveAccess">${UI.save}<span>Guardar WhatsApp</span></button></div>
-  <div class="section-card"><h3>Seguridad del administrador</h3>${supabaseConfigured()?`<div class="notice">El PIN usa Supabase Auth. Debe tener entre 6 y 12 dígitos.</div><div class="admin-grid two" style="margin-top:10px"><div class="field"><label>Nuevo PIN</label><input class="input" id="newAdminPin" type="password" inputmode="numeric" maxlength="12"></div><div class="field"><label>Confirmar nuevo PIN</label><input class="input" id="confirmAdminPin" type="password" inputmode="numeric" maxlength="12"></div></div><div class="toolbar"><button class="btn" id="changePin">${UI.lock}<span>Cambiar PIN</span></button><button class="btn ghost" id="adminLogout">${UI.lock}<span>Cerrar sesión</span></button></div>`:`<div class="notice">Supabase todavía no está configurado en el archivo. Mientras tanto se usa el PIN local de demostración.</div><div class="field" style="margin-top:10px"><label>PIN local</label><input class="input" id="bizPin" type="password" value="${esc(cfg.adminPin)}"></div>`}</div>
+  <div class="section-card"><h3>WhatsApp</h3><div class="field"><label>Número internacional sin signo de suma</label><input class="input" id="bizWhatsapp" value="${esc(cfg.whatsapp)}"></div><button class="btn" id="saveAccess">${UI.save}<span>Guardar WhatsApp</span></button></div>
+  <div class="section-card"><h3>Seguridad del administrador</h3><div class="notice">Sesión activa: ${esc(email||'Administrador')}</div><div class="admin-grid two" style="margin-top:10px"><div class="field"><label>Nueva contraseña</label><input class="input" id="newAdminPassword" type="password" autocomplete="new-password" minlength="8"></div><div class="field"><label>Confirmar nueva contraseña</label><input class="input" id="confirmAdminPassword" type="password" autocomplete="new-password" minlength="8"></div></div><div class="toolbar"><button class="btn" id="changePassword">${UI.lock}<span>Cambiar contraseña</span></button><button class="btn ghost" id="adminLogout">${UI.lock}<span>Cerrar sesión</span></button></div></div>
+  <div class="section-card"><h3>CARTO</h3><div class="notice">Usa tu API key de CARTO Basemaps. La app agregará la clave automáticamente a las solicitudes de tiles y mantendrá visible la atribución de OpenStreetMap y CARTO.</div><div class="admin-grid two" style="margin-top:10px"><div class="field"><label>API key de CARTO</label><input class="input" id="cartoApiKey" type="password" value="${esc(m.apiKey||'')}" placeholder="Pega tu API key"></div><div class="field"><label>Estilo del mapa</label><select class="select" id="cartoStyle"><option value="voyager" ${m.style==='voyager'?'selected':''}>Voyager</option><option value="light_all" ${m.style==='light_all'?'selected':''}>Positron</option><option value="dark_all" ${m.style==='dark_all'?'selected':''}>Dark Matter</option></select></div></div><button class="btn" id="saveMapConfig">${UI.map}<span>Guardar CARTO</span></button></div>
   <div class="section-card"><h3>Métodos de pago</h3><div id="paymentAdmin">${cfg.payments.map(p=>`<div class="admin-grid two" style="margin-bottom:8px"><input class="input" data-pay-title="${p.id}" value="${esc(p.title)}"><div class="row"><input class="input" data-pay-data="${p.id}" value="${esc(p.data)}"><button class="icon-btn" data-pay-delete="${p.id}">${UI.trash}</button></div></div>`).join('')}</div><div class="toolbar"><button class="btn secondary" id="addPayment">${UI.plus}<span>Agregar método</span></button><button class="btn" id="savePayments">${UI.save}<span>Guardar métodos</span></button></div></div>
   <div class="section-card"><h3>Origen del negocio</h3><div class="field"><label>Dirección</label><input class="input" id="originAddress" value="${esc(cfg.origin.address)}"></div><button class="btn secondary" id="geocodeOrigin">${UI.pin}<span>Ubicar dirección</span></button><div class="small muted" style="margin:8px 0">También puedes dar clic en el mapa o mover el marcador.</div><div id="originMap" class="map"></div><label class="row" style="margin-top:10px"><input type="checkbox" id="deliveryEnabled" ${cfg.deliveryEnabled?'checked':''}><span>Activar envío a domicilio</span></label></div>`;
   bindBusinessAdmin();setTimeout(initOriginMap,100);
@@ -486,14 +516,33 @@ function renderBusinessAdmin(c){
 function bindBusinessAdmin(){
   document.getElementById('saveIdentity').onclick=()=>{state.config.businessName=document.getElementById('bizName').value.trim()||defaults.config.businessName;state.config.tagline=document.getElementById('bizTagline').value.trim();save();renderHeader();toast('Identidad guardada.','ok')};
   document.getElementById('bizLogo').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{state.config.logo=r.result;save();renderHeader()};r.readAsDataURL(f)};
-  document.getElementById('saveAccess').onclick=()=>{const w=document.getElementById('bizWhatsapp').value.replace(/\D/g,'');if(!w){toast('Escribe el número de WhatsApp.','error');return}state.config.whatsapp=w;if(!supabaseConfigured()&&document.getElementById('bizPin'))state.config.adminPin=document.getElementById('bizPin').value.trim()||state.config.adminPin;save();toast('WhatsApp guardado.','ok')};
-  if(document.getElementById('changePin'))document.getElementById('changePin').onclick=changeAdminPin;
-  if(document.getElementById('adminLogout'))document.getElementById('adminLogout').onclick=adminSignOut;
+  document.getElementById('saveAccess').onclick=()=>{const w=document.getElementById('bizWhatsapp').value.replace(/\D/g,'');if(!w){toast('Escribe el número de WhatsApp.','error');return}state.config.whatsapp=w;save();toast('WhatsApp guardado.','ok')};
+  document.getElementById('changePassword').onclick=changeAdminPassword;
+  document.getElementById('adminLogout').onclick=adminSignOut;
+  document.getElementById('saveMapConfig').onclick=()=>{
+    const apiKey=document.getElementById('cartoApiKey').value.trim();
+    const style=document.getElementById('cartoStyle').value;
+    if(!apiKey){toast('Pega tu API key de CARTO.','error');return}
+    state.config.map={provider:'carto',apiKey,style,attribution:'OpenStreetMap contributors, CARTO'};
+    save();toast('CARTO guardado.','ok');setTimeout(initOriginMap,100);
+  };
   document.getElementById('addPayment').onclick=()=>{state.config.payments.push({id:uid('pay'),title:'Nuevo método',data:'Dato para copiar'});save();renderBusinessAdmin(document.getElementById('adminContent'))};
   document.getElementById('savePayments').onclick=()=>{state.config.payments=state.config.payments.map(p=>({...p,title:document.querySelector(`[data-pay-title="${p.id}"]`)?.value.trim()||p.title,data:document.querySelector(`[data-pay-data="${p.id}"]`)?.value.trim()||p.data}));save();toast('Métodos de pago guardados.','ok')};
   document.querySelectorAll('[data-pay-delete]').forEach(b=>b.onclick=()=>{state.config.payments=state.config.payments.filter(p=>p.id!==b.dataset.payDelete);save();renderBusinessAdmin(document.getElementById('adminContent'))});
   document.getElementById('geocodeOrigin').onclick=()=>geocodeAddress(document.getElementById('originAddress').value,'origin');
   document.getElementById('deliveryEnabled').onchange=e=>{state.config.deliveryEnabled=e.target.checked;save()};
+}
+async function changeAdminPassword(){
+  if(!supabaseClient||!adminSession){toast('Inicia sesión como administrador.','error');return}
+  const a=document.getElementById('newAdminPassword')?.value||'';
+  const b=document.getElementById('confirmAdminPassword')?.value||'';
+  if(a.length<8){toast('La nueva contraseña debe tener al menos 8 caracteres.','error');return}
+  if(a!==b){toast('Las contraseñas no coinciden.','error');return}
+  const {error}=await supabaseClient.auth.updateUser({password:a});
+  if(error){toast(error.message||'No se pudo cambiar la contraseña.','error');return}
+  document.getElementById('newAdminPassword').value='';
+  document.getElementById('confirmAdminPassword').value='';
+  toast('Contraseña actualizada.','ok');
 }
 function cloudOrderToState(o){
   return {id:String(o.id),folio:o.folio,date:o.created_at,dateText:new Date(o.created_at).toLocaleString('es-MX'),
@@ -539,7 +588,7 @@ async function confirmOrder(){
    EVENTS & INIT
 ============================== */
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.cat){currentCategory=b.dataset.cat;renderCategories();renderCatalog()}if(b.dataset.inc)changeQty(b.dataset.inc,1);if(b.dataset.dec)changeQty(b.dataset.dec,-1);if(b.dataset.remove){delete state.cart[b.dataset.remove];save();renderCart();renderCatalog()}if(b.dataset.closeDrawer!==undefined)closeDrawer();if(b.dataset.closeModal)closeModal(b.dataset.closeModal);if(b.dataset.copy){navigator.clipboard.writeText(b.dataset.copy).then(()=>{const n=document.getElementById('copy_'+b.dataset.copyId);n?.classList.add('show');setTimeout(()=>n?.classList.remove('show'),1600)}).catch(()=>toast('No se pudo copiar.','error'))}if(b.dataset.tab)renderAdminPane(b.dataset.tab)});
-document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e.target.value;renderCatalog()});document.getElementById('cartBtn').onclick=openDrawer;document.getElementById('adminBtn').onclick=openAdmin;document.getElementById('pinSubmit').onclick=checkPin;document.getElementById('pinInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin()});document.getElementById('overlay').onclick=()=>{closeDrawer();document.querySelectorAll('.modal.show').forEach(m=>closeModal(m.id))};document.getElementById('whatsappFab').onclick=()=>window.open(`https://wa.me/${state.config.whatsapp}?text=${encodeURIComponent(`Hola, quiero información de ${state.config.businessName}.`)}`,'_blank');
+document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e.target.value;renderCatalog()});document.getElementById('cartBtn').onclick=openDrawer;document.getElementById('adminBtn').onclick=openAdmin;document.getElementById('pinSubmit').onclick=checkPin;document.getElementById('adminEmailInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('adminPasswordInput').focus()});document.getElementById('adminPasswordInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin()});document.getElementById('overlay').onclick=()=>{closeDrawer();document.querySelectorAll('.modal.show').forEach(m=>closeModal(m.id))};document.getElementById('whatsappFab').onclick=()=>window.open(`https://wa.me/${state.config.whatsapp}?text=${encodeURIComponent(`Hola, quiero información de ${state.config.businessName}.`)}`,'_blank');
 applyDesign();renderHeader();renderCategories();renderCatalog();initSupabase().catch(()=>toast('No se pudo conectar con Supabase. Se muestran datos locales.','error'));
 </script>
 </body>
