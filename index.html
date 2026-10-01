@@ -113,6 +113,44 @@ button{cursor:pointer}
 hr{border:0;border-top:1px solid var(--line);margin:14px 0}
 @media(min-width:720px){.controls{grid-template-columns:1.3fr 2fr;align-items:center}.grid{grid-template-columns:repeat(2,1fr)}.admin-grid.two{grid-template-columns:1fr 1fr}.icon-picker{grid-template-columns:repeat(6,1fr)}.palette-grid{grid-template-columns:repeat(3,1fr)}.result-grid{grid-template-columns:repeat(4,1fr)}}
 @media(min-width:1020px){.grid{grid-template-columns:repeat(3,1fr)}.admin-layout{grid-template-columns:220px 1fr}.admin-tabs{display:grid;align-content:start;gap:4px;border-right:1px solid var(--line);border-bottom:0;padding:14px}.tab-btn{justify-content:flex-start}.admin-content{padding:20px}.icon-picker{grid-template-columns:repeat(8,1fr)}}
+
+/* Tema público claro/oscuro */
+.theme-btn{flex:0 0 auto}
+body.dark-mode{
+  --text:#f3f4f6 !important;
+  --muted:#aeb7c5 !important;
+  --card:#161a20 !important;
+  --site-bg:#0d1015 !important;
+  --secondary:#242a33 !important;
+  --line:#303743 !important;
+}
+body.dark-mode::before{background:#0d1015}
+body.dark-mode.pattern-on::after{filter:invert(1);opacity:.025}
+body.dark-mode .topbar{background:rgba(22,26,32,.94)}
+body.dark-mode .product-card,
+body.dark-mode .section-card,
+body.dark-mode .payment-item,
+body.dark-mode .summary-card,
+body.dark-mode .modal,
+body.dark-mode .drawer,
+body.dark-mode .toast{box-shadow:0 10px 30px rgba(0,0,0,.24)}
+body.dark-mode .input,
+body.dark-mode .textarea,
+body.dark-mode .select,
+body.dark-mode .search-wrap input{background:#11151b;color:#f3f4f6}
+body.dark-mode .hero-card{box-shadow:0 18px 44px rgba(0,0,0,.3)}
+body.dark-mode .leaflet-container{background:#171b21}
+.theme-switch-label{display:none}
+@media(min-width:720px){.theme-switch-label{display:inline}}
+.icon-pack-tabs{display:flex;gap:7px;overflow:auto;margin:0 0 10px;padding-bottom:3px}
+.icon-pack-btn{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;padding:7px 10px;font-size:.76rem;font-weight:800;white-space:nowrap}
+.icon-pack-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.supabase-status{display:flex;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--secondary);color:var(--text);font-size:.8rem}
+.supabase-status svg{width:18px;height:18px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:1.9}
+.supabase-status[data-kind="ok"]{color:var(--success)}
+.supabase-status[data-kind="error"]{color:var(--danger)}
+.supabase-status[data-kind="warn"]{color:var(--warning)}
+
 </style>
 </head>
 <body>
@@ -121,6 +159,7 @@ hr{border:0;border-top:1px solid var(--line);margin:14px 0}
     <div class="brand-logo" id="brandLogo"></div>
     <div class="brand-copy"><h1 id="brandName">Sazón Manzanillo</h1><p id="brandTagline">Comida preparada al momento</p></div>
   </div>
+  <button class="icon-btn theme-btn" id="themeBtn" aria-label="Cambiar tema"></button>
   <button class="icon-btn" id="adminBtn" aria-label="Administración"></button>
   <button class="icon-btn cart-btn" id="cartBtn" aria-label="Carrito"><span class="badge-count" id="cartCount">0</span></button>
 </div></div>
@@ -140,7 +179,7 @@ hr{border:0;border-top:1px solid var(--line);margin:14px 0}
   <div class="drawer-foot" id="cartFoot"></div>
 </aside>
 <div class="modal" id="summaryModal"><div class="modal-head"><strong>Resumen de tu pedido</strong><button class="icon-btn" data-close-modal="summaryModal" aria-label="Cerrar"></button></div><div class="modal-body" id="summaryBody"></div></div>
-<div class="modal" id="pinModal"><div class="modal-head"><strong>Acceso de administrador</strong><button class="icon-btn" data-close-modal="pinModal" aria-label="Cerrar"></button></div><div class="modal-body"><div class="section-card"><div class="field"><label>Correo</label><input class="input" type="email" autocomplete="username" id="adminEmailInput" placeholder="correo@ejemplo.com"></div><div class="field"><label>Contraseña</label><input class="input" type="password" autocomplete="current-password" id="adminPasswordInput" placeholder="Ingresa tu contraseña"></div><button class="btn full" id="pinSubmit"></button><div class="small muted" style="margin-top:10px">El acceso se valida con Supabase Auth. Usa el correo y contraseña creados en Authentication.</div></div></div></div>
+<div class="modal" id="pinModal"><div class="modal-head"><strong>Acceso de administrador</strong><button class="icon-btn" data-close-modal="pinModal" aria-label="Cerrar"></button></div><div class="modal-body"><div class="section-card"><div class="field"><label>Correo</label><input class="input" type="email" autocomplete="username" id="adminEmailInput" placeholder="correo@ejemplo.com"></div><div class="field"><label>Contraseña</label><input class="input" type="password" autocomplete="current-password" id="adminPasswordInput" placeholder="Ingresa tu contraseña"></div><button class="btn full" id="pinSubmit"></button><div class="small muted" style="margin-top:10px">El acceso se valida con Supabase Auth. Usa el correo y contraseña creados en Authentication.</div><div class="supabase-status" id="supabaseStatus" data-kind="warn"></div></div></div></div>
 <div class="modal admin-modal" id="adminModal"><div class="modal-head"><strong>Panel de administración</strong><button class="icon-btn" data-close-modal="adminModal" aria-label="Cerrar"></button></div><div class="modal-body"><div class="admin-layout"><nav class="admin-tabs" id="adminTabs"></nav><section class="admin-content" id="adminContent"></section></div></div></div>
 <div class="toast-wrap" id="toastWrap"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -188,7 +227,11 @@ const UI = {
   upload:`<svg viewBox="0 0 24 24"><path d="M12 20V9M8 13l4-4 4 4M5 4h14"/></svg>`,
   file:`<svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v5h5"/></svg>`,
   save:`<svg viewBox="0 0 24 24"><path d="M5 4h12l2 2v14H5zM8 4v6h8V4M8 16h8"/></svg>`,
-  refresh:`<svg viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5M18 10a7 7 0 0 0-12-2M6 14a7 7 0 0 0 12 2"/></svg>`
+  refresh:`<svg viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5M18 10a7 7 0 0 0-12-2M6 14a7 7 0 0 0 12 2"/></svg>`,
+  moon:`<svg viewBox="0 0 24 24"><path d="M20 15.5A8 8 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5z"/></svg>`,
+  sun:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`,
+  database:`<svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>`
+
 };
 
 const FOOD = {
@@ -217,8 +260,46 @@ const FOOD = {
  cake:`<svg viewBox="0 0 64 64"><path d="M13 31h38v21H13zM16 31c3-8 9-12 16-12s13 4 16 12M22 19v-6M32 19v-6M42 19v-6"/></svg>`,
  cookie:`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20"/><circle cx="24" cy="25" r="2"/><circle cx="38" cy="20" r="2"/><circle cx="42" cy="36" r="2"/><circle cx="26" cy="42" r="2"/><circle cx="34" cy="31" r="2"/></svg>`,
  donut:`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="20"/><circle cx="32" cy="32" r="7"/><path d="M15 27c8 5 26 5 34 0"/></svg>`,
- fruit:`<svg viewBox="0 0 64 64"><path d="M31 18c-3-8 0-12 7-15M35 12c8-3 13 0 15 6-7 3-12 2-15-6z"/><circle cx="31" cy="36" r="17"/></svg>`
+ fruit:`<svg viewBox="0 0 64 64"><path d="M31 18c-3-8 0-12 7-15M35 12c8-3 13 0 15 6-7 3-12 2-15-6z"/><circle cx="31" cy="36" r="17"/></svg>`,
+ ramen:`<svg viewBox="0 0 64 64"><path d="M12 31h40c-2 13-9 21-20 21S14 44 12 31zM18 27h28M20 22c5-6 10 5 15-1s10 5 15-1M42 9l-8 18M51 11l-9 16"/></svg>`,
+ steak:`<svg viewBox="0 0 64 64"><path d="M17 19c8-8 24-9 32 0 7 8 2 22-8 29-9 7-24 5-29-5-4-9-1-18 5-24z"/><path d="M25 25c5-4 13-4 17 1 4 5 1 12-4 15-6 4-14 2-16-4-2-5 0-9 3-12z"/></svg>`,
+ fish:`<svg viewBox="0 0 64 64"><path d="M12 32c10-13 24-16 36-7l8-8v30l-8-8c-12 9-26 6-36-7z"/><circle cx="39" cy="29" r="2"/></svg>`,
+ shrimp:`<svg viewBox="0 0 64 64"><path d="M47 20c-4-8-17-9-25-2-9 8-8 22 1 29 8 7 21 4 26-5-8 3-17 0-20-7-3-8 3-15 11-16 3 0 5 0 7 1zM22 47l-8 5M28 48l-3 8"/></svg>`,
+ nachos:`<svg viewBox="0 0 64 64"><path d="M13 47l13-30 13 30zM29 45l13-27 10 29zM21 39h12M38 39h9"/></svg>`,
+ wings:`<svg viewBox="0 0 64 64"><path d="M20 19c9-7 21-4 25 5 4 10-3 21-14 23-10 2-20-5-20-15 0-5 3-10 9-13zM43 39l9 9M52 48l3 5M52 48l-5 3"/></svg>`,
+ kebab:`<svg viewBox="0 0 64 64"><path d="M32 7v50M22 15l10-5 10 5-10 6zM21 27l11-5 11 5-11 6zM22 40l10-5 10 5-10 6z"/></svg>`,
+ croissant:`<svg viewBox="0 0 64 64"><path d="M15 38c-5-6-3-15 3-20l8 8c-3 4-3 8 0 11 4 4 9 4 13 0 3-3 3-8 0-11l8-8c7 6 8 16 2 22-9 10-25 9-34-2z"/></svg>`,
+ pancakes:`<svg viewBox="0 0 64 64"><ellipse cx="32" cy="20" rx="19" ry="8"/><path d="M13 20v8c0 4 8 8 19 8s19-4 19-8v-8M13 28v8c0 4 8 8 19 8s19-4 19-8v-8M13 36v8c0 4 8 8 19 8s19-4 19-8v-8"/><path d="M29 16h7"/></svg>`,
+ waffle:`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="21"/><path d="M18 20l28 24M14 30l20 20M30 14l20 20M46 20L20 46M50 30L30 50M34 14L14 34"/></svg>`,
+ cereal:`<svg viewBox="0 0 64 64"><path d="M12 28h40c-1 14-9 24-20 24S13 42 12 28z"/><circle cx="23" cy="25" r="3"/><circle cx="33" cy="22" r="3"/><circle cx="42" cy="25" r="3"/></svg>`,
+ avocado:`<svg viewBox="0 0 64 64"><path d="M32 9c7 11 18 19 18 31 0 10-8 17-18 17s-18-7-18-17c0-12 11-20 18-31z"/><circle cx="32" cy="40" r="9"/></svg>`,
+ chili:`<svg viewBox="0 0 64 64"><path d="M48 18c-4 22-16 33-35 28 13-3 19-12 22-24zM47 18c2-6 7-8 11-5"/></svg>`,
+ corn:`<svg viewBox="0 0 64 64"><path d="M32 11c9 0 14 10 14 23S41 55 32 55 18 47 18 34s5-23 14-23z"/><path d="M22 20h20M20 29h24M20 38h24M22 47h20M27 12v42M37 12v42"/></svg>`,
+ bread:`<svg viewBox="0 0 64 64"><path d="M14 28c0-9 7-16 16-16 4 0 8 2 11 5 8-2 14 4 14 12 0 5-3 9-7 11v12H16V39c-1-3-2-7-2-11zM24 26c3-3 7-3 10 0M35 24c3-3 7-3 10 0"/></svg>`,
+ muffin:`<svg viewBox="0 0 64 64"><path d="M18 29c0-10 7-17 14-17s14 7 14 17H18zM16 31h32l-5 23H21z"/><circle cx="27" cy="22" r="2"/><circle cx="38" cy="21" r="2"/></svg>`,
+ cupcake:`<svg viewBox="0 0 64 64"><path d="M19 27c0-9 6-15 13-15s13 6 13 15H19zM18 30h28l-4 24H22zM24 39h16"/></svg>`,
+ chocolate:`<svg viewBox="0 0 64 64"><path d="M17 10h30v44H17zM17 21h30M17 32h30M17 43h30M27 10v44M37 10v44"/></svg>`,
+ popsicle:`<svg viewBox="0 0 64 64"><path d="M22 11h20c5 0 8 4 8 9v20H14V20c0-5 3-9 8-9zM14 40h36l-5 9H19zM29 49v8h6v-8"/></svg>`,
+ milkshake:`<svg viewBox="0 0 64 64"><path d="M19 22h26l-4 32H23zM17 22h30M29 14c2-7 9-8 13-3 4 5 1 10-4 11M36 22l8-17"/></svg>`,
+ tea:`<svg viewBox="0 0 64 64"><path d="M14 22h31v20c0 7-6 12-14 12h-3c-8 0-14-5-14-12V22zM45 27h5c5 0 8 3 8 8s-3 8-8 8h-5M25 15c-3-3 2-5 0-8M36 15c-3-3 2-5 0-8"/></svg>`,
+ smoothie:`<svg viewBox="0 0 64 64"><path d="M20 17h24l-4 38H24zM17 17h30M35 17l7-12M42 5h7"/><path d="M24 29c6-5 12 5 17 0"/></svg>`,
+ lemonade:`<svg viewBox="0 0 64 64"><path d="M18 18h28l-4 36H22zM15 18h34M35 18l8-12"/><circle cx="32" cy="35" r="9"/><path d="M26 35h12M32 29v12"/></svg>`,
+ boba:`<svg viewBox="0 0 64 64"><path d="M20 17h24l-4 38H24zM17 17h30M36 17l7-13"/><circle cx="27" cy="46" r="3"/><circle cx="35" cy="47" r="3"/><circle cx="31" cy="39" r="3"/><circle cx="39" cy="40" r="3"/></svg>`
+
 };
+
+
+const FOOD_PACKS={
+  'Clásicos':['plate','burger','pizza','taco','burrito','hotdog','fries','chicken','salad','soup','sandwich','torta','quesadilla','eggs'],
+  'Internacional':['sushi','pasta','ramen','steak','fish','shrimp','nachos','wings','kebab','croissant','pancakes','waffle','cereal','avocado','chili','corn','bread'],
+  'Bebidas':['coffee','soda','juice','water','beer','milkshake','tea','smoothie','lemonade','boba'],
+  'Postres':['icecream','cake','cookie','donut','fruit','muffin','cupcake','chocolate','popsicle']
+};
+let activeFoodPack='Todos';
+function foodIconKeys(){
+  if(activeFoodPack==='Todos')return Object.keys(FOOD);
+  return FOOD_PACKS[activeFoodPack]||Object.keys(FOOD);
+}
 
 /* ==============================
    SUPABASE
@@ -227,7 +308,7 @@ const FOOD = {
 ============================== */
 const SUPABASE_URL='https://qgmlmtmthqwjvgmvmpe.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_UYHdkpNQO4dEjhGODSgzzQ_ku45uaWs';
-let supabaseClient=null,adminSession=null,cloudSyncTimer=null,cloudReady=false;
+let supabaseClient=null,adminSession=null,cloudSyncTimer=null,cloudReady=false,supabaseConnectionState='idle',supabaseLastError='';
 function supabaseConfigured(){
   return /^https:\/\/.+\.supabase\.co$/i.test(SUPABASE_URL)
     && !SUPABASE_ANON_KEY.includes('PEGA_AQUI');
@@ -277,6 +358,24 @@ function publicConfigForCloud(){
   delete cfg.adminPin;
   return cfg;
 }
+
+function setSupabaseStatus(kind,message){
+  supabaseConnectionState=kind;
+  supabaseLastError=message||'';
+  const el=document.getElementById('supabaseStatus');
+  if(!el)return;
+  el.dataset.kind=kind==='ok'?'ok':kind==='error'?'error':'warn';
+  el.innerHTML=(kind==='ok'?UI.check:kind==='error'?UI.close:UI.database)+`<span>${esc(message)}</span>`;
+}
+function explainSupabaseError(error){
+  const msg=String(error?.message||error?.error_description||error||'Error desconocido');
+  if(/Invalid API key|No API key/i.test(msg))return 'La clave pública de Supabase no es válida.';
+  if(/Failed to fetch|NetworkError|fetch/i.test(msg))return 'No se pudo alcanzar Supabase por red. Revisa la URL del proyecto.';
+  if(/relation .* does not exist|Could not find the table/i.test(msg))return 'Supabase responde, pero faltan las tablas. Ejecuta supabase-setup.sql.';
+  if(/permission denied|row-level security|policy/i.test(msg))return 'Supabase responde, pero faltan permisos o políticas RLS.';
+  return msg;
+}
+
 function productRow(p,sortOrder=0){
   return {id:String(p.id),name:p.name,description:p.description||'',category:p.category||'',price:Number(p.price)||0,stock:Math.max(0,Number(p.stock)||0),icon:p.icon||'plate',image:p.image||'',active:p.active!==false,sort_order:sortOrder};
 }
@@ -313,20 +412,47 @@ async function syncAdminStateToCloud(){
   }
 }
 async function initSupabase(){
-  if(!supabaseConfigured()||!window.supabase){
+  if(!supabaseConfigured()){
     cloudReady=false;
+    setSupabaseStatus('error','Falta configurar SUPABASE_URL o la Publishable key en index.html.');
     return;
   }
-  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-  const {data}=await supabaseClient.auth.getSession();
-  adminSession=data?.session||null;
-  await loadPublicCloudState();
-  cloudReady=true;
+  if(!window.supabase){
+    cloudReady=false;
+    setSupabaseStatus('error','No cargó la librería de Supabase desde CDN.');
+    return;
+  }
+  try{
+    supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{
+      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+    });
+    const {data,error}=await supabaseClient.auth.getSession();
+    if(error)throw error;
+    adminSession=data?.session||null;
+    cloudReady=true;
+    setSupabaseStatus('ok','Supabase conectado. Autenticación disponible.');
+  }catch(error){
+    cloudReady=false;
+    setSupabaseStatus('error',explainSupabaseError(error));
+    throw error;
+  }
+
+  try{
+    await loadPublicCloudState();
+  }catch(error){
+    console.error('Carga pública Supabase:',error);
+    setSupabaseStatus('warn','Supabase está conectado, pero no se pudieron leer productos/configuración: '+explainSupabaseError(error));
+  }
+
   supabaseClient.auth.onAuthStateChange((_event,session)=>{adminSession=session||null});
-  supabaseClient.channel('catalog-live')
-    .on('postgres_changes',{event:'*',schema:'public',table:'products'},()=>loadPublicCloudState().catch(()=>{}))
-    .on('postgres_changes',{event:'*',schema:'public',table:'catalog_settings'},()=>loadPublicCloudState().catch(()=>{}))
-    .subscribe();
+  try{
+    supabaseClient.channel('catalog-live')
+      .on('postgres_changes',{event:'*',schema:'public',table:'products'},()=>loadPublicCloudState().catch(()=>{}))
+      .on('postgres_changes',{event:'*',schema:'public',table:'catalog_settings'},()=>loadPublicCloudState().catch(()=>{}))
+      .subscribe();
+  }catch(error){
+    console.warn('Realtime no disponible:',error);
+  }
 }
 const money=n=>new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(Number(n||0));
 const uid=p=>p+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
@@ -340,13 +466,33 @@ function applyDesign(){const d=state.config.design,r=document.documentElement.st
  if(d.bgType==='solid')document.body.style.background=d.siteBg;
  if(d.bgType==='gradient')document.body.style.background=`linear-gradient(${d.gradAngle}deg,${d.grad1},${d.grad2}) fixed`;
  if(d.bgType==='image'&&d.bgImage){document.body.style.background=`linear-gradient(rgba(255,255,255,${1-d.bgOpacity}),rgba(255,255,255,${1-d.bgOpacity})),url('${d.bgImage}') center/cover fixed`}
+ applyPublicTheme();
+}
+
+
+const THEME_STORE='foodCatalogThemeMode';
+let publicThemeMode=localStorage.getItem(THEME_STORE)||'default';
+function applyPublicTheme(){
+  document.body.classList.toggle('dark-mode',publicThemeMode==='dark');
+  const b=document.getElementById('themeBtn');
+  if(b){
+    b.innerHTML=(publicThemeMode==='dark'?UI.sun:UI.moon)+`<span class="theme-switch-label">${publicThemeMode==='dark'?'Predeterminado':'Oscuro'}</span>`;
+    b.setAttribute('aria-label',publicThemeMode==='dark'?'Usar tema predeterminado':'Usar tema oscuro');
+    if(window.innerWidth>=720)b.style.width='auto',b.style.padding='0 12px'; else b.style.width='44px',b.style.padding='0';
+  }
+}
+function togglePublicTheme(){
+  publicThemeMode=publicThemeMode==='dark'?'default':'dark';
+  localStorage.setItem(THEME_STORE,publicThemeMode);
+  applyDesign();
+  applyPublicTheme();
 }
 
 /* ==============================
    PUBLIC CATALOG
 ============================== */
 function productVisual(p){if(p.image)return `<img src="${p.image}" alt="${esc(p.name)}">`;return FOOD[p.icon]||FOOD.plate}
-function renderHeader(){document.getElementById('brandName').textContent=state.config.businessName;document.getElementById('brandTagline').textContent=state.config.tagline;document.getElementById('heroTitle').textContent=`${state.config.businessName}`;const l=document.getElementById('brandLogo');l.innerHTML=state.config.logo?`<img src="${state.config.logo}" alt="Logo">`:FOOD.plate;document.getElementById('adminBtn').innerHTML=UI.settings;document.getElementById('cartBtn').innerHTML=UI.cart+`<span class="badge-count" id="cartCount">0</span>`;document.querySelector('[data-close-drawer]').innerHTML=UI.close;document.querySelectorAll('[data-close-modal]').forEach(b=>b.innerHTML=UI.close);document.getElementById('whatsappFab').innerHTML=UI.whatsapp;const sw=document.getElementById('searchWrap');if(!sw.querySelector('svg'))sw.insertAdjacentHTML('afterbegin',UI.search);document.getElementById('pinSubmit').innerHTML=UI.lock+' Entrar';updateCartCount()}
+function renderHeader(){applyPublicTheme();document.getElementById('brandName').textContent=state.config.businessName;document.getElementById('brandTagline').textContent=state.config.tagline;document.getElementById('heroTitle').textContent=`${state.config.businessName}`;const l=document.getElementById('brandLogo');l.innerHTML=state.config.logo?`<img src="${state.config.logo}" alt="Logo">`:FOOD.plate;document.getElementById('adminBtn').innerHTML=UI.settings;document.getElementById('cartBtn').innerHTML=UI.cart+`<span class="badge-count" id="cartCount">0</span>`;document.querySelector('[data-close-drawer]').innerHTML=UI.close;document.querySelectorAll('[data-close-modal]').forEach(b=>b.innerHTML=UI.close);document.getElementById('whatsappFab').innerHTML=UI.whatsapp;const sw=document.getElementById('searchWrap');if(!sw.querySelector('svg'))sw.insertAdjacentHTML('afterbegin',UI.search);document.getElementById('pinSubmit').innerHTML=UI.lock+' Entrar';updateCartCount()}
 function categories(){return ['Todos',...new Set(state.products.filter(p=>p.active).map(p=>p.category).filter(Boolean))]}
 function renderCategories(){document.getElementById('categoryChips').innerHTML=categories().map(c=>`<button class="chip ${c===currentCategory?'active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}
 function renderCatalog(){const arr=state.products.filter(p=>p.active&&(currentCategory==='Todos'||p.category===currentCategory)&&(`${p.name} ${p.description}`.toLowerCase().includes(searchTerm.toLowerCase())));document.getElementById('catalogGrid').innerHTML=arr.length?arr.map(p=>{const q=state.cart[p.id]||0;return `<article class="product-card"><div class="product-visual">${productVisual(p)}</div><div class="product-body"><div class="product-head"><h3 class="product-name">${esc(p.name)}</h3><div class="price">${money(p.price)}</div></div><p class="desc">${esc(p.description)}</p><div class="meta"><span>${esc(p.category)}</span><span>Stock: ${p.stock}</span></div><div class="qty-row">${p.stock<=0?'<span class="stock-out">Agotado</span>':`<div class="qty-control"><button class="icon-btn" data-dec="${p.id}" aria-label="Quitar cantidad" ${q<=0?'disabled':''}>${UI.minus}</button><span class="qty-value">${q}</span><button class="icon-btn" data-inc="${p.id}" aria-label="Agregar cantidad" ${q>=p.stock?'disabled':''}>${UI.plus}</button></div>`}<button class="btn secondary" data-inc="${p.id}" ${p.stock<=0||q>=p.stock?'disabled':''}>${UI.cart}<span>Agregar</span></button></div></div></article>`}).join(''):'<div class="section-card"><strong>No hay productos para mostrar.</strong></div>';updateCartCount()}
@@ -452,7 +598,7 @@ async function openAdmin(){
   setTimeout(()=>email?.focus(),80);
 }
 async function checkPin(){
-  if(!supabaseConfigured()||!supabaseClient){toast('Configura primero la URL y la clave pública de Supabase.','error');return}
+  if(!supabaseConfigured()){toast('Configura primero la URL y la clave pública de Supabase.','error');return}if(!supabaseClient){try{await initSupabase()}catch(e){toast(explainSupabaseError(e),'error');return}}
   const email=document.getElementById('adminEmailInput').value.trim().toLowerCase();
   const password=document.getElementById('adminPasswordInput').value;
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Escribe un correo válido.','error');return}
@@ -462,7 +608,7 @@ async function checkPin(){
     const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
     if(error)throw error;
     const {data:isAdmin,error:adminError}=await supabaseClient.rpc('is_catalog_admin');
-    if(adminError||isAdmin!==true){
+    if(adminError){throw new Error('No se pudo verificar el rol administrador: '+explainSupabaseError(adminError))}if(isAdmin!==true){
       await supabaseClient.auth.signOut();
       throw new Error('Esta cuenta no tiene permisos de administrador.');
     }
@@ -475,15 +621,19 @@ async function checkPin(){
 function renderAdmin(){document.getElementById('adminTabs').innerHTML=adminTabs.map(([id,label,ico])=>`<button class="tab-btn ${activeAdmin===id?'active':''}" data-tab="${id}">${ico}<span>${label}</span></button>`).join('');renderAdminPane(activeAdmin)}
 function renderAdminPane(id){activeAdmin=id;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));const c=document.getElementById('adminContent');if(id==='products')renderProductsAdmin(c);if(id==='design')renderDesignAdmin(c);if(id==='business')renderBusinessAdmin(c);if(id==='trip')renderTripAdmin(c);if(id==='orders')renderOrdersAdmin(c)}
 function renderProductsAdmin(c){c.innerHTML=`<div class="toolbar"><button class="btn" id="newProduct">${UI.plus}<span>Nuevo producto</span></button></div><div class="section-card" id="productFormWrap" style="display:${editingProductId?'block':'none'}">${productFormHtml()}</div><div class="section-card"><h3>Productos</h3>${state.products.map(p=>`<div class="product-admin"><div class="product-visual" style="width:54px;height:54px">${productVisual(p)}</div><div><strong>${esc(p.name)}</strong><div class="small muted">${esc(p.category)} · ${money(p.price)} · Stock ${p.stock} · ${p.active?'Activo':'Inactivo'}</div><div class="row" style="margin-top:6px"><button class="icon-btn" data-stock-dec="${p.id}">${UI.minus}</button><button class="icon-btn" data-stock-inc="${p.id}">${UI.plus}</button></div></div><div class="row"><button class="icon-btn" data-edit-product="${p.id}">${UI.edit}</button><button class="icon-btn" data-delete-product="${p.id}">${UI.trash}</button></div></div>`).join('')}</div>`;bindProductAdmin()}
-function productFormHtml(){const p=state.products.find(x=>x.id===editingProductId)||{name:'',description:'',category:'',price:0,stock:0,icon:'plate',image:'',active:true};return `<h3>${editingProductId?'Editar producto':'Nuevo producto'}</h3><div class="admin-grid two"><div><div class="field"><label>Nombre</label><input class="input" id="apName" value="${esc(p.name)}"></div><div class="field"><label>Descripción</label><textarea class="textarea" id="apDesc">${esc(p.description)}</textarea></div><div class="field"><label>Categoría</label><input class="input" id="apCategory" value="${esc(p.category)}"></div><div class="field"><label>Precio</label><input class="input" id="apPrice" type="number" min="0" step="0.01" value="${p.price}"></div><div class="field"><label>Stock</label><input class="input" id="apStock" type="number" min="0" step="1" value="${p.stock}"></div><label class="row"><input type="checkbox" id="apActive" ${p.active?'checked':''}><span>Producto activo</span></label></div><div><div class="field"><label>Biblioteca de iconos SVG</label><div class="icon-picker" id="iconPicker">${Object.keys(FOOD).map(k=>`<button class="icon-option ${p.icon===k&&!p.image?'selected':''}" data-icon="${k}" type="button">${FOOD[k]}</button>`).join('')}</div></div><div class="field"><label>Imagen propia PNG, JPG o SVG</label><label class="btn secondary" for="apImage">${UI.upload}<span>Subir imagen</span></label><input class="hidden" type="file" id="apImage" accept="image/png,image/jpeg,image/svg+xml"><input type="hidden" id="apImageData" value="${p.image||''}"></div></div></div><div class="toolbar"><button class="btn" id="saveProduct">${UI.save}<span>Guardar</span></button><button class="btn ghost" id="cancelProduct">${UI.close}<span>Cancelar</span></button></div>`}
-function bindProductAdmin(){const n=document.getElementById('newProduct');if(n)n.onclick=()=>{editingProductId='';renderProductsAdmin(document.getElementById('adminContent'));document.getElementById('productFormWrap').style.display='block'};document.querySelectorAll('[data-edit-product]').forEach(b=>b.onclick=()=>{editingProductId=b.dataset.editProduct;renderProductsAdmin(document.getElementById('adminContent'))});document.querySelectorAll('[data-delete-product]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar este producto?')){state.products=state.products.filter(p=>p.id!==b.dataset.deleteProduct);delete state.cart[b.dataset.deleteProduct];save();renderProductsAdmin(document.getElementById('adminContent'));renderCatalog()}});document.querySelectorAll('[data-stock-inc]').forEach(b=>b.onclick=()=>quickStock(b.dataset.stockInc,1));document.querySelectorAll('[data-stock-dec]').forEach(b=>b.onclick=()=>quickStock(b.dataset.stockDec,-1));document.querySelectorAll('.icon-option').forEach(b=>b.onclick=()=>{document.querySelectorAll('.icon-option').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');document.getElementById('apImageData').value='';b.dataset.chosen='1'});const image=document.getElementById('apImage');if(image)image.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{document.getElementById('apImageData').value=r.result;document.querySelectorAll('.icon-option').forEach(x=>x.classList.remove('selected'))};r.readAsDataURL(f)};const sp=document.getElementById('saveProduct');if(sp)sp.onclick=saveProductForm;const cp=document.getElementById('cancelProduct');if(cp)cp.onclick=()=>{editingProductId=null;renderProductsAdmin(document.getElementById('adminContent'))}}
+function productFormHtml(){const p=state.products.find(x=>x.id===editingProductId)||{name:'',description:'',category:'',price:0,stock:0,icon:'plate',image:'',active:true};return `<h3>${editingProductId?'Editar producto':'Nuevo producto'}</h3><div class="admin-grid two"><div><div class="field"><label>Nombre</label><input class="input" id="apName" value="${esc(p.name)}"></div><div class="field"><label>Descripción</label><textarea class="textarea" id="apDesc">${esc(p.description)}</textarea></div><div class="field"><label>Categoría</label><input class="input" id="apCategory" value="${esc(p.category)}"></div><div class="field"><label>Precio</label><input class="input" id="apPrice" type="number" min="0" step="0.01" value="${p.price}"></div><div class="field"><label>Stock</label><input class="input" id="apStock" type="number" min="0" step="1" value="${p.stock}"></div><label class="row"><input type="checkbox" id="apActive" ${p.active?'checked':''}><span>Producto activo</span></label></div><div><div class="field"><label>Biblioteca de iconos SVG</label><div class="icon-pack-tabs">${['Todos',...Object.keys(FOOD_PACKS)].map(pack=>`<button class="icon-pack-btn ${activeFoodPack===pack?'active':''}" data-icon-pack="${pack}" type="button">${pack}</button>`).join('')}</div><div class="icon-picker" id="iconPicker">${foodIconKeys().map(k=>`<button class="icon-option ${p.icon===k&&!p.image?'selected':''}" data-icon="${k}" title="${k}" type="button">${FOOD[k]}</button>`).join('')}</div></div><div class="field"><label>Imagen propia PNG, JPG o SVG</label><label class="btn secondary" for="apImage">${UI.upload}<span>Subir imagen</span></label><input class="hidden" type="file" id="apImage" accept="image/png,image/jpeg,image/svg+xml"><input type="hidden" id="apImageData" value="${p.image||''}"></div></div></div><div class="toolbar"><button class="btn" id="saveProduct">${UI.save}<span>Guardar</span></button><button class="btn ghost" id="cancelProduct">${UI.close}<span>Cancelar</span></button></div>`}
+function bindProductAdmin(){
+document.querySelectorAll('[data-icon-pack]').forEach(b=>b.onclick=()=>{activeFoodPack=b.dataset.iconPack;renderProductsAdmin(document.getElementById('adminContent'));if(editingProductId!==null)document.getElementById('productFormWrap').style.display='block'});
+const n=document.getElementById('newProduct');if(n)n.onclick=()=>{editingProductId='';renderProductsAdmin(document.getElementById('adminContent'));document.getElementById('productFormWrap').style.display='block'};document.querySelectorAll('[data-edit-product]').forEach(b=>b.onclick=()=>{editingProductId=b.dataset.editProduct;renderProductsAdmin(document.getElementById('adminContent'))});document.querySelectorAll('[data-delete-product]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar este producto?')){state.products=state.products.filter(p=>p.id!==b.dataset.deleteProduct);delete state.cart[b.dataset.deleteProduct];save();renderProductsAdmin(document.getElementById('adminContent'));renderCatalog()}});document.querySelectorAll('[data-stock-inc]').forEach(b=>b.onclick=()=>quickStock(b.dataset.stockInc,1));document.querySelectorAll('[data-stock-dec]').forEach(b=>b.onclick=()=>quickStock(b.dataset.stockDec,-1));document.querySelectorAll('.icon-option').forEach(b=>b.onclick=()=>{document.querySelectorAll('.icon-option').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');document.getElementById('apImageData').value='';b.dataset.chosen='1'});const image=document.getElementById('apImage');if(image)image.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{document.getElementById('apImageData').value=r.result;document.querySelectorAll('.icon-option').forEach(x=>x.classList.remove('selected'))};r.readAsDataURL(f)};const sp=document.getElementById('saveProduct');if(sp)sp.onclick=saveProductForm;const cp=document.getElementById('cancelProduct');if(cp)cp.onclick=()=>{editingProductId=null;renderProductsAdmin(document.getElementById('adminContent'))}}
 function quickStock(id,d){const p=state.products.find(x=>x.id===id);if(!p)return;p.stock=Math.max(0,p.stock+d);save();renderProductsAdmin(document.getElementById('adminContent'));renderCatalog()}
 function saveProductForm(){const selected=document.querySelector('.icon-option.selected');const obj={id:editingProductId||uid('p'),name:document.getElementById('apName').value.trim(),description:document.getElementById('apDesc').value.trim(),category:document.getElementById('apCategory').value.trim(),price:Number(document.getElementById('apPrice').value),stock:Math.max(0,Math.floor(Number(document.getElementById('apStock').value))),icon:selected?.dataset.icon||'plate',image:document.getElementById('apImageData').value,active:document.getElementById('apActive').checked};if(!obj.name||!obj.category||obj.price<0){toast('Completa nombre, categoría y precio válido.','error');return}const i=state.products.findIndex(x=>x.id===obj.id);if(i>=0)state.products[i]=obj;else state.products.push(obj);editingProductId=null;save();renderProductsAdmin(document.getElementById('adminContent'));renderCategories();renderCatalog();toast('Producto guardado.','ok')}
 const palettes=[['Clásica rojo','#c62828','#fff3f3','#ffb300','#232323','#ffffff'],['Verde fresco','#197a4b','#effbf3','#f2b134','#1f2a24','#ffffff'],['Naranja cálido','#d65f16','#fff4e8','#9d4edd','#2c231d','#ffffff'],['Oscuro elegante','#27272a','#3f3f46','#d4af37','#f4f4f5','#18181b'],['Azul marino','#16324f','#edf4fb','#f0a202','#18212a','#ffffff'],['Rosa pastel','#b85c7f','#fff0f6','#7b61a8','#3a2630','#ffffff']];
 function renderDesignAdmin(c){const d=state.config.design;c.innerHTML=`<div class="section-card"><h3>Paletas predefinidas</h3><div class="palette-grid">${palettes.map((p,i)=>`<button class="palette-card" data-palette="${i}"><strong>${p[0]}</strong><div class="swatches">${p.slice(1).map(x=>`<span style="background:${x}"></span>`).join('')}</div></button>`).join('')}</div></div><div class="section-card"><h3>Colores personalizados</h3><div class="color-grid">${[['Primario','primary'],['Secundario','secondary'],['Acento','accent'],['Texto','text'],['Fondo tarjetas','card'],['Fondo sitio','siteBg'],['Iconos producto','iconColor']].map(([lab,key])=>`<label class="color-input"><input type="color" data-design="${key}" value="${d[key]}"><span>${lab}</span></label>`).join('')}</div></div><div class="section-card"><h3>Fondo del sitio</h3><div class="field"><label>Tipo</label><select class="select" id="bgType"><option value="solid" ${d.bgType==='solid'?'selected':''}>Color sólido</option><option value="gradient" ${d.bgType==='gradient'?'selected':''}>Degradado</option><option value="image" ${d.bgType==='image'?'selected':''}>Imagen</option></select></div><div class="admin-grid two"><div class="field"><label>Color 1</label><input type="color" class="input" id="grad1" value="${d.grad1}"></div><div class="field"><label>Color 2</label><input type="color" class="input" id="grad2" value="${d.grad2}"></div></div><div class="field"><label>Ángulo del degradado</label><input class="input" id="gradAngle" type="range" min="0" max="360" value="${d.gradAngle}"></div><div class="field"><label>Imagen de fondo</label><label class="btn secondary" for="bgImage">${UI.upload}<span>Subir imagen</span></label><input class="hidden" id="bgImage" type="file" accept="image/*"></div><div class="field"><label>Opacidad de imagen</label><input class="input" id="bgOpacity" type="range" min="0" max="1" step="0.05" value="${d.bgOpacity}"></div><label class="row"><input type="checkbox" id="pattern" ${d.pattern?'checked':''}><span>Patrón de ilustraciones de comida</span></label><div class="field"><label>Opacidad del patrón</label><input class="input" id="patternOpacity" type="range" min="0" max="0.2" step="0.005" value="${d.patternOpacity}"></div></div><div class="section-card"><h3>Tipografía e iconos</h3><div class="admin-grid two"><div class="field"><label>Tipografía</label><select class="select" id="fontSelect">${['Inter','Nunito','Poppins','Roboto'].map(f=>`<option ${d.font===f?'selected':''}>${f}</option>`).join('')}</select></div><div class="field"><label>Tamaño de iconos de producto</label><input class="input" id="iconSize" type="range" min="54" max="110" value="${d.iconSize}"></div></div><label class="row"><input type="checkbox" id="rounded" ${d.rounded?'checked':''}><span>Bordes redondeados</span></label></div><div class="section-card"><h3>Vista previa</h3><div class="product-card"><div class="product-visual">${FOOD.burger}</div><div class="product-body"><div class="product-head"><h3 class="product-name">Producto de muestra</h3><div class="price">${money(99)}</div></div><p class="desc">La vista previa cambia con tu diseño.</p><button class="btn">${UI.cart}<span>Agregar</span></button></div></div></div><div class="toolbar"><button class="btn ghost" id="resetDesign">${UI.refresh}<span>Restablecer diseño</span></button></div>`;bindDesignAdmin()}
 function bindDesignAdmin(){document.querySelectorAll('[data-palette]').forEach(b=>b.onclick=()=>{const p=palettes[Number(b.dataset.palette)],d=state.config.design;[d.primary,d.secondary,d.accent,d.text,d.card]=p.slice(1);d.iconColor=d.primary;save();applyDesign();renderDesignAdmin(document.getElementById('adminContent'))});document.querySelectorAll('[data-design]').forEach(i=>i.oninput=e=>{state.config.design[e.target.dataset.design]=e.target.value;save();applyDesign()});const ids=['bgType','grad1','grad2','gradAngle','bgOpacity','pattern','patternOpacity','fontSelect','iconSize','rounded'];ids.forEach(id=>{const el=document.getElementById(id);if(!el)return;const evt=el.type==='range'||el.type==='color'?'input':'change';el.addEventListener(evt,()=>{const d=state.config.design;if(id==='pattern'||id==='rounded')d[id]=el.checked;else if(id==='fontSelect')d.font=el.value;else if(id==='iconSize')d.iconSize=Number(el.value);else if(id==='gradAngle')d.gradAngle=Number(el.value);else if(id==='bgOpacity'||id==='patternOpacity')d[id]=Number(el.value);else d[id]=el.value;save();applyDesign()})});document.getElementById('bgImage').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{state.config.design.bgImage=r.result;state.config.design.bgType='image';save();applyDesign();renderDesignAdmin(document.getElementById('adminContent'))};r.readAsDataURL(f)};document.getElementById('resetDesign').onclick=()=>{state.config.design=deepClone(defaults.config.design);save();applyDesign();renderDesignAdmin(document.getElementById('adminContent'));renderHeader()}}
 function renderBusinessAdmin(c){const cfg=state.config;c.innerHTML=`<div class="section-card"><h3>Identidad</h3><div class="admin-grid two"><div class="field"><label>Nombre del negocio</label><input class="input" id="bizName" value="${esc(cfg.businessName)}"></div><div class="field"><label>Eslogan</label><input class="input" id="bizTagline" value="${esc(cfg.tagline)}"></div></div><div class="field"><label>Logo</label><label class="btn secondary" for="bizLogo">${UI.upload}<span>Subir logo</span></label><input class="hidden" id="bizLogo" type="file" accept="image/*"></div><button class="btn" id="saveIdentity">${UI.save}<span>Guardar identidad</span></button></div><div class="section-card"><h3>WhatsApp y acceso</h3><div class="admin-grid two"><div class="field"><label>Número de WhatsApp</label><input class="input" id="bizWhatsapp" value="${esc(cfg.whatsapp)}"></div><div class="field"><label>Nuevo PIN</label><input class="input" id="bizPin" type="password" value="${esc(cfg.adminPin)}"></div></div><button class="btn" id="saveAccess">${UI.save}<span>Guardar</span></button></div><div class="section-card"><h3>Métodos de pago</h3><div id="paymentAdmin">${cfg.payments.map(p=>`<div class="admin-grid two" style="margin-bottom:8px"><input class="input" data-pay-title="${p.id}" value="${esc(p.title)}"><div class="row"><input class="input" data-pay-data="${p.id}" value="${esc(p.data)}"><button class="icon-btn" data-pay-delete="${p.id}">${UI.trash}</button></div></div>`).join('')}</div><div class="toolbar"><button class="btn secondary" id="addPayment">${UI.plus}<span>Agregar método</span></button><button class="btn" id="savePayments">${UI.save}<span>Guardar métodos</span></button></div></div><div class="section-card"><h3>Origen del negocio</h3><div class="field"><label>Dirección</label><input class="input" id="originAddress" value="${esc(cfg.origin.address)}"></div><button class="btn secondary" id="geocodeOrigin">${UI.pin}<span>Ubicar dirección</span></button><div class="small muted" style="margin:8px 0">También puedes dar clic en el mapa o mover el marcador.</div><div id="originMap" class="map"></div><label class="row" style="margin-top:10px"><input type="checkbox" id="deliveryEnabled" ${cfg.deliveryEnabled?'checked':''}><span>Activar envío a domicilio</span></label></div>`;bindBusinessAdmin();setTimeout(initOriginMap,100)}
-function bindBusinessAdmin(){document.getElementById('saveIdentity').onclick=()=>{state.config.businessName=document.getElementById('bizName').value.trim()||defaults.config.businessName;state.config.tagline=document.getElementById('bizTagline').value.trim();save();renderHeader();toast('Identidad guardada.','ok')};document.getElementById('bizLogo').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{state.config.logo=r.result;save();renderHeader()};r.readAsDataURL(f)};document.getElementById('saveAccess').onclick=()=>{const w=document.getElementById('bizWhatsapp').value.replace(/\D/g,''),p=document.getElementById('bizPin').value.trim();if(!w||!p){toast('Completa WhatsApp y PIN.','error');return}state.config.whatsapp=w;state.config.adminPin=p;save();toast('Datos de acceso guardados.','ok')};document.getElementById('addPayment').onclick=()=>{state.config.payments.push({id:uid('pay'),title:'Nuevo método',data:'Dato para copiar'});save();renderBusinessAdmin(document.getElementById('adminContent'))};document.getElementById('savePayments').onclick=()=>{state.config.payments.forEach(p=>{p.title=document.querySelector(`[data-pay-title="${p.id}"]`)?.value.trim()||p.title;p.data=document.querySelector(`[data-pay-data="${p.id}"]`)?.value.trim()||p.data});save();toast('Métodos guardados.','ok')};document.querySelectorAll('[data-pay-delete]').forEach(b=>b.onclick=()=>{state.config.payments=state.config.payments.filter(p=>p.id!==b.dataset.payDelete);save();renderBusinessAdmin(document.getElementById('adminContent'))});document.getElementById('geocodeOrigin').onclick=()=>geocodeAddress(document.getElementById('originAddress').value,'origin');document.getElementById('deliveryEnabled').onchange=e=>{state.config.deliveryEnabled=e.target.checked;save()}}
+function bindBusinessAdmin(){const adminStatus=document.getElementById('adminSupabaseStatus');if(adminStatus){adminStatus.dataset.kind=supabaseConnectionState==='ok'?'ok':supabaseConnectionState==='error'?'error':'warn';adminStatus.innerHTML=(supabaseConnectionState==='ok'?UI.check:supabaseConnectionState==='error'?UI.close:UI.database)+`<span>${esc(supabaseLastError||'Supabase listo.')}</span>`}
+document.getElementById('retrySupabase').onclick=async()=>{try{await initSupabase();toast('Prueba de Supabase completada.','ok');renderBusinessAdmin(document.getElementById('adminContent'))}catch(e){toast(explainSupabaseError(e),'error')}};
+  document.getElementById('saveIdentity').onclick=()=>{state.config.businessName=document.getElementById('bizName').value.trim()||defaults.config.businessName;state.config.tagline=document.getElementById('bizTagline').value.trim();save();renderHeader();toast('Identidad guardada.','ok')};document.getElementById('bizLogo').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{state.config.logo=r.result;save();renderHeader()};r.readAsDataURL(f)};document.getElementById('saveAccess').onclick=()=>{const w=document.getElementById('bizWhatsapp').value.replace(/\D/g,''),p=document.getElementById('bizPin').value.trim();if(!w||!p){toast('Completa WhatsApp y PIN.','error');return}state.config.whatsapp=w;state.config.adminPin=p;save();toast('Datos de acceso guardados.','ok')};document.getElementById('addPayment').onclick=()=>{state.config.payments.push({id:uid('pay'),title:'Nuevo método',data:'Dato para copiar'});save();renderBusinessAdmin(document.getElementById('adminContent'))};document.getElementById('savePayments').onclick=()=>{state.config.payments.forEach(p=>{p.title=document.querySelector(`[data-pay-title="${p.id}"]`)?.value.trim()||p.title;p.data=document.querySelector(`[data-pay-data="${p.id}"]`)?.value.trim()||p.data});save();toast('Métodos guardados.','ok')};document.querySelectorAll('[data-pay-delete]').forEach(b=>b.onclick=()=>{state.config.payments=state.config.payments.filter(p=>p.id!==b.dataset.payDelete);save();renderBusinessAdmin(document.getElementById('adminContent'))});document.getElementById('geocodeOrigin').onclick=()=>geocodeAddress(document.getElementById('originAddress').value,'origin');document.getElementById('deliveryEnabled').onchange=e=>{state.config.deliveryEnabled=e.target.checked;save()}}
 function initOriginMap(){if(!document.getElementById('originMap')||typeof L==='undefined')return;if(originMap){originMap.remove();originMap=null}const o=state.config.origin;originMap=L.map('originMap').setView([o.lat,o.lng],14);if(!addConfiguredTileLayer(originMap,'originMap')){originMap.remove();originMap=null;return;}originMarker=L.marker([o.lat,o.lng],{draggable:true}).addTo(originMap);const set=e=>{const ll=e.latlng||e.target.getLatLng();state.config.origin.lat=ll.lat;state.config.origin.lng=ll.lng;save()};originMap.on('click',e=>{originMarker.setLatLng(e.latlng);set(e)});originMarker.on('dragend',set)}
 function renderTripAdmin(c){const s=state.config.shipping;c.innerHTML=`<div class="section-card"><h3>Ruta y distancia</h3><div class="field"><label>Origen</label><input class="input" value="${esc(state.config.origin.address)}" disabled></div><div class="field"><label>Destino</label><input class="input" id="tripDestination" placeholder="Escribe una dirección"></div><button class="btn secondary" id="tripGeocode">${UI.pin}<span>Buscar destino</span></button><div class="small muted" style="margin:8px 0">También puedes dar clic en el mapa para fijar el destino.</div><div id="tripMap" class="map"></div><label class="row" style="margin-top:10px"><input type="checkbox" id="roundTrip" ${s.roundTrip?'checked':''}><span>Ida y vuelta</span></label></div><div class="section-card"><h3>Vehículo y combustible</h3><div class="field"><label>Vehículo</label><select class="select" id="vehicle"><option value="moto" ${s.vehicle==='moto'?'selected':''}>Moto</option><option value="auto" ${s.vehicle==='auto'?'selected':''}>Auto</option><option value="truck" ${s.vehicle==='truck'?'selected':''}>Camioneta</option><option value="bike" ${s.vehicle==='bike'?'selected':''}>Bicicleta u otro</option></select></div><div class="admin-grid two">${[['Moto','moto',UI.moto],['Auto','auto',UI.car],['Camioneta','truck',UI.truck],['Bicicleta u otro','bike',UI.bike]].map(([lab,key,ico])=>`<div class="field"><label class="row">${ico}<span>${lab} km/l</span></label><input class="input" type="number" step="0.1" data-eff="${key}" value="${s.efficiency[key]}"></div>`).join('')}</div><div class="field"><label>Combustible</label><select class="select" id="fuelType">${['Magna','Premium','Diésel'].map(f=>`<option ${s.fuel===f?'selected':''}>${f}</option>`).join('')}</select></div><div class="admin-grid two">${['Magna','Premium','Diésel'].map(f=>`<div class="field"><label>${f} precio por litro</label><input class="input" type="number" step="0.01" data-fuel="${f}" value="${s.fuelPrice[f]}"></div>`).join('')}</div></div><div class="section-card"><h3>Tarifa de envío</h3><div class="admin-grid two"><div class="field"><label>Costo base</label><input class="input" id="shipBase" type="number" step="0.01" value="${s.base}"></div><div class="field"><label>Tarifa por km</label><input class="input" id="shipPerKm" type="number" step="0.01" value="${s.perKm}"></div><div class="field"><label>Margen de ganancia</label><input class="input" id="shipMargin" type="number" step="0.1" value="${s.margin}"></div><div class="field"><label>Redondeo</label><input class="input" id="shipRound" type="number" step="1" value="${s.rounding}"></div><div class="field"><label>Envío gratis desde</label><input class="input" id="shipFree" type="number" step="1" value="${s.freeFrom}"></div></div></div><div class="section-card"><h3>Resultado</h3><div class="result-grid"><div class="metric"><strong id="resKm">0.00 km</strong><span>Distancia</span></div><div class="metric"><strong id="resLiters">0.00 l</strong><span>Litros</span></div><div class="metric"><strong id="resFuel">${money(0)}</strong><span>Costo combustible</span></div><div class="metric"><strong id="resSuggested">${money(0)}</strong><span>Envío sugerido</span></div></div><div class="toolbar" style="margin-top:12px"><button class="btn" id="useRate">${UI.save}<span>Usar esta tarifa</span></button></div></div>`;bindTripAdmin();setTimeout(initTripMap,100)}
 let tripKm=0;
@@ -508,7 +658,7 @@ function renderBusinessAdmin(c){
   c.innerHTML=`<div class="section-card"><h3>Identidad</h3><div class="admin-grid two"><div class="field"><label>Nombre del negocio</label><input class="input" id="bizName" value="${esc(cfg.businessName)}"></div><div class="field"><label>Eslogan</label><input class="input" id="bizTagline" value="${esc(cfg.tagline)}"></div></div><div class="field"><label>Logo</label><label class="btn secondary" for="bizLogo">${UI.upload}<span>Subir logo</span></label><input class="hidden" id="bizLogo" type="file" accept="image/*"></div><button class="btn" id="saveIdentity">${UI.save}<span>Guardar identidad</span></button></div>
   <div class="section-card"><h3>WhatsApp</h3><div class="field"><label>Número internacional sin signo de suma</label><input class="input" id="bizWhatsapp" value="${esc(cfg.whatsapp)}"></div><button class="btn" id="saveAccess">${UI.save}<span>Guardar WhatsApp</span></button></div>
   <div class="section-card"><h3>Seguridad del administrador</h3><div class="notice">Sesión activa: ${esc(email||'Administrador')}</div><div class="admin-grid two" style="margin-top:10px"><div class="field"><label>Nueva contraseña</label><input class="input" id="newAdminPassword" type="password" autocomplete="new-password" minlength="8"></div><div class="field"><label>Confirmar nueva contraseña</label><input class="input" id="confirmAdminPassword" type="password" autocomplete="new-password" minlength="8"></div></div><div class="toolbar"><button class="btn" id="changePassword">${UI.lock}<span>Cambiar contraseña</span></button><button class="btn ghost" id="adminLogout">${UI.lock}<span>Cerrar sesión</span></button></div></div>
-  <div class="section-card"><h3>CARTO</h3><div class="notice">Usa tu API key de CARTO Basemaps. La app agregará la clave automáticamente a las solicitudes de tiles y mantendrá visible la atribución de OpenStreetMap y CARTO.</div><div class="admin-grid two" style="margin-top:10px"><div class="field"><label>API key de CARTO</label><input class="input" id="cartoApiKey" type="password" value="${esc(m.apiKey||'')}" placeholder="Pega tu API key"></div><div class="field"><label>Estilo del mapa</label><select class="select" id="cartoStyle"><option value="voyager" ${m.style==='voyager'?'selected':''}>Voyager</option><option value="light_all" ${m.style==='light_all'?'selected':''}>Positron</option><option value="dark_all" ${m.style==='dark_all'?'selected':''}>Dark Matter</option></select></div></div><button class="btn" id="saveMapConfig">${UI.map}<span>Guardar CARTO</span></button></div>
+  <div class="section-card"><h3>Conexión Supabase</h3><div class="supabase-status" id="adminSupabaseStatus" data-kind="warn">${UI.database}<span>Estado de conexión pendiente.</span></div><div class="toolbar" style="margin-top:10px"><button class="btn secondary" id="retrySupabase">${UI.refresh}<span>Probar conexión</span></button></div></div><div class="section-card"><h3>CARTO</h3><div class="notice">Usa tu API key de CARTO Basemaps. La app agregará la clave automáticamente a las solicitudes de tiles y mantendrá visible la atribución de OpenStreetMap y CARTO.</div><div class="admin-grid two" style="margin-top:10px"><div class="field"><label>API key de CARTO</label><input class="input" id="cartoApiKey" type="password" value="${esc(m.apiKey||'')}" placeholder="Pega tu API key"></div><div class="field"><label>Estilo del mapa</label><select class="select" id="cartoStyle"><option value="voyager" ${m.style==='voyager'?'selected':''}>Voyager</option><option value="light_all" ${m.style==='light_all'?'selected':''}>Positron</option><option value="dark_all" ${m.style==='dark_all'?'selected':''}>Dark Matter</option></select></div></div><button class="btn" id="saveMapConfig">${UI.map}<span>Guardar CARTO</span></button></div>
   <div class="section-card"><h3>Métodos de pago</h3><div id="paymentAdmin">${cfg.payments.map(p=>`<div class="admin-grid two" style="margin-bottom:8px"><input class="input" data-pay-title="${p.id}" value="${esc(p.title)}"><div class="row"><input class="input" data-pay-data="${p.id}" value="${esc(p.data)}"><button class="icon-btn" data-pay-delete="${p.id}">${UI.trash}</button></div></div>`).join('')}</div><div class="toolbar"><button class="btn secondary" id="addPayment">${UI.plus}<span>Agregar método</span></button><button class="btn" id="savePayments">${UI.save}<span>Guardar métodos</span></button></div></div>
   <div class="section-card"><h3>Origen del negocio</h3><div class="field"><label>Dirección</label><input class="input" id="originAddress" value="${esc(cfg.origin.address)}"></div><button class="btn secondary" id="geocodeOrigin">${UI.pin}<span>Ubicar dirección</span></button><div class="small muted" style="margin:8px 0">También puedes dar clic en el mapa o mover el marcador.</div><div id="originMap" class="map"></div><label class="row" style="margin-top:10px"><input type="checkbox" id="deliveryEnabled" ${cfg.deliveryEnabled?'checked':''}><span>Activar envío a domicilio</span></label></div>`;
   bindBusinessAdmin();setTimeout(initOriginMap,100);
@@ -588,8 +738,8 @@ async function confirmOrder(){
    EVENTS & INIT
 ============================== */
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.cat){currentCategory=b.dataset.cat;renderCategories();renderCatalog()}if(b.dataset.inc)changeQty(b.dataset.inc,1);if(b.dataset.dec)changeQty(b.dataset.dec,-1);if(b.dataset.remove){delete state.cart[b.dataset.remove];save();renderCart();renderCatalog()}if(b.dataset.closeDrawer!==undefined)closeDrawer();if(b.dataset.closeModal)closeModal(b.dataset.closeModal);if(b.dataset.copy){navigator.clipboard.writeText(b.dataset.copy).then(()=>{const n=document.getElementById('copy_'+b.dataset.copyId);n?.classList.add('show');setTimeout(()=>n?.classList.remove('show'),1600)}).catch(()=>toast('No se pudo copiar.','error'))}if(b.dataset.tab)renderAdminPane(b.dataset.tab)});
-document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e.target.value;renderCatalog()});document.getElementById('cartBtn').onclick=openDrawer;document.getElementById('adminBtn').onclick=openAdmin;document.getElementById('pinSubmit').onclick=checkPin;document.getElementById('adminEmailInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('adminPasswordInput').focus()});document.getElementById('adminPasswordInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin()});document.getElementById('overlay').onclick=()=>{closeDrawer();document.querySelectorAll('.modal.show').forEach(m=>closeModal(m.id))};document.getElementById('whatsappFab').onclick=()=>window.open(`https://wa.me/${state.config.whatsapp}?text=${encodeURIComponent(`Hola, quiero información de ${state.config.businessName}.`)}`,'_blank');
-applyDesign();renderHeader();renderCategories();renderCatalog();initSupabase().catch(()=>toast('No se pudo conectar con Supabase. Se muestran datos locales.','error'));
+document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e.target.value;renderCatalog()});document.getElementById('cartBtn').onclick=openDrawer;document.getElementById('themeBtn').onclick=togglePublicTheme;document.getElementById('adminBtn').onclick=openAdmin;document.getElementById('pinSubmit').onclick=checkPin;document.getElementById('adminEmailInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('adminPasswordInput').focus()});document.getElementById('adminPasswordInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin()});document.getElementById('overlay').onclick=()=>{closeDrawer();document.querySelectorAll('.modal.show').forEach(m=>closeModal(m.id))};document.getElementById('whatsappFab').onclick=()=>window.open(`https://wa.me/${state.config.whatsapp}?text=${encodeURIComponent(`Hola, quiero información de ${state.config.businessName}.`)}`,'_blank');
+applyDesign();renderHeader();renderCategories();renderCatalog();initSupabase().catch(e=>{console.error('Supabase init:',e);toast(explainSupabaseError(e),'error')});
 </script>
 </body>
 </html>
