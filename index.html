@@ -230,7 +230,7 @@ const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 let supabaseClient=null,adminSession=null,cloudSyncTimer=null,cloudReady=false;
 function supabaseConfigured(){
   return /^https:\/\/.+\.supabase\.co$/i.test(SUPABASE_URL)
-    && !SUPABASE_ANON_KEY.includes('https://qgmlmtmthqwjvgmvmpe.supabase.co');
+    && !SUPABASE_ANON_KEY.includes('PEGA_AQUI');
 }
 
 /* ==============================
