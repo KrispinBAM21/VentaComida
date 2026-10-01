@@ -151,6 +151,33 @@ body.dark-mode .leaflet-container{background:#171b21}
 .supabase-status[data-kind="error"]{color:var(--danger)}
 .supabase-status[data-kind="warn"]{color:var(--warning)}
 
+
+/* Centro administrativo V5 */
+.admin-dashboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.admin-kpi{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px}
+.admin-kpi strong{display:block;font-size:1.35rem;color:var(--primary);margin-top:4px}
+.admin-kpi span{font-size:.76rem;color:var(--muted);font-weight:700}
+.admin-kpi svg,.review-card svg,.integration-card svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.review-list{display:grid;gap:10px}
+.review-card{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:13px}
+.review-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.review-meta{display:flex;flex-wrap:wrap;gap:6px 12px;color:var(--muted);font-size:.78rem;margin-top:7px}
+.review-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.payment-status{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 9px;font-size:.72rem;font-weight:900}
+.ps-WAITING_PAYMENT{background:#eef2f7;color:#4b5563}
+.ps-PROCESSING{background:#fff3cd;color:#7a5700}
+.ps-PENDING_REVIEW{background:#fff1db;color:#92400e}
+.ps-APPROVED{background:#dff4e9;color:#176a43}
+.ps-REJECTED{background:#fde8e7;color:#b42318}
+.integration-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.integration-card{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:14px}
+.code-note{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.78rem;padding:10px;border-radius:10px;background:var(--secondary);overflow:auto;white-space:pre-wrap}
+.audit-list{display:grid;gap:8px}
+.audit-item{border-left:3px solid var(--primary);padding:9px 11px;background:var(--secondary);border-radius:9px;font-size:.8rem}
+.receipt-thumb{width:56px;height:56px;border-radius:10px;background:var(--secondary);display:grid;place-items:center;color:var(--primary);overflow:hidden}
+.receipt-thumb img{width:100%;height:100%;object-fit:cover}
+@media(min-width:720px){.admin-dashboard{grid-template-columns:repeat(5,minmax(0,1fr))}.integration-grid{grid-template-columns:repeat(2,1fr)}}
+
 </style>
 </head>
 <body>
@@ -230,7 +257,14 @@ const UI = {
   refresh:`<svg viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5M18 10a7 7 0 0 0-12-2M6 14a7 7 0 0 0 12 2"/></svg>`,
   moon:`<svg viewBox="0 0 24 24"><path d="M20 15.5A8 8 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5z"/></svg>`,
   sun:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`,
-  database:`<svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>`
+  database:`<svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>`,
+  dashboard:`<svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/></svg>`,
+  receipt:`<svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h4"/></svg>`,
+  review:`<svg viewBox="0 0 24 24"><path d="M5 4h10l4 4v12H5zM15 4v5h5M8 13l2 2 5-5"/></svg>`,
+  audit:`<svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 8h6M9 12h6M9 16h4"/></svg>`,
+  telegram:`<svg viewBox="0 0 24 24"><path d="M21 4 3 11l7 2 2 7 9-16zM10 13l5-4"/></svg>`,
+  shield:`<svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>`
+
 
 };
 
@@ -306,7 +340,7 @@ function foodIconKeys(){
    Pega la URL del proyecto y la Publishable/anon key.
    Nunca uses service_role dentro de este archivo.
 ============================== */
-const SUPABASE_URL='https://qgmlmtmthqwjvgmvmpe.supabase.co';
+const SUPABASE_URL='https://qgmlmtmtthqwjvgmvmpe.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_UYHdkpNQO4dEjhGODSgzzQ_ku45uaWs';
 let supabaseClient=null,adminSession=null,cloudSyncTimer=null,cloudReady=false,supabaseConnectionState='idle',supabaseLastError='';
 function supabaseConfigured(){
@@ -570,8 +604,17 @@ async function computeClientRoute(){if(checkout.lat==null)return;const o=state.c
 function nextFolio(){const d=new Date(),stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;return `${stamp}-${String(state.folioSeq).padStart(4,'0')}`}
 async function buildPdf(order){const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});let titleX=14;if(state.config.logo&&/^data:image\/(png|jpe?g|webp);/i.test(state.config.logo)){try{const fmt=(state.config.logo.match(/^data:image\/(png|jpe?g|webp);/i)||[])[1];doc.addImage(state.config.logo,fmt&&fmt.toLowerCase().startsWith('jp')?'JPEG':fmt.toUpperCase(),14,9,16,16);titleX=34}catch(e){}}doc.setFont('helvetica','bold');doc.setFontSize(18);doc.text(state.config.businessName,titleX,18);doc.setFontSize(10);doc.setFont('helvetica','normal');doc.text(`Folio: ${order.folio}`,14,25);doc.text(`Fecha: ${order.dateText}`,14,31);doc.text(`Cliente: ${order.customer.name}`,14,39);doc.text(`Teléfono: ${order.customer.phone}`,14,45);doc.text(`Entrega: ${order.delivery.label}`,14,51);if(order.delivery.address)doc.text(`Dirección: ${order.delivery.address}`,14,57,{maxWidth:180});const y=order.delivery.address?66:58;doc.autoTable({startY:y,head:[['Producto','Cantidad','Precio unitario','Total']],body:order.items.map(i=>[i.name,String(i.qty),money(i.price),money(i.total)]),styles:{fontSize:9},headStyles:{fillColor:[60,60,60]},theme:'grid'});let yy=doc.lastAutoTable.finalY+8;doc.setFont('helvetica','normal');doc.text(`Subtotal: ${money(order.subtotal)}`,140,yy);yy+=6;doc.text(`Envío: ${money(order.shipping)}`,140,yy);yy+=7;doc.setFont('helvetica','bold');doc.text(`TOTAL GENERAL: ${money(order.total)}`,140,yy);yy+=10;doc.setFont('helvetica','normal');doc.text(`Método de pago elegido: ${order.paymentTitle}`,14,yy,{maxWidth:180});yy+=8;doc.text('Métodos de pago disponibles:',14,yy);yy+=6;state.config.payments.forEach(p=>{doc.text(`${p.title}: ${p.data}`,18,yy,{maxWidth:175});yy+=6});return doc.output('blob')}
 function whatsappText(order){return [`PEDIDO #${order.folio}`,`CLIENTE: ${order.customer.name} y ${order.customer.phone}`,'DETALLE:',...order.items.map(i=>`${i.qty} x ${i.name} - ${money(i.price)} c/u = ${money(i.total)}`),`ENTREGA: ${order.delivery.label}${order.delivery.address?' - '+order.delivery.address:''}${order.delivery.km?` - ${order.delivery.km.toFixed(2)} km`:''}`,`SUBTOTAL: ${money(order.subtotal)}`,`ENVIO: ${money(order.shipping)}`,`TOTAL: ${money(order.total)}`,`METODO DE PAGO: ${order.paymentTitle}`,'Adjunto mi comprobante a continuación.'].join('\n')}
+
+function renderOrdersAdmin(c,skipFetch=false){
+  c.innerHTML=`<div class="section-card"><h3>Historial de pedidos</h3><div class="table-wrap"><table class="admin-table"><thead><tr><th>Orden</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Pago</th><th>Entrega</th><th>Acciones</th></tr></thead><tbody>${state.orders.length?state.orders.map(o=>`<tr><td>${esc(o.publicId||o.folio)}</td><td>${esc(new Date(o.date).toLocaleString('es-MX'))}</td><td>${esc(o.customer.name)}</td><td>${money(o.total)}</td><td>${paymentBadge(o.paymentStatus||'WAITING_PAYMENT')}</td><td><span class="status-badge status-${o.status}">${o.status==='pendiente'?UI.pending:o.status==='pagado'?UI.paid:UI.delivered}<span>${o.status}</span></span></td><td><div class="row"><select class="select" data-order-status="${o.id}"><option value="pendiente" ${o.status==='pendiente'?'selected':''}>Pendiente</option><option value="pagado" ${o.status==='pagado'?'selected':''}>Pagado</option><option value="entregado" ${o.status==='entregado'?'selected':''}>Entregado</option></select><button class="icon-btn" data-reprint="${o.id}">${UI.download}</button></div></td></tr>`).join(''):`<tr><td colspan="7">Todavía no hay pedidos.</td></tr>`}</tbody></table></div></div><div class="section-card"><h3>Respaldo</h3><div class="toolbar"><button class="btn" id="exportJson">${UI.download}<span>Exportar JSON</span></button><label class="btn secondary" for="importJson">${UI.upload}<span>Importar JSON</span></label><input class="hidden" id="importJson" type="file" accept="application/json"></div></div>`;
+  document.querySelectorAll('[data-order-status]').forEach(s=>s.onchange=async e=>{const o=state.orders.find(x=>x.id===e.target.dataset.orderStatus);if(!o)return;o.status=e.target.value;saveLocal();if(supabaseClient&&adminSession){const {error}=await supabaseClient.from('orders').update({status:o.status}).eq('id',o.id);if(error)toast('No se pudo actualizar el estado.','error')}renderOrdersAdmin(document.getElementById('adminContent'),true)});
+  document.querySelectorAll('[data-reprint]').forEach(b=>b.onclick=()=>reprintOrder(b.dataset.reprint));
+  document.getElementById('exportJson').onclick=exportJson;document.getElementById('importJson').onchange=importJson;
+  if(!skipFetch&&supabaseClient&&adminSession)fetchCloudOrders().then(()=>{if(activeAdmin==='orders')renderOrdersAdmin(document.getElementById('adminContent'),true)}).catch(e=>toast(e.message||'No se pudo cargar el historial de Supabase.','error'));
+}
+
 async function confirmOrder(){const items=cartItems(),folio=nextFolio(),pay=state.config.payments.find(x=>x.id===checkout.paymentId),now=new Date();const order={id:uid('o'),folio,date:now.toISOString(),dateText:now.toLocaleString('es-MX'),customer:{name:checkout.name,phone:checkout.phone,notes:checkout.notes},items:items.map(x=>({id:x.p.id,name:x.p.name,qty:x.qty,price:x.p.price,total:x.qty*x.p.price})),subtotal:subtotal(),shipping:checkout.shipping,total:subtotal()+checkout.shipping,paymentId:checkout.paymentId,paymentTitle:pay?.title||'',delivery:{type:checkout.delivery,label:checkout.delivery==='pickup'?'Recoger en sitio':'Domicilio',address:checkout.delivery==='delivery'?checkout.address:'',km:checkout.delivery==='delivery'?checkout.distance:0},status:'pendiente'};lastPdfBlob=await buildPdf(order);lastPdfName=`pedido-${folio}.pdf`;lastOrderId=order.id;state.orders.unshift(order);state.folioSeq++;items.forEach(x=>{x.p.stock=Math.max(0,x.p.stock-x.qty)});state.cart={};save();renderCatalog();updateCartCount();renderPostConfirm(order)}
-function renderPostConfirm(order){document.getElementById('summaryBody').innerHTML=`<div class="section-card"><div class="row">${UI.check}<div><strong>Pedido generado</strong><div class="small muted">Folio ${order.folio}</div></div></div></div><div class="total-line grand"><span>TOTAL GENERAL</span><span>${money(order.total)}</span></div><div class="stack" style="margin-top:16px"><button class="btn full" id="downloadPdf">${UI.download}<span>Descargar PDF</span></button>${navigator.canShare?`<button class="btn secondary full" id="shareFiles">${UI.attach}<span>Compartir PDF + comprobante</span></button>`:''}<button class="btn success full" id="payWhatsapp">${UI.whatsapp}<span>PAGAR</span></button></div><div class="notice" style="margin-top:12px">Al abrir WhatsApp, adjunta tu comprobante en el chat.</div>`;document.getElementById('downloadPdf').onclick=downloadLastPdf;document.getElementById('payWhatsapp').onclick=()=>{window.open(`https://wa.me/${state.config.whatsapp}?text=${encodeURIComponent(whatsappText(order))}`,'_blank');resetCheckout();closeModal('summaryModal')};if(document.getElementById('shareFiles'))document.getElementById('shareFiles').onclick=()=>shareFiles(order)}
+function renderPostConfirm(order){document.getElementById('summaryBody').innerHTML=`<div class="section-card"><div class="row">${UI.check}<div><strong>Pedido generado</strong><div class="small muted">Folio ${order.folio}</div></div></div></div><div class="total-line grand"><span>TOTAL GENERAL</span><span>${money(order.total)}</span></div><div class="stack" style="margin-top:16px"><button class="btn full" id="downloadPdf">${UI.download}<span>Descargar PDF</span></button>${navigator.canShare?`<button class="btn secondary full" id="shareFiles">${UI.attach}<span>Compartir PDF + comprobante</span></button>`:''}<button class="btn success full" id="payWhatsapp">${UI.whatsapp}<span>PAGAR</span></button></div><div class="notice" style="margin-top:12px">Tu comprobante se registra en el sistema cuando la conexión está disponible. WhatsApp se mantiene como canal de contacto del negocio.</div>`;document.getElementById('downloadPdf').onclick=downloadLastPdf;document.getElementById('payWhatsapp').onclick=()=>{window.open(`https://wa.me/${state.config.whatsapp}?text=${encodeURIComponent(whatsappText(order))}`,'_blank');resetCheckout();closeModal('summaryModal')};if(document.getElementById('shareFiles'))document.getElementById('shareFiles').onclick=()=>shareFiles(order)}
 function downloadLastPdf(){if(!lastPdfBlob)return;const a=document.createElement('a');a.href=URL.createObjectURL(lastPdfBlob);a.download=lastPdfName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 async function shareFiles(order){if(!lastPdfBlob||!checkout.proofFile)return;const pdfFile=new File([lastPdfBlob],lastPdfName,{type:'application/pdf'}),files=[pdfFile,checkout.proofFile];try{if(navigator.canShare?.({files}))await navigator.share({title:`Pedido ${order.folio}`,text:'Cuenta del pedido y comprobante',files});else toast('Tu navegador no permite compartir estos archivos juntos.','error')}catch(e){if(e.name!=='AbortError')toast('No se pudieron compartir los archivos.','error')}}
 function resetCheckout(){checkout={delivery:'pickup',address:'',lat:null,lng:null,distance:0,shipping:0,name:'',phone:'',notes:'',paymentId:'',proofFile:null,proofUrl:'',proofName:''}}
@@ -586,8 +629,19 @@ function closeModal(id){document.getElementById(id).classList.remove('show');if(
 /* ==============================
    ADMIN PANEL
 ============================== */
-const adminTabs=[['products','Productos',UI.products],['design','Personalización',UI.palette],['business','Negocio',UI.business],['trip','Calculadora de viajes',UI.calc],['orders','Pedidos',UI.orders]];
-let activeAdmin='products',editingProductId=null;
+const adminTabs=[
+['dashboard','Dashboard',UI.dashboard],
+['products','Productos',UI.products],
+['design','Personalización',UI.palette],
+['business','Negocio',UI.business],
+['trip','Calculadora de viajes',UI.calc],
+['orders','Pedidos',UI.orders],
+['review','Revisión de pagos',UI.review],
+['receipts','Comprobantes',UI.receipt],
+['audit','Auditoría',UI.audit],
+['integrations','Integraciones',UI.telegram]
+];
+let activeAdmin='dashboard',editingProductId=null;
 async function openAdmin(){
   if(adminSession&&supabaseClient){renderAdmin();openModal('adminModal');return}
   const email=document.getElementById('adminEmailInput');
@@ -619,7 +673,21 @@ async function checkPin(){
   finally{btn.disabled=false}
 }
 function renderAdmin(){document.getElementById('adminTabs').innerHTML=adminTabs.map(([id,label,ico])=>`<button class="tab-btn ${activeAdmin===id?'active':''}" data-tab="${id}">${ico}<span>${label}</span></button>`).join('');renderAdminPane(activeAdmin)}
-function renderAdminPane(id){activeAdmin=id;document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));const c=document.getElementById('adminContent');if(id==='products')renderProductsAdmin(c);if(id==='design')renderDesignAdmin(c);if(id==='business')renderBusinessAdmin(c);if(id==='trip')renderTripAdmin(c);if(id==='orders')renderOrdersAdmin(c)}
+function renderAdminPane(id){
+  activeAdmin=id;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+  const c=document.getElementById('adminContent');
+  if(id==='dashboard')renderAdminDashboard(c);
+  if(id==='products')renderProductsAdmin(c);
+  if(id==='design')renderDesignAdmin(c);
+  if(id==='business')renderBusinessAdmin(c);
+  if(id==='trip')renderTripAdmin(c);
+  if(id==='orders')renderOrdersAdmin(c);
+  if(id==='review')renderPaymentReviewAdmin(c);
+  if(id==='receipts')renderReceiptsAdmin(c);
+  if(id==='audit')renderAuditAdmin(c);
+  if(id==='integrations')renderIntegrationsAdmin(c);
+}
 function renderProductsAdmin(c){c.innerHTML=`<div class="toolbar"><button class="btn" id="newProduct">${UI.plus}<span>Nuevo producto</span></button></div><div class="section-card" id="productFormWrap" style="display:${editingProductId?'block':'none'}">${productFormHtml()}</div><div class="section-card"><h3>Productos</h3>${state.products.map(p=>`<div class="product-admin"><div class="product-visual" style="width:54px;height:54px">${productVisual(p)}</div><div><strong>${esc(p.name)}</strong><div class="small muted">${esc(p.category)} · ${money(p.price)} · Stock ${p.stock} · ${p.active?'Activo':'Inactivo'}</div><div class="row" style="margin-top:6px"><button class="icon-btn" data-stock-dec="${p.id}">${UI.minus}</button><button class="icon-btn" data-stock-inc="${p.id}">${UI.plus}</button></div></div><div class="row"><button class="icon-btn" data-edit-product="${p.id}">${UI.edit}</button><button class="icon-btn" data-delete-product="${p.id}">${UI.trash}</button></div></div>`).join('')}</div>`;bindProductAdmin()}
 function productFormHtml(){const p=state.products.find(x=>x.id===editingProductId)||{name:'',description:'',category:'',price:0,stock:0,icon:'plate',image:'',active:true};return `<h3>${editingProductId?'Editar producto':'Nuevo producto'}</h3><div class="admin-grid two"><div><div class="field"><label>Nombre</label><input class="input" id="apName" value="${esc(p.name)}"></div><div class="field"><label>Descripción</label><textarea class="textarea" id="apDesc">${esc(p.description)}</textarea></div><div class="field"><label>Categoría</label><input class="input" id="apCategory" value="${esc(p.category)}"></div><div class="field"><label>Precio</label><input class="input" id="apPrice" type="number" min="0" step="0.01" value="${p.price}"></div><div class="field"><label>Stock</label><input class="input" id="apStock" type="number" min="0" step="1" value="${p.stock}"></div><label class="row"><input type="checkbox" id="apActive" ${p.active?'checked':''}><span>Producto activo</span></label></div><div><div class="field"><label>Biblioteca de iconos SVG</label><div class="icon-pack-tabs">${['Todos',...Object.keys(FOOD_PACKS)].map(pack=>`<button class="icon-pack-btn ${activeFoodPack===pack?'active':''}" data-icon-pack="${pack}" type="button">${pack}</button>`).join('')}</div><div class="icon-picker" id="iconPicker">${foodIconKeys().map(k=>`<button class="icon-option ${p.icon===k&&!p.image?'selected':''}" data-icon="${k}" title="${k}" type="button">${FOOD[k]}</button>`).join('')}</div></div><div class="field"><label>Imagen propia PNG, JPG o SVG</label><label class="btn secondary" for="apImage">${UI.upload}<span>Subir imagen</span></label><input class="hidden" type="file" id="apImage" accept="image/png,image/jpeg,image/svg+xml"><input type="hidden" id="apImageData" value="${p.image||''}"></div></div></div><div class="toolbar"><button class="btn" id="saveProduct">${UI.save}<span>Guardar</span></button><button class="btn ghost" id="cancelProduct">${UI.close}<span>Cancelar</span></button></div>`}
 function bindProductAdmin(){
@@ -645,6 +713,135 @@ function renderOrdersAdmin(c){c.innerHTML=`<div class="section-card"><h3>Histori
 function exportJson(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='respaldo-catalogo-comida.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function importJson(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const data=JSON.parse(r.result);state=merge(defaults,data);save();applyDesign();renderHeader();renderCategories();renderCatalog();renderOrdersAdmin(document.getElementById('adminContent'));toast('Respaldo importado.','ok')}catch(err){toast('El archivo JSON no es válido.','error')}};r.readAsText(f)}
 
+
+
+/* ==============================
+   CENTRO DE ORDENES Y COMPROBANTES V5
+============================== */
+const PAYMENT_LABELS={
+  WAITING_PAYMENT:'Esperando comprobante',
+  PROCESSING:'Procesando comprobante',
+  PENDING_REVIEW:'En revisión',
+  APPROVED:'Pago aprobado',
+  REJECTED:'Pago rechazado'
+};
+function paymentBadge(status){
+  const s=PAYMENT_LABELS[status]?status:'WAITING_PAYMENT';
+  const ico=s==='APPROVED'?UI.check:s==='REJECTED'?UI.close:s==='PENDING_REVIEW'?UI.review:UI.pending;
+  return `<span class="payment-status ps-${s}">${ico}<span>${PAYMENT_LABELS[s]}</span></span>`;
+}
+async function safeSelect(table,query='*',opts={}){
+  if(!supabaseClient||!adminSession)throw new Error('Inicia sesión como administrador.');
+  let q=supabaseClient.from(table).select(query);
+  if(opts.order)q=q.order(opts.order,{ascending:opts.ascending??false});
+  if(opts.limit)q=q.limit(opts.limit);
+  const {data,error}=await q;
+  if(error)throw error;
+  return data||[];
+}
+async function renderAdminDashboard(c){
+  c.innerHTML=`<div class="section-card"><h3>Centro de órdenes</h3><div class="notice">El panel web administra pedidos y comprobantes. Telegram queda como canal interno y nunca se muestra al cliente.</div></div><div class="admin-dashboard" id="adminKpis"></div><div class="section-card"><h3>Órdenes recientes</h3><div id="adminRecent">Cargando...</div></div>`;
+  try{
+    const orders=await safeSelect('orders','id,folio,public_id,customer_name,total,payment_status,status,created_at',{order:'created_at',limit:100});
+    const counts={all:orders.length,WAITING_PAYMENT:0,PROCESSING:0,PENDING_REVIEW:0,APPROVED:0,REJECTED:0};
+    orders.forEach(o=>counts[o.payment_status||'WAITING_PAYMENT']=(counts[o.payment_status||'WAITING_PAYMENT']||0)+1);
+    document.getElementById('adminKpis').innerHTML=[
+      ['Total',counts.all,UI.orders],['En revisión',counts.PENDING_REVIEW,UI.review],['Aprobadas',counts.APPROVED,UI.check],['Rechazadas',counts.REJECTED,UI.close],['Procesando',counts.PROCESSING,UI.pending]
+    ].map(([l,v,i])=>`<div class="admin-kpi">${i}<span>${l}</span><strong>${v}</strong></div>`).join('');
+    document.getElementById('adminRecent').innerHTML=orders.length?`<div class="table-wrap"><table class="admin-table"><thead><tr><th>Orden</th><th>Cliente</th><th>Total</th><th>Pago</th><th>Fecha</th></tr></thead><tbody>${orders.slice(0,12).map(o=>`<tr><td>${esc(o.public_id||o.folio)}</td><td>${esc(o.customer_name||'')}</td><td>${money(o.total)}</td><td>${paymentBadge(o.payment_status||'WAITING_PAYMENT')}</td><td>${new Date(o.created_at).toLocaleString('es-MX')}</td></tr>`).join('')}</tbody></table></div>`:'Todavía no hay órdenes.';
+  }catch(e){
+    document.getElementById('adminKpis').innerHTML='';
+    document.getElementById('adminRecent').innerHTML=`<div class="notice">Ejecuta la migración V5 para habilitar el centro de órdenes. ${esc(e.message||'')}</div>`;
+  }
+}
+async function setPaymentDecision(orderId,status,reason=''){
+  if(!['APPROVED','REJECTED','PENDING_REVIEW'].includes(status))return;
+  const patch={payment_status:status,rejection_reason:status==='REJECTED'?reason:null,approved_at:status==='APPROVED'?new Date().toISOString():null,rejected_at:status==='REJECTED'?new Date().toISOString():null,reviewed_by:adminSession?.user?.id||null};
+  const {error}=await supabaseClient.from('orders').update(patch).eq('id',orderId);
+  if(error)throw error;
+  await supabaseClient.from('order_events').insert({order_id:orderId,event_type:status==='APPROVED'?'PAYMENT_APPROVED':status==='REJECTED'?'PAYMENT_REJECTED':'PAYMENT_REVIEW',new_status:status,source:'WEB',user_id:adminSession?.user?.id||null,metadata:{reason}});
+}
+async function renderPaymentReviewAdmin(c){
+  c.innerHTML=`<div class="section-card"><h3>Revisión de pagos</h3><div class="notice">La imagen del comprobante es evidencia auxiliar. La aprobación final se registra como decisión administrativa y queda auditada.</div></div><div class="review-list" id="reviewList">Cargando...</div>`;
+  try{
+    const [orders,receipts]=await Promise.all([
+      safeSelect('orders','id,folio,public_id,customer_name,total,expected_amount,payment_status,created_at',{order:'created_at',limit:250}),
+      safeSelect('receipts','*',{order:'created_at',limit:250})
+    ]);
+    const rm=new Map();receipts.forEach(r=>{if(!rm.has(String(r.order_id)))rm.set(String(r.order_id),r)});
+    const pending=orders.filter(o=>['PROCESSING','PENDING_REVIEW','REJECTED','WAITING_PAYMENT'].includes(o.payment_status||'WAITING_PAYMENT'));
+    const list=document.getElementById('reviewList');
+    list.innerHTML=pending.length?pending.map(o=>{const r=rm.get(String(o.id));return `<article class="review-card"><div class="review-card-head"><div><strong>${esc(o.public_id||o.folio)}</strong><div class="small muted">${esc(o.customer_name||'')}</div></div>${paymentBadge(o.payment_status||'WAITING_PAYMENT')}</div><div class="review-meta"><span>Esperado: ${money(o.expected_amount??o.total)}</span>${r?.detected_amount!=null?`<span>Detectado: ${money(r.detected_amount)}</span>`:''}${r?.detected_bank?`<span>Banco: ${esc(r.detected_bank)}</span>`:''}${r?.detected_reference?`<span>Referencia: ${esc(r.detected_reference)}</span>`:''}${r?.confidence!=null?`<span>Confianza: ${Math.round(Number(r.confidence)*100)}%</span>`:''}</div><div class="review-actions">${r?`<button class="btn secondary" data-view-receipt="${r.id}">${UI.receipt}<span>Ver comprobante</span></button>`:''}<button class="btn success" data-payment-approve="${o.id}">${UI.check}<span>Aprobar</span></button><button class="btn danger" data-payment-reject="${o.id}">${UI.close}<span>Rechazar</span></button></div></article>`}).join(''):`<div class="notice">No hay pagos pendientes de revisión.</div>`;
+    document.querySelectorAll('[data-payment-approve]').forEach(b=>b.onclick=async()=>{try{await setPaymentDecision(b.dataset.paymentApprove,'APPROVED');toast('Pago aprobado.','ok');renderPaymentReviewAdmin(c)}catch(e){toast(e.message,'error')}});
+    document.querySelectorAll('[data-payment-reject]').forEach(b=>b.onclick=async()=>{const reason=prompt('Motivo del rechazo:','Comprobante no válido')||'Rechazado por administrador';try{await setPaymentDecision(b.dataset.paymentReject,'REJECTED',reason);toast('Pago rechazado.','ok');renderPaymentReviewAdmin(c)}catch(e){toast(e.message,'error')}});
+    document.querySelectorAll('[data-view-receipt]').forEach(b=>b.onclick=()=>openReceiptSecure(b.dataset.viewReceipt));
+  }catch(e){document.getElementById('reviewList').innerHTML=`<div class="notice">No se pudo cargar revisión de pagos. ${esc(e.message||'')}</div>`}
+}
+async function openReceiptSecure(receiptId){
+  try{
+    const {data:r,error}=await supabaseClient.from('receipts').select('file_path,file_url').eq('id',receiptId).single();
+    if(error)throw error;
+    if(r.file_path){
+      const {data,error:se}=await supabaseClient.storage.from('receipts-private').createSignedUrl(r.file_path,120);
+      if(se)throw se;
+      window.open(data.signedUrl,'_blank','noopener');
+    }else if(r.file_url){window.open(r.file_url,'_blank','noopener')}
+  }catch(e){toast('No se pudo abrir el comprobante.','error')}
+}
+async function renderReceiptsAdmin(c){
+  c.innerHTML=`<div class="section-card"><h3>Comprobantes</h3><div class="notice">Los archivos se mantienen privados y se abren mediante enlaces firmados temporales.</div></div><div id="receiptsAdmin">Cargando...</div>`;
+  try{
+    const [receipts,orders]=await Promise.all([safeSelect('receipts','*',{order:'created_at',limit:300}),safeSelect('orders','id,folio,public_id,customer_name,total')]);
+    const om=new Map(orders.map(o=>[String(o.id),o]));
+    document.getElementById('receiptsAdmin').innerHTML=receipts.length?`<div class="table-wrap"><table class="admin-table"><thead><tr><th>Orden</th><th>Archivo</th><th>Hash</th><th>Monto detectado</th><th>Banco</th><th>Confianza</th><th>Fecha</th><th></th></tr></thead><tbody>${receipts.map(r=>{const o=om.get(String(r.order_id));return `<tr><td>${esc(o?.public_id||o?.folio||r.order_id)}</td><td>${esc(r.original_name||'Comprobante')}</td><td>${esc((r.file_hash||'').slice(0,12))}</td><td>${r.detected_amount!=null?money(r.detected_amount):'Pendiente'}</td><td>${esc(r.detected_bank||'')}</td><td>${r.confidence!=null?Math.round(Number(r.confidence)*100)+'%':''}</td><td>${new Date(r.created_at).toLocaleString('es-MX')}</td><td><button class="icon-btn" data-view-receipt="${r.id}" aria-label="Ver">${UI.receipt}</button></td></tr>`}).join('')}</tbody></table></div>`:'<div class="notice">Todavía no hay comprobantes almacenados.</div>';
+    document.querySelectorAll('[data-view-receipt]').forEach(b=>b.onclick=()=>openReceiptSecure(b.dataset.viewReceipt));
+  }catch(e){document.getElementById('receiptsAdmin').innerHTML=`<div class="notice">Ejecuta la migración V5 para habilitar comprobantes. ${esc(e.message||'')}</div>`}
+}
+async function renderAuditAdmin(c){
+  c.innerHTML=`<div class="section-card"><h3>Auditoría</h3><div class="notice">Historial de cambios de estado y decisiones administrativas.</div></div><div class="audit-list" id="auditList">Cargando...</div>`;
+  try{
+    const events=await safeSelect('order_events','*',{order:'created_at',limit:300});
+    document.getElementById('auditList').innerHTML=events.length?events.map(e=>`<div class="audit-item"><strong>${esc(e.event_type||'EVENTO')}</strong> · ${esc(e.source||'SYSTEM')}<div class="small muted">${new Date(e.created_at).toLocaleString('es-MX')} · ${esc(e.old_status||'')} ${e.new_status?'→ '+esc(e.new_status):''}</div></div>`).join(''):'<div class="notice">Todavía no hay eventos registrados.</div>';
+  }catch(e){document.getElementById('auditList').innerHTML=`<div class="notice">Ejecuta la migración V5 para habilitar auditoría. ${esc(e.message||'')}</div>`}
+}
+async function invokeTelegramAdmin(action){
+  if(!supabaseClient||!adminSession)throw new Error('Inicia sesión como administrador.');
+  const {data,error}=await supabaseClient.functions.invoke('telegram-admin',{body:{action}});
+  if(error)throw error;
+  if(data?.error)throw new Error(data.error);
+  return data;
+}
+function renderIntegrationsAdmin(c){
+  c.innerHTML=`<div class="integration-grid"><div class="integration-card">${UI.telegram}<h3>Telegram administrativo</h3><p class="small muted">Telegram es interno. El navegador nunca recibe el token del bot.</p><div class="code-note">TELEGRAM_BOT_TOKEN
+TELEGRAM_ADMIN_CHAT_ID
+TELEGRAM_ADMIN_USER_ID
+TELEGRAM_WEBHOOK_SECRET
+PUBLIC_SITE_URL</div><div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="tgStatus">${UI.refresh}<span>Comprobar</span></button><button class="btn" id="tgWebhook">${UI.telegram}<span>Configurar webhook</span></button><button class="btn ghost" id="tgTest">${UI.telegram}<span>Mensaje de prueba</span></button></div><div id="tgResult" class="small muted"></div></div><div class="integration-card">${UI.shield}<h3>Validación de comprobantes</h3><p class="small muted">El sistema guarda hashes, datos detectados y señales de inconsistencia. La IA no tiene autoridad absoluta para aprobar un pago.</p><div class="code-note">WAITING_PAYMENT
+PROCESSING
+PENDING_REVIEW
+APPROVED
+REJECTED</div></div></div>`;
+  const out=document.getElementById('tgResult');
+  document.getElementById('tgStatus').onclick=async()=>{try{out.textContent='Consultando...';out.textContent=JSON.stringify(await invokeTelegramAdmin('status'))}catch(e){out.textContent=e.message}};
+  document.getElementById('tgWebhook').onclick=async()=>{try{out.textContent='Configurando...';out.textContent=JSON.stringify(await invokeTelegramAdmin('set_webhook'))}catch(e){out.textContent=e.message}};
+  document.getElementById('tgTest').onclick=async()=>{try{out.textContent='Enviando...';out.textContent=JSON.stringify(await invokeTelegramAdmin('test'))}catch(e){out.textContent=e.message}};
+}
+async function uploadReceiptForOrder(order){
+  if(!checkout.proofFile||!supabaseClient)return {ok:false,skipped:true};
+  try{
+    const form=new FormData();
+    form.append('public_id',order.publicId||order.public_id||order.folio);
+    form.append('file',checkout.proofFile,checkout.proofName||checkout.proofFile.name);
+    const {data,error}=await supabaseClient.functions.invoke('receipt-upload',{body:form});
+    if(error)throw error;
+    if(data?.error)throw new Error(data.error);
+    return {ok:true,data};
+  }catch(e){
+    console.error('Receipt upload:',e);
+    toast('El pedido se creó, pero el comprobante no pudo guardarse en el sistema. Conserva el archivo y avisa al negocio.','error');
+    return {ok:false,error:e};
+  }
+}
 
 /* ==============================
    SUPABASE: ADMIN, PEDIDOS Y SEGURIDAD
@@ -695,9 +892,11 @@ async function changeAdminPassword(){
   toast('Contraseña actualizada.','ok');
 }
 function cloudOrderToState(o){
-  return {id:String(o.id),folio:o.folio,date:o.created_at,dateText:new Date(o.created_at).toLocaleString('es-MX'),
-    customer:{name:o.customer_name,phone:o.customer_phone,notes:o.notes||''},
+  return {id:String(o.id),folio:o.folio,publicId:o.public_id||o.folio,date:o.created_at,dateText:new Date(o.created_at).toLocaleString('es-MX'),
+    customer:{name:o.customer_name,phone:o.customer_phone,email:o.customer_email||'',notes:o.notes||''},
     items:Array.isArray(o.items)?o.items:[],subtotal:Number(o.subtotal)||0,shipping:Number(o.shipping)||0,total:Number(o.total)||0,
+    expectedAmount:Number(o.expected_amount??o.total)||0,paymentStatus:o.payment_status||'WAITING_PAYMENT',
+    approvedAt:o.approved_at||null,rejectedAt:o.rejected_at||null,rejectionReason:o.rejection_reason||'',
     paymentTitle:o.payment_title||'',delivery:{type:o.delivery_type,label:o.delivery_type==='pickup'?'Recoger en sitio':'Domicilio',address:o.delivery_address||'',km:Number(o.distance_km)||0},status:o.status||'pendiente'};
 }
 async function fetchCloudOrders(){
@@ -726,6 +925,8 @@ async function confirmOrder(){
       });
       if(error)throw error;
       const order=cloudOrderToState(data);
+      const receiptResult=await uploadReceiptForOrder(order);
+      if(receiptResult.ok)order.paymentStatus='PENDING_REVIEW';
       lastPdfBlob=await buildPdf(order);lastPdfName=`pedido-${order.folio}.pdf`;lastOrderId=order.id;
       state.cart={};saveLocal();await loadPublicCloudState();renderCatalog();updateCartCount();renderPostConfirm(order);return;
     }catch(e){toast(e?.message||'No se pudo registrar el pedido. Intenta nuevamente.','error');return}
