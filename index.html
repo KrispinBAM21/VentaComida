@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3xudnryDUOOoVPngyMZf+I1KMZUdY=" crossorigin=""/>
-<style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+><style>
 :root{
   --primary:#c62828; --secondary:#fff3f3; --accent:#ffb300; --text:#232323; --card:#ffffff;
   --site-bg:#f7f7f9; --muted:#6b7280; --line:#e5e7eb; --success:#16834b; --warning:#b7791f; --danger:#b42318;
@@ -182,10 +182,10 @@ body.dark-mode .leaflet-container{background:#171b21}
 <div class="modal" id="pinModal"><div class="modal-head"><strong>Acceso de administrador</strong><button class="icon-btn" data-close-modal="pinModal" aria-label="Cerrar"></button></div><div class="modal-body"><div class="section-card"><div class="field"><label>Correo</label><input class="input" type="email" autocomplete="username" id="adminEmailInput" placeholder="correo@ejemplo.com"></div><div class="field"><label>Contraseña</label><input class="input" type="password" autocomplete="current-password" id="adminPasswordInput" placeholder="Ingresa tu contraseña"></div><button class="btn full" id="pinSubmit"></button><div class="small muted" style="margin-top:10px">El acceso se valida con Supabase Auth. Usa el correo y contraseña creados en Authentication.</div><div class="supabase-status" id="supabaseStatus" data-kind="warn"></div></div></div></div>
 <div class="modal admin-modal" id="adminModal"><div class="modal-head"><strong>Panel de administración</strong><button class="icon-btn" data-close-modal="adminModal" aria-label="Cerrar"></button></div><div class="modal-body"><div class="admin-layout"><nav class="admin-tabs" id="adminTabs"></nav><section class="admin-content" id="adminContent"></section></div></div></div>
 <div class="toast-wrap" id="toastWrap"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.58.0/dist/umd/supabase.min.js"></script>
 <script>
 'use strict';
 
