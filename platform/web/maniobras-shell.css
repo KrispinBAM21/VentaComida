@@ -7,3 +7,29 @@ button,.btn,.upload-control{position:relative;transition:transform .18s ease,box
 @media(max-width:1050px){.business-shell{grid-template-columns:1fr}.business-shell .module-nav{display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:10px;max-width:100%}.business-shell .module{flex:0 0 auto;max-width:220px}.business-shell .module span{white-space:normal}.admin-grid.two{grid-template-columns:1fr}#moduleBody{padding:16px}}
 @media(max-width:600px){.store-topbar{gap:6px;padding:10px 12px}.brand{gap:8px;flex:1 1 0;min-width:0}.brand-logo{width:36px;height:36px;flex:0 0 36px}.brand-logo svg{width:26px;height:26px}.brand-copy #name{font-size:15px}.brand-copy p{font-size:11px}.store-topbar .icon{width:38px;min-height:40px;flex:0 0 38px}.theme-control{padding:0}.theme-control span{display:none}.business-editor[open]{width:calc(100% - 16px);border-radius:14px}.business-editor>.head{padding:12px;min-height:64px}#moduleBody{padding:12px}.business-shell .module{font-size:12px}.icon-picker{grid-template-columns:repeat(4,minmax(0,1fr))}.product-admin{grid-template-columns:44px minmax(0,1fr)}.product-admin>.row{grid-column:2}.product-admin .product-visual{width:44px;height:44px}.btn{max-width:100%}.image-control small{overflow-wrap:anywhere}}
 @media(prefers-reduced-motion:reduce){button,.btn,.upload-control,.btn svg,.icon svg,.module svg{transition:none!important;transform:none!important}.interaction-wave{display:none;animation:none}}
+
+/* Panel VentaComida: dashboard, rutas y fidelidad visual del proyecto de referencia. */
+.admin-dashboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.admin-kpi{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:14px;min-width:0}
+.admin-kpi svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9}
+.admin-kpi span{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-top:8px}
+.admin-kpi strong{display:block;font-size:22px;color:var(--primary);margin-top:4px}
+.result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.metric{padding:12px;border-radius:12px;background:var(--secondary);min-width:0}
+.metric strong{display:block;font-size:17px;color:var(--primary);margin-top:4px;overflow-wrap:anywhere}
+.metric span{font-size:12px;color:var(--muted)}
+.route-admin-map,#tripRouteMap{height:340px;min-height:280px;border:1px solid var(--line);border-radius:14px;overflow:hidden;isolation:isolate;z-index:0;margin-top:12px}
+.route-pin{width:110px;height:78px;display:flex;flex-direction:column;align-items:center;pointer-events:auto}
+.route-pin-label{background:#123047;color:#fff;border-radius:7px;padding:5px 10px;font:600 13px Arial,sans-serif;white-space:nowrap;box-shadow:0 2px 5px #0003}
+.route-pin.destination .route-pin-label{background:#176b6b}
+.route-pin-stem{width:2px;height:12px;background:#123047}
+.route-pin.destination .route-pin-stem{background:#176b6b}
+.route-pin>svg{width:32px!important;height:38px!important;padding:5px;color:#fff;background:#123047;border:2px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);filter:drop-shadow(0 2px 2px #0004)}
+.route-pin>svg path,.route-pin>svg circle,.route-pin>svg rect{transform-origin:center}
+.route-pin.destination>svg{background:#176b6b}
+#tripSearchResults{margin-top:8px}
+.btn.full{width:100%}
+.business-editor .module:hover{background:color-mix(in srgb,var(--secondary) 72%,transparent);transform:translateY(-1px)}
+.business-editor .module.selected{box-shadow:inset 3px 0 0 var(--primary)}
+@media(min-width:720px){.admin-dashboard{grid-template-columns:repeat(5,minmax(0,1fr))}.result-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:600px){.route-admin-map,#tripRouteMap{height:280px}.admin-dashboard{grid-template-columns:repeat(2,minmax(0,1fr))}.result-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
