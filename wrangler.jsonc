@@ -1,0 +1,9 @@
+
+{
+  "name": "ventacomida",
+  "compatibility_date": "2026-10-08",
+  "assets": {
+    "directory": "./dist"
+  },
+  "previews": {}
+}
