@@ -2734,7 +2734,7 @@ async function v12LoadBusinessReviews(){
 
 /* ---------- Más: menú adaptado al restaurante ---------- */
 function v12OpenMore(){
-  const m=v4Modal('v12MoreModal','Más'),body=m.querySelector('.modal-body');
+  const m=v4Modal('v12MoreModal','Menú'),body=m.querySelector('.modal-body');
   body.innerHTML=`${customerSession?`<div class="section-card"><strong>${esc(customerProfile?.full_name||customerSession.user.email||'Mi cuenta')}</strong><p class="small muted">Cuenta activa</p></div>`:`<div class="section-card"><strong>Guarda tus domicilios y favoritos</strong><p class="small muted">Crea una cuenta para no escribir de nuevo tus datos en cada pedido.</p><button class="btn" id="v12MoreAccount">${FOOD.customer||UI.lock}<span>Crear cuenta / iniciar sesión</span></button></div>`}
   <div class="v12-menu-list">
     <button class="v12-menu-item" data-v12-menu="orders">${V12I.orders}<span>Mis compras</span></button>
@@ -2749,8 +2749,8 @@ function v12OpenMore(){
   body.querySelectorAll('[data-v12-menu]').forEach(b=>b.onclick=()=>{
     const a=b.dataset.v12Menu;closeModal(m.id);
     if(a==='orders')return openMyOrders();
-    if(a==='favorites')return v12OpenFavorites();
-    if(a==='offers')return v12OpenOffers();
+    if(a==='favorites')return window.v12OpenFavorites();
+    if(a==='offers')return window.v12OpenOffers();
     if(a==='categories')return v12OpenCategories();
     if(a==='reviews')return v12OpenBusinessReviews();
     if(a==='settings'){renderCustomerProfile();return openModal('customerProfileModal')}
@@ -2771,8 +2771,7 @@ function v12InstallBottomNav(){
   const nav=document.createElement('nav');nav.id='v12BottomNav';nav.className='v12-bottom-nav';
   nav.innerHTML=`<button class="active" data-v12-bottom="home">${V12I.home}<span>Inicio</span></button>
     <button data-v12-bottom="categories">${V12I.grid}<span>Categorías</span></button>
-    <button data-v12-bottom="cart">${V12I.cart}<span>Carrito</span></button>
-    <button data-v12-bottom="more">${V12I.more}<span>Más</span></button>`;
+    <button data-v12-bottom="cart">${V12I.cart}<span>Carrito</span></button>`;
   document.body.append(nav);
   nav.querySelectorAll('[data-v12-bottom]').forEach(b=>b.onclick=()=>{
     nav.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));
@@ -2780,7 +2779,6 @@ function v12InstallBottomNav(){
     if(a==='home'){v12View='home';renderCatalog();window.scrollTo({top:0,behavior:'smooth'})}
     if(a==='categories')v12OpenCategories();
     if(a==='cart')document.getElementById('cartBtn')?.click();
-    if(a==='more')v12OpenMore();
   });
 }
 
@@ -3055,6 +3053,18 @@ customerAuthChanged=async function(session){
 };
 const v12AccountButtonBase=renderAccountButton;
 renderAccountButton=function(){v12AccountButtonBase();v12GuestCallout()};
+
+/* ---------- API de navegación para módulos de versiones posteriores ---------- */
+Object.assign(window, {
+  V12I,
+  v12OpenMore,
+  v12OpenOffers,
+  v12OpenFavorites,
+  v12OpenCategories,
+  v12OpenBusinessReviews,
+  v12HomeNav,
+  v12IsInternalProduct
+});
 
 /* ---------- Inicio ---------- */
 v12InstallBottomNav();
@@ -4188,7 +4198,11 @@ v17InstallQuickActions();v17PaintHeaderBadges();paintExperience();setTimeout(()=
 }
 .v18-more-button{display:inline-grid!important;place-items:center!important;width:48px!important;height:48px!important;padding:0!important;flex:0 0 48px!important}
 .v18-more-button svg{width:23px!important;height:23px!important}
-@media(max-width:760px){.v18-more-button{display:none!important}}
+@media(max-width:760px){
+  .v18-more-button{display:inline-grid!important;place-items:center!important}
+  #v12BottomNav{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #v12BottomNav [data-v12-bottom="more"]{display:none!important}
+}
 
 /* Favoritos y cupones viven en “Más”, no se repiten en la fila principal. */
 .v12-home-nav [data-v17-quick="favorites"],.v12-home-nav [data-v17-quick="coupons"]{display:none!important}
@@ -4237,7 +4251,7 @@ function v18Cfg(){
 function v18RemoveDuplicateQuickActions(){document.querySelectorAll('.v12-home-nav [data-v17-quick="favorites"],.v12-home-nav [data-v17-quick="coupons"]').forEach(x=>x.remove())}
 function v18EnsureMoreButton(){
   const header=document.querySelector('.topbar .header'); if(!header||document.getElementById('v18MoreButton'))return;
-  const b=document.createElement('button'); b.id='v18MoreButton'; b.className='icon-btn v18-more-button'; b.type='button'; b.title='Más opciones'; b.setAttribute('aria-label','Más opciones'); b.innerHTML=V18_MORE_ICON; b.onclick=()=>v12OpenMore();
+  const b=document.createElement('button'); b.id='v18MoreButton'; b.className='icon-btn v18-more-button'; b.type='button'; b.title='Más opciones'; b.setAttribute('aria-label','Más opciones'); b.innerHTML=V18_MORE_ICON; b.setAttribute('aria-haspopup','dialog'); b.setAttribute('aria-controls','v12MoreModal'); b.onclick=()=>{if(typeof window.v12OpenMore==='function'){window.v12OpenMore();b.setAttribute('aria-expanded','true');}else{toast('El menú no está disponible. Actualiza la página.','error')}};
   const cart=document.getElementById('cartBtn'); if(cart)header.insertBefore(b,cart); else header.append(b);
 }
 const v18HeaderBase=renderHeader;
@@ -4319,6 +4333,20 @@ openFoodAddressEditor=function(a){
   document.getElementById('v18FindAddress').onclick=e=>panelRun(e.currentTarget,async()=>{const f=Object.fromEntries(['street','number','colony','postal_code','municipality','state'].map(k=>[k,document.getElementById('address_'+k).value.trim()]));const rows=await v18SearchAddress(f),box=document.getElementById('v18AddressSuggestions');box.innerHTML=rows.map((r,i)=>`<button type="button" class="v18-address-suggestion" data-i="${i}"><strong>${esc(r.display_name.split(',').slice(0,2).join(','))}</strong><small>${esc(r.display_name)}</small></button>`).join('');box.querySelectorAll('[data-i]').forEach(b=>b.onclick=async()=>{const r=rows[Number(b.dataset.i)];await choose(Number(r.lat),Number(r.lon),false);v18FillAddress(r);publicAddressMap?.setView([Number(r.lat),Number(r.lon)],19);box.innerHTML=''});},'Selecciona la coincidencia correcta.');
   document.getElementById('addressSave').onclick=e=>panelRun(e.currentTarget,async()=>{if(!point)throw Error('Selecciona una ubicación o marca la entrada en el mapa.');if(!current())throw Error('Vuelve a abrir el domicilio.');const data={id:a?.id||'',...Object.fromEntries(['label','street','number','colony','postal_code','municipality','state','references'].map(k=>[k,document.getElementById('address_'+k).value.trim()])),...point,is_default:document.getElementById('addressDefault').checked};const r=await customerRpc('address_save',data);if(!current())return;customerAddresses=r.addresses;const saved=customerAddresses.find(x=>a?x.id===a.id:x.label===data.label&&Number(x.lat)===Number(data.lat)&&Number(x.lng)===Number(data.lng));closeModal(m.id);renderCustomerProfile();renderSavedAddressShortcut();if(saved)await useFoodAddress(saved.id)},'Domicilio guardado.');
 };
+
+/* Sincroniza el estado del botón al cerrar el menú por X, fondo o Escape. */
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-close-modal="v12MoreModal"], #overlay')){
+    document.getElementById('v18MoreButton')?.setAttribute('aria-expanded','false');
+  }
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.getElementById('v12MoreModal')?.classList.contains('show')){
+    closeModal('v12MoreModal');
+    document.getElementById('v18MoreButton')?.setAttribute('aria-expanded','false');
+    document.getElementById('v18MoreButton')?.focus();
+  }
+});
 
 /* inicio */
 v18Cfg();v18EnsureMoreButton();v18RemoveDuplicateQuickActions();v18WireExperience();
