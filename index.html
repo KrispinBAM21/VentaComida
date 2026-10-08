@@ -1337,10 +1337,22 @@ const v7PostConfirm=renderPostConfirm;renderPostConfirm=function(o){v7PostConfir
 const v7Confirm=confirmOrder;confirmOrder=async function(){await v7Confirm();if(v6Pending&&customerSession)try{await refreshTracking()}catch(e){console.warn('Seguimiento no disponible:',e.message)}};
 const v7Profile=renderCustomerProfile;renderCustomerProfile=function(){v7Profile();const orders=document.getElementById('accountOrders');if(orders)orders.onclick=openMyOrders};
 const v7AccountButton=renderAccountButton;renderAccountButton=function(){v7AccountButton();const button=document.getElementById('customerAccountBtn');button.classList.add('account-labelled');const label=customerSession?(customerProfile?.full_name||customerSession.user.user_metadata?.full_name||customerSession.user.user_metadata?.name||'Mi cuenta'):'Mi cuenta';const span=document.createElement('span');span.textContent=label;button.append(span);button.title=customerSession?'Sesión iniciada: '+label:'Iniciar sesión o crear cuenta';renderTrackingButtons()};
-const v7DrawAuth=drawCustomerAuth;drawCustomerAuth=function(host){v7DrawAuth(host);const button=document.getElementById('foodGoogle');if(!button)return;const old=button.onclick;button.onclick=async()=>{try{sessionStorage.setItem('VentaComida.oauthPending','1');const original=supabaseClient?.auth.signInWithOAuth?.bind(supabaseClient.auth);if(original){supabaseClient.auth.signInWithOAuth=async args=>original({...args,options:{...args.options,queryParams:{prompt:'select_account'}}})}await old();if(document.getElementById('foodAuthStatus')?.textContent)sessionStorage.removeItem('VentaComida.oauthPending');}catch(e){document.getElementById('foodAuthStatus').textContent=e.message;sessionStorage.removeItem('VentaComida.oauthPending')}};document.getElementById('foodAuthStatus')?.classList.add('auth-feedback')};
+const v7DrawAuth=drawCustomerAuth;drawCustomerAuth=function(host){v7DrawAuth(host);const button=document.getElementById('foodGoogle');if(!button)return;button.onclick=async()=>{if(button.disabled)return;button.disabled=true;const out=document.getElementById('foodAuthStatus');try{if(!supabaseClient)throw Error('Espera a que conecte el sitio.');persistCheckout();await storeProof();sessionStorage.setItem('VentaComida.oauthPending','1');const {data,error}=await supabaseClient.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname,skipBrowserRedirect:true,queryParams:{prompt:'select_account'}}});if(error)throw error;if(!data?.url)throw Error('Google no devolvió una dirección de acceso. Comprueba la configuración OAuth.');location.assign(data.url)}catch(e){sessionStorage.removeItem('VentaComida.oauthPending');if(out)out.textContent=e.message;button.disabled=false}};document.getElementById('foodAuthStatus')?.classList.add('auth-feedback')};
 // Única suscripción Auth: sus callbacks aplazan cualquier consulta fuera del bloqueo de sesión.
 let v7AuthSubscription,v7LiveChannel;
-initSupabase=async function(){v6Restoring=true;try{if(!window.supabase||!supabaseConfigured())throw Error('No se pudo cargar la conexión al sitio.');if(!supabaseClient)supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'implicit'}});if(!v7AuthSubscription){const result=supabaseClient.auth.onAuthStateChange((event,session)=>{if(v6Restoring&&['INITIAL_SESSION','SIGNED_IN'].includes(event))return;if(event==='TOKEN_REFRESHED'){customerSession=session;adminSession=session;renderAccountButton();return}setTimeout(()=>{if(event==='SIGNED_OUT'){clearCustomerState();return}if(event==='PASSWORD_RECOVERY'){customerAuthView='update';customerSession=session;renderCustomerProfile();openModal('customerProfileModal');return}customerAuthChanged(session).then(()=>{renderAccountButton();refreshTracking().catch(()=>{})}).catch(e=>toast(e.message,'error'))},0)});v7AuthSubscription=result.data.subscription}const{data,error}=await supabaseClient.auth.getSession();if(error)throw error;cloudReady=true;setSupabaseStatus('ok','Sitio conectado.');await customerAuthChanged(data?.session);trackingCredentials=trackingCredentials.filter(x=>!x.owner||x.owner===data?.session?.user.id);persistTracking();await refreshSiteStatus();await loadPublicCloudState();await restoreCheckout();v6Restoring=false;persistCheckout();renderAccountButton();renderResumeBanner();const oauth=sessionStorage.getItem('VentaComida.oauthPending');if(data?.session&&oauth){sessionStorage.removeItem('VentaComida.oauthPending');renderCustomerProfile();openModal('customerProfileModal');toast('Sesión con Google iniciada. Completa tu nombre y teléfono.','ok')}const params=new URLSearchParams(location.hash.slice(1)),oauthError=params.get('error_description')||new URLSearchParams(location.search).get('error_description');if(oauthError){sessionStorage.removeItem('VentaComida.oauthPending');customerAuthView='login';renderCustomerProfile();openModal('customerProfileModal');document.getElementById('foodAuthStatus').textContent='No se pudo iniciar sesión: '+oauthError;history.replaceState(null,'',location.pathname)}await recoverLocalTracking().catch(()=>{});await refreshTracking().catch(()=>{});if(!v7LiveChannel){v7LiveChannel=supabaseClient.channel('catalog-v7').on('postgres_changes',{event:'*',schema:'public',table:'products'},()=>loadPublicCloudState().catch(()=>{})).on('postgres_changes',{event:'*',schema:'public',table:'catalog_settings'},()=>loadPublicCloudState().catch(()=>{})).subscribe()}}catch(e){setSupabaseStatus('error',e.message);toast('No terminó de cargar el sitio: '+e.message,'error')}finally{v6Restoring=false;renderAccountButton();renderTrackingButtons()}};
+initSupabase=async function(){v6Restoring=true;try{if(!window.supabase||!supabaseConfigured())throw Error('No se pudo cargar la conexión al sitio.');if(!supabaseClient)supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'implicit'}});if(!v7AuthSubscription){const result=supabaseClient.auth.onAuthStateChange((event,session)=>{if(v6Restoring&&event==='INITIAL_SESSION')return;if(v6Restoring&&event==='SIGNED_IN'){customerSession=session;adminSession=session;renderAccountButton();return;}if(event==='TOKEN_REFRESHED'){customerSession=session;adminSession=session;renderAccountButton();return}setTimeout(()=>{if(event==='SIGNED_OUT'){clearCustomerState();return}if(event==='PASSWORD_RECOVERY'){customerAuthView='update';customerSession=session;renderCustomerProfile();openModal('customerProfileModal');return}customerAuthChanged(session).then(()=>{renderAccountButton();refreshTracking().catch(()=>{})}).catch(e=>toast(e.message,'error'))},0)});v7AuthSubscription=result.data.subscription}let{data,error}=await supabaseClient.auth.getSession();if(error)throw error;
+if(!data?.session&&customerSession?.access_token){data={session:customerSession}}
+if(!data?.session&&sessionStorage.getItem('VentaComida.oauthPending')){
+  for(let retry=0;retry<4&&!data?.session;retry++){
+    await new Promise(resolve=>setTimeout(resolve,300*(retry+1)));
+    const check=await supabaseClient.auth.getSession();
+    if(check.error)throw check.error;
+    data=check.data;
+    if(!data?.session&&customerSession?.access_token)data={session:customerSession};
+  }
+}
+cloudReady=true;setSupabaseStatus('ok','Sitio conectado.');
+await customerAuthChanged(data?.session);trackingCredentials=trackingCredentials.filter(x=>!x.owner||x.owner===data?.session?.user.id);persistTracking();await refreshSiteStatus();await loadPublicCloudState();await restoreCheckout();v6Restoring=false;persistCheckout();renderAccountButton();renderResumeBanner();const oauth=sessionStorage.getItem('VentaComida.oauthPending');if(data?.session&&oauth){sessionStorage.removeItem('VentaComida.oauthPending');customerAuthView='login';renderCustomerProfile();openModal('customerProfileModal');toast('Sesión con Google iniciada.','ok')}else if(oauth&&!data?.session){sessionStorage.removeItem('VentaComida.oauthPending');customerAuthView='login';renderCustomerProfile();openModal('customerProfileModal');const feedback=document.getElementById('foodAuthStatus');if(feedback)feedback.textContent='Google autorizó el acceso, pero el navegador no conservó la sesión. Comprueba que las cookies y el almacenamiento del sitio estén permitidos y vuelve a intentarlo.';}const params=new URLSearchParams(location.hash.slice(1)),oauthError=params.get('error_description')||new URLSearchParams(location.search).get('error_description');if(oauthError){sessionStorage.removeItem('VentaComida.oauthPending');customerAuthView='login';renderCustomerProfile();openModal('customerProfileModal');document.getElementById('foodAuthStatus').textContent='No se pudo iniciar sesión: '+oauthError;history.replaceState(null,'',location.pathname)}await recoverLocalTracking().catch(()=>{});await refreshTracking().catch(()=>{});if(!v7LiveChannel){v7LiveChannel=supabaseClient.channel('catalog-v7').on('postgres_changes',{event:'*',schema:'public',table:'products'},()=>loadPublicCloudState().catch(()=>{})).on('postgres_changes',{event:'*',schema:'public',table:'catalog_settings'},()=>loadPublicCloudState().catch(()=>{})).subscribe()}}catch(e){setSupabaseStatus('error',e.message);toast('No terminó de cargar el sitio: '+e.message,'error')}finally{v6Restoring=false;renderAccountButton();renderTrackingButtons()}};
 const v7AuthChanged=customerAuthChanged;customerAuthChanged=async function(session){const previous=customerSession?.user.id;if(previous&&session?.user.id&&previous!==session.user.id)clearTrackingState();await v7AuthChanged(session);if(session?.user?.id){try{const saved=JSON.parse(localStorage.getItem(TRACKING_KEY+':account:'+session.user.id)||'{}');trackingSeen=Number(saved.seen)||0;chatSeen=saved.chatSeen||{}}catch{trackingSeen=0;chatSeen={}}}if(session&&customerProfile&&!customerProfile.full_name)customerProfile.full_name=session.user.user_metadata?.full_name||session.user.user_metadata?.name||'';renderAccountButton()};
 function clearTrackingState(){trackingEpoch++;trackingCredentials=[];trackingOrders=[];trackingEvents=[];trackingSeen=0;chatSeen={};chatDrafts.clear();closeChat();localStorage.removeItem(TRACKING_KEY);for(const id of ['myOrdersModal','notificationsModal']){closeModal(id);document.getElementById(id)?.querySelector('.modal-body')?.replaceChildren()}renderTrackingButtons()}
 const v7ClearState=clearCustomerState;clearCustomerState=function(){const shouldClear=!!customerSession||v6Logout;v7ClearState();if(shouldClear)clearTrackingState();renderTrackingButtons()};
@@ -4437,5 +4449,68 @@ v12OpenMore=function(){
 })();
 </script>
 
+<style id="vc-v20-conditional-prompts">#v12GuestCallout[hidden],#v15Experience[hidden]{display:none!important}</style>
+<script id="vc-v20-conditional-prompts">
+(function(){
+'use strict';
+let reviewOwner=null,reviewComplete=false,reviewLoading=false;
+function syncPrompts(){
+ const guest=document.getElementById('v12GuestCallout');
+ if(guest&&customerSession?.user?.id)guest.remove();
+ const experience=document.getElementById('v15Experience');
+ if(experience)experience.hidden=!!customerSession?.user?.id&&reviewOwner===customerSession.user.id&&reviewComplete;
+}
+async function checkReview(){
+ const id=customerSession?.user?.id||null;
+ if(!id){reviewOwner=null;reviewComplete=false;syncPrompts();return}
+ if(reviewOwner===id||reviewLoading)return;
+ reviewLoading=true;
+ try{
+   const {data,error}=await supabaseClient.from('business_reviews').select('id,comment').eq('user_id',id).eq('active',true).limit(1);
+   if(error)throw error;
+   if(customerSession?.user?.id!==id)return;
+   reviewOwner=id;reviewComplete=!!data?.some(r=>typeof r.comment==='string'&&r.comment.trim().length>=3);
+ }catch(e){console.warn('No se pudo comprobar la opinión:',e.message)}
+ finally{reviewLoading=false;syncPrompts()}
+}
+const oldPaint=paintExperience;
+paintExperience=function(){oldPaint();syncPrompts();checkReview()};
+const oldAuth=customerAuthChanged;
+customerAuthChanged=async function(session){const previous=customerSession?.user?.id;await oldAuth(session);if(previous!==customerSession?.user?.id){reviewOwner=null;reviewComplete=false}syncPrompts();checkReview()};
+const oldRefresh=refreshExperience;
+refreshExperience=async function(){await oldRefresh();reviewOwner=null;reviewComplete=false;checkReview()};
+new MutationObserver(()=>syncPrompts()).observe(document.body,{subtree:true,childList:true});
+syncPrompts();checkReview();
+})();
+</script>
+<script id="vc-v21-auth-recovery">
+/* Restauración visible de sesiones OAuth y cuentas por correo, sin permisos administrativos automáticos. */
+(function(){
+'use strict';
+let lastId=null;
+async function reconcileSession(){
+ if(!supabaseClient)return;
+ try{
+   const {data,error}=await supabaseClient.auth.getSession();
+   if(error)throw error;
+   const session=data?.session;
+   if(!session)return;
+   const id=session.user?.id;
+   if(!id||customerSession?.user?.id===id)return;
+   if(lastId===id)return;
+   lastId=id;
+   try{
+     await customerAuthChanged(session);
+     customerAuthView='login';
+     renderAccountButton();
+     if(document.getElementById('customerProfileModal')?.classList.contains('show'))renderCustomerProfile();
+   }finally{lastId=null}
+ }catch(error){console.warn('No se pudo recuperar la sesión:',error.message)}
+}
+window.addEventListener('pageshow',()=>{setTimeout(reconcileSession,0)});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)reconcileSession()});
+setTimeout(reconcileSession,1200);
+})();
+</script>
 </body>
 </html>
