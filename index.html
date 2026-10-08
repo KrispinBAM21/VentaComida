@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>VENTACOMIDA</title>
+<title>VibraErótica — Boutique y reservas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -202,16 +202,17 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 <div class="topbar"><div class="container header">
   <div class="brand">
     <div class="brand-logo" id="brandLogo"></div>
-    <div class="brand-copy"><h1 id="brandName">Sazón Manzanillo</h1><p id="brandTagline">Comida preparada al momento</p></div>
+    <div class="brand-copy"><h1 id="brandName">VibraErótica</h1><p id="brandTagline">Boutique para adultos y reservas</p></div>
   </div>
   <button class="icon-btn theme-btn" id="themeBtn" aria-label="Cambiar tema"></button>
   <button class="icon-btn" id="adminBtn" hidden style="display:none" aria-label="Administración"></button>
   <button class="icon-btn cart-btn" id="cartBtn" aria-label="Carrito"><span class="badge-count" id="cartCount">0</span></button>
 </div></div>
 <main>
-  <section class="hero"><div class="container"><div class="hero-card"><h2 id="heroTitle">Sabor que llega hasta ti</h2><p id="heroText">Explora el menú, arma tu pedido y envíalo por WhatsApp con tu cuenta en PDF.</p></div></div></section>
+  <section class="hero"><div class="container"><div class="hero-card"><h2 id="heroTitle">VibraErótica</h2><p id="heroText">Explora productos para adultos, conoce nuestro espacio y consulta nuestros servicios.</p></div></div></section>
+<section class="container" style="padding:12px 0"><div class="section-card" style="border-left:4px solid #d63d78"><strong>VibraErótica · Versión de recuperación de funcionalidades</strong><p class="small muted">Este archivo conserva los módulos completos del sistema original mientras se realiza su migración. Los apartados de reparto, rutas o tiempos de comida que todavía aparezcan son heredados y NO están adaptados ni deben utilizarse para operaciones reales. Reservas y galería multimedia: consulta el prototipo complementario.</p><a class="btn" href="VibraErotica_v2.html" style="text-decoration:none">Abrir boutique y reservas (prototipo)</a></div></section>
   <section class="container controls">
-    <div class="search-wrap" id="searchWrap"><input id="searchInput" placeholder="Buscar platillos o bebidas" /></div>
+    <div class="search-wrap" id="searchWrap"><input id="searchInput" placeholder="Buscar productos" /></div>
     <div class="chips" id="categoryChips"></div>
   </section>
   <section class="container grid" id="catalogGrid"></section>
@@ -359,8 +360,8 @@ function foodIconKeys(){
    Pega la URL del proyecto y la Publishable/anon key.
    Nunca uses service_role dentro de este archivo.
 ============================== */
-const SUPABASE_URL='https://qgmlmtmtthqwjvgmvmpe.supabase.co';
-const SUPABASE_ANON_KEY='sb_publishable_UYHdkpNQO4dEjhGODSgzzQ_ku45uaWs';
+const SUPABASE_URL='https://TU_PROYECTO.supabase.co';
+const SUPABASE_ANON_KEY='PEGA_AQUI_TU_PUBLISHABLE_KEY';
 let supabaseClient=null,adminSession=null,cloudSyncTimer=null,cloudReady=false,supabaseConnectionState='idle',supabaseLastError='';
 function supabaseConfigured(){
   return /^https:\/\/.+\.supabase\.co$/i.test(SUPABASE_URL)
@@ -370,25 +371,20 @@ function supabaseConfigured(){
 /* ==============================
    DATA & STORAGE
 ============================== */
-const STORE='foodCatalogApp_v1';
+const STORE='vibraEroticaRestored_v1';
 const defaults={
  config:{
-  businessName:'Sazón Manzanillo',tagline:'Comida preparada al momento',logo:'',whatsapp:'5213141234567',adminPin:'1234',deliveryEnabled:true,
+  businessName:'VibraErótica',tagline:'Boutique para adultos y reservas',logo:'',whatsapp:'5213141234567',adminPin:'1234',deliveryEnabled:false,
   origin:{address:'Centro, Manzanillo, Colima, México',lat:19.0522,lng:-104.3158},
   map:{provider:'carto',apiKey:'',style:'voyager',attribution:'OpenStreetMap contributors, CARTO'},
-  payments:[{id:'pay1',title:'Transferencia bancaria',data:'CLABE 012345678901234567'},{id:'pay2',title:'Depósito en tienda de conveniencia',data:'Referencia 1234567890'}],
+  payments:[{id:'pay1',title:'Transferencia bancaria',data:'Configurar en Administración'},{id:'pay2',title:'Depósito en tienda de conveniencia',data:'Configurar en Administración'}],
   shipping:{base:35,perKm:8,margin:20,rounding:5,freeFrom:600,roundTrip:false,vehicle:'moto',fuel:'Magna',efficiency:{moto:28,auto:13,truck:9,bike:9999},fuelPrice:{Magna:24.5,Premium:26.4,'Diésel':25.9}},
   design:{primary:'#c62828',secondary:'#fff3f3',accent:'#ffb300',text:'#232323',card:'#ffffff',siteBg:'#f7f7f9',bgType:'solid',grad1:'#f7f7f9',grad2:'#fff0e6',gradAngle:135,bgImage:'',bgOpacity:.18,pattern:true,patternOpacity:.055,iconColor:'#c62828',iconSize:72,font:'Inter',rounded:true}
  },
  products:[
-  {id:'p1',name:'Hamburguesa Clásica',description:'Carne de res, queso, lechuga, jitomate y aderezo de la casa.',category:'Hamburguesas',price:95,stock:18,icon:'burger',image:'',active:true},
-  {id:'p2',name:'Hamburguesa Doble',description:'Doble carne, doble queso y cebolla caramelizada.',category:'Hamburguesas',price:135,stock:12,icon:'burger',image:'',active:true},
-  {id:'p3',name:'Tacos Dorados',description:'Orden de cuatro tacos con lechuga, crema y salsa.',category:'Mexicana',price:85,stock:20,icon:'taco',image:'',active:true},
-  {id:'p4',name:'Quesadilla Especial',description:'Tortilla de harina con queso y guisado del día.',category:'Mexicana',price:70,stock:16,icon:'quesadilla',image:'',active:true},
-  {id:'p5',name:'Papas Fritas',description:'Papas crujientes con sal y aderezo.',category:'Complementos',price:55,stock:25,icon:'fries',image:'',active:true},
-  {id:'p6',name:'Pollo Frito',description:'Dos piezas de pollo crujiente con ensalada.',category:'Complementos',price:110,stock:10,icon:'chicken',image:'',active:true},
-  {id:'p7',name:'Refresco',description:'Bebida fría de 600 ml.',category:'Bebidas',price:30,stock:30,icon:'soda',image:'',active:true},
-  {id:'p8',name:'Agua Embotellada',description:'Agua natural de 600 ml.',category:'Bebidas',price:22,stock:35,icon:'water',image:'',active:true}
+  {id:'ve1',name:'Lencería elegante',description:'Colección de lencería para adultos.',category:'Lencería',price:450,stock:12,icon:'gift',image:'',active:true},
+  {id:'ve2',name:'Accesorios de bienestar',description:'Artículos de cuidado y bienestar íntimo para adultos.',category:'Bienestar',price:290,stock:15,icon:'gift',image:'',active:true},
+  {id:'ve3',name:'Artículos para parejas',description:'Selección de accesorios para adultos.',category:'Accesorios',price:350,stock:10,icon:'gift',image:'',active:true}
  ],
  cart:{},orders:[],folioSeq:1
 };
