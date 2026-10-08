@@ -2587,7 +2587,7 @@ function v12HomeNav(){
   if(host)return host;
   host=document.createElement('div');host.id='v12HomeNav';host.className='container v12-home-nav';
   host.innerHTML=[
-    ['home','Inicio',V12I.home],['categories','Categorías',V12I.grid],['best','Más vendidos',V12I.star],['timed','Por tiempo',UI.pending]
+    ['home','Inicio',V12I.home],['categories','Categorías',V12I.grid],['best','Más vendidos',V12I.chart],['timed','Por tiempo',UI.pending]
   ].map(([id,label,icon])=>`<button class="chip ${id==='home'?'active':''}" data-v12-view="${id}">${icon}<span>${label}</span></button>`).join('');
   const controls=document.querySelector('.container.controls');controls?.before(host);
   host.querySelectorAll('[data-v12-view]').forEach(b=>b.onclick=()=>{
@@ -2741,7 +2741,7 @@ function v12OpenMore(){
     <button class="v12-menu-item" data-v12-menu="favorites">${V12I.star}<span>Favoritos</span></button>
     <button class="v12-menu-item" data-v12-menu="offers">${V12I.ticket}<span>Cupones y ofertas</span></button>
     <button class="v12-menu-item" data-v12-menu="categories">${V12I.grid}<span>Categorías</span></button>
-    <button class="v12-menu-item" data-v12-menu="best">${V12I.star}<span>Más vendidos</span></button>
+    <button class="v12-menu-item" data-v12-menu="best">${V12I.chart}<span>Más vendidos</span></button>
     <button class="v12-menu-item" data-v12-menu="reviews">${V12I.heart}<span>Opiniones del local</span></button>
     <button class="v12-menu-item" data-v12-menu="settings">${V12I.settings}<span>Configuración</span></button>
   </div>`;
@@ -3934,13 +3934,21 @@ renderCustomerProfile=function(){
 async function renderV16ProfileAdmin(c){
   const p=publicProfileCfg(); let goals=[]; try{goals=(await v16Community('goals_admin',{})).goals||[]}catch{}
   const s=p.socials||{};
-  c.innerHTML=`<section class="section-card"><h3>Portada y perfil público</h3><div class="admin-grid two"><label class="field"><span>URL de portada</span><input class="input" id="v16Cover" value="${esc(p.cover||'')}"></label><label class="field"><span>URL de foto de perfil</span><input class="input" id="v16Avatar" value="${esc(p.avatar||'')}"></label><label class="field"><span>Subir portada</span><input class="input" id="v16CoverUpload" type="file" accept="image/png,image/jpeg,image/webp"></label><label class="field"><span>Subir foto de perfil</span><input class="input" id="v16AvatarUpload" type="file" accept="image/png,image/jpeg,image/webp"></label></div><div class="admin-grid two"><div class="v16-crop-thumb rect">${p.cover?`<img id="v16CoverPreview" src="${esc(p.cover)}">`:'<img id="v16CoverPreview" style="display:none">'} </div><div class="v16-crop-thumb circle">${p.avatar?`<img id="v16AvatarPreview" src="${esc(p.avatar)}">`:'<img id="v16AvatarPreview" style="display:none">'}</div></div><label class="field"><span>Descripción</span><textarea class="textarea" id="v16Bio">${esc(p.bio||'')}</textarea></label><div class="admin-grid two"><label class="field"><span>Texto de ubicación</span><input class="input" id="v16LocationLabel" value="${esc(p.location_label||'')}" placeholder="Ej. Manzanillo, Colima"></label><label class="field"><span>Enlace de donación</span><input class="input" id="v16DonationUrl" value="${esc(p.donation_url||'')}" placeholder="https://..."></label><label class="field"><span>Texto del botón de donación</span><input class="input" id="v16DonationLabel" value="${esc(p.donation_label||'Apoyar con donación')}" maxlength="40"></label><label class="row"><input id="v16ProfileShow" type="checkbox" ${p.show!==false?'checked':''}> Mostrar perfil público</label></div></section>
+  c.innerHTML=`<section class="section-card"><h3>Portada y perfil público</h3><div class="admin-grid two"><label class="field"><span>URL de portada</span><input class="input" id="v16Cover" value="${esc(p.cover||'')}"></label><label class="field"><span>URL de foto de perfil</span><input class="input" id="v16Avatar" value="${esc(p.avatar||'')}"></label><label class="field"><span>Subir portada</span><input class="input" id="v16CoverUpload" type="file" accept="image/png,image/jpeg,image/webp"></label><label class="field"><span>Subir foto de perfil</span><input class="input" id="v16AvatarUpload" type="file" accept="image/png,image/jpeg,image/webp"></label></div><label class="row v19-logo-reuse"><input type="checkbox" id="v16UseLogo" __REPLACE_ME__ > Usar el logotipo actual como foto del perfil público</label><div class="admin-grid two"><div class="v16-crop-thumb rect">${p.cover?`<img id="v16CoverPreview" src="${esc(p.cover)}">`:'<img id="v16CoverPreview" style="display:none">'} </div><div class="v16-crop-thumb circle">${p.avatar?`<img id="v16AvatarPreview" src="${esc(p.avatar)}">`:'<img id="v16AvatarPreview" style="display:none">'}</div></div><label class="field"><span>Descripción</span><textarea class="textarea" id="v16Bio">${esc(p.bio||'')}</textarea></label><div class="admin-grid two"><label class="field"><span>Texto de ubicación</span><input class="input" id="v16LocationLabel" value="${esc(p.location_label||'')}" placeholder="Ej. Manzanillo, Colima"></label><label class="field"><span>Enlace de donación</span><input class="input" id="v16DonationUrl" value="${esc(p.donation_url||'')}" placeholder="https://..."></label><label class="field"><span>Texto del botón de donación</span><input class="input" id="v16DonationLabel" value="${esc(p.donation_label||'Apoyar con donación')}" maxlength="40"></label><label class="row"><input id="v16ProfileShow" type="checkbox" ${p.show!==false?'checked':''}> Mostrar perfil público</label></div></section>
  <section class="section-card"><h3>Redes sociales</h3><div class="admin-grid two">${['facebook','instagram','tiktok','x','telegram','whatsapp','youtube','website'].map(k=>`<label class="field"><span>${socialLabel(k)}</span><input class="input" data-v16-social="${k}" value="${esc(s[k]||'')}" placeholder="https://..."></label>`).join('')}</div><button class="btn v16-glow-btn" id="v16SaveProfile">${UI.save}<span>Guardar perfil del negocio</span></button></section>
  <section class="section-card"><h3>Metas de seguidores / likes externos</h3><p class="small muted">Para actualizar automáticamente las metas usa la función Edge social-metrics con API oficial del proveedor. Aquí puedes crear, sincronizar y eliminar metas.</p><div class="admin-grid two"><label class="field"><span>Plataforma</span><select class="select" id="v16GoalPlatform">${['facebook','instagram','tiktok','x','telegram','youtube'].map(x=>`<option value="${x}">${socialLabel(x)}</option>`).join('')}</select></label><label class="field"><span>Meta</span><input class="input" id="v16GoalTarget" type="number" min="1" value="1000"></label><label class="field"><span>Texto</span><input class="input" id="v16GoalLabel" placeholder="Llegar a 1,000 seguidores"></label><label class="field"><span>URL que visitará el usuario</span><input class="input" id="v16GoalUrl" placeholder="https://..."></label><label class="field"><span>ID externo / username</span><input class="input" id="v16GoalExternal" placeholder="page_id, user_id, chat_id..."></label><label class="field"><span>Métrica</span><select class="select" id="v16GoalMetric"><option value="followers">Seguidores</option><option value="likes">Likes</option><option value="members">Miembros</option></select></label></div><button class="btn secondary" id="v16GoalSave">${UI.plus}<span>Agregar meta</span></button></section>
  <section class="section-card"><h3>Metas activas</h3><div id="v16GoalList">${goals.map(g=>`<article class="v14-goal"><div class="v14-goal-head"><span>${esc(g.label)}</span><span>${Number(g.current_count||0)} / ${Number(g.target_count||0)}</span></div><div class="v14-goal-bar"><span style="width:${Math.min(100,Number(g.current_count||0)/Math.max(1,Number(g.target_count||1))*100)}%"></span></div><div class="toolbar"><button class="btn secondary" data-v16-syncgoal="${esc(g.id)}">${UI.refresh}<span>Actualizar métrica</span></button><button class="btn ghost" data-v16-deletegoal="${esc(g.id)}">${UI.trash}<span>Eliminar</span></button></div></article>`).join('')||'<p class="small muted">Sin metas.</p>'}</div></section>`;
   const bindCropUpload=(id,aspect,shape,inputId,previewId)=>{const el=document.getElementById(id); el.onchange=async e=>{try{if(!e.target.files?.[0])return; const src=await fileToDataURL(e.target.files[0]); openCropper({title:shape==='circle'?'Ajustar foto de perfil':'Ajustar portada',src,aspect,shape,apply:(data)=>{document.getElementById(inputId).value=data; const img=document.getElementById(previewId); img.src=data; img.style.display='block'; toast('Imagen ajustada. Guarda el perfil para aplicar.','ok')}})}catch(err){toast(err.message,'error')}}};
   bindCropUpload('v16CoverUpload',16/5,'rect','v16Cover','v16CoverPreview'); bindCropUpload('v16AvatarUpload',1,'circle','v16Avatar','v16AvatarPreview');
-  document.getElementById('v16SaveProfile').onclick=e=>panelRun(e.currentTarget,async()=>{state.config.publicProfile={...state.config.publicProfile,cover:document.getElementById('v16Cover').value.trim(),avatar:document.getElementById('v16Avatar').value.trim(),bio:document.getElementById('v16Bio').value.trim(),show:document.getElementById('v16ProfileShow').checked,location_label:document.getElementById('v16LocationLabel').value.trim(),donation_url:document.getElementById('v16DonationUrl').value.trim(),donation_label:document.getElementById('v16DonationLabel').value.trim(),socials:Object.fromEntries([...c.querySelectorAll('[data-v16-social]')].map(x=>[x.dataset.v16Social,x.value.trim()]))}; saveLocal(); await syncAdminStateToCloud(); ensureBusinessTrigger();},'Perfil guardado.');
+  const reuseLogo=document.getElementById('v16UseLogo');
+  reuseLogo.disabled=!state.config.logo;
+  if(!state.config.logo)reuseLogo.parentElement.title='Primero configura el logotipo en Personalización.';
+  reuseLogo.onchange=()=>{
+    if(!reuseLogo.checked)return;
+    document.getElementById('v16Avatar').value=state.config.logo;
+    const img=document.getElementById('v16AvatarPreview');img.src=state.config.logo;img.style.display='block';
+  };
+  document.getElementById('v16SaveProfile').onclick=e=>panelRun(e.currentTarget,async()=>{state.config.publicProfile={...state.config.publicProfile,cover:document.getElementById('v16Cover').value.trim(),avatar:(document.getElementById('v16UseLogo').checked&&state.config.logo?state.config.logo:document.getElementById('v16Avatar').value.trim()),bio:document.getElementById('v16Bio').value.trim(),show:document.getElementById('v16ProfileShow').checked,location_label:document.getElementById('v16LocationLabel').value.trim(),donation_url:document.getElementById('v16DonationUrl').value.trim(),donation_label:document.getElementById('v16DonationLabel').value.trim(),socials:Object.fromEntries([...c.querySelectorAll('[data-v16-social]')].map(x=>[x.dataset.v16Social,x.value.trim()]))}; saveLocal(); await syncAdminStateToCloud(); ensureBusinessTrigger();},'Perfil guardado.');
   document.getElementById('v16GoalSave').onclick=e=>panelRun(e.currentTarget,async()=>{await v16Community('goal_save',{platform:document.getElementById('v16GoalPlatform').value,label:document.getElementById('v16GoalLabel').value.trim(),target_count:Number(document.getElementById('v16GoalTarget').value),target_url:document.getElementById('v16GoalUrl').value.trim(),external_id:document.getElementById('v16GoalExternal').value.trim(),metric_kind:document.getElementById('v16GoalMetric').value}); await renderV16ProfileAdmin(c)},'Meta agregada.');
   c.querySelectorAll('[data-v16-deletegoal]').forEach(b=>b.onclick=e=>panelRun(e.currentTarget,async()=>{await v16Community('goal_delete',{id:b.dataset.v16Deletegoal}); await renderV16ProfileAdmin(c)},'Meta eliminada.'));
   c.querySelectorAll('[data-v16-syncgoal]').forEach(b=>b.onclick=e=>panelRun(e.currentTarget,async()=>{if(!supabaseClient)throw Error('Sin conexión con Supabase.'); const {data,error}=await supabaseClient.functions.invoke('social-metrics',{body:{action:'sync_goal',goal_id:b.dataset.v16Syncgoal}}); if(error||data?.error)throw Error(data?.error||error.message||'No se pudo sincronizar la meta.'); await renderV16ProfileAdmin(c)},'Métrica actualizada.'));
@@ -4159,9 +4167,9 @@ const v17RenderAdminBase=renderAdmin;renderAdmin=function(){v17EnsureCouponTab()
 paintExperience=function(){
   let h=document.getElementById('v15Experience');if(!h){h=document.createElement('section');h.id='v15Experience';document.querySelector('.container.controls')?.before(h)}
   h.className='container v17-experience';const s=summary?.scores||{},avg=Number(s.overall||0);
-  h.innerHTML=`<button class="v17-experience-toggle" id="v17ExperienceToggle" aria-expanded="false"><div><h3>Tu experiencia importa</h3><p>Califica el negocio, conoce el perfil, consulta opiniones y síguenos.</p></div><span class="v17-experience-chevron">${V17_ICON.chev}</span></button><div class="v17-experience-panel"><div><div class="v17-experience-inner"><div class="v17-experience-summary"><span class="v17-stars">${avg?'★'.repeat(Math.round(avg)):'☆☆☆☆☆'}</span><span>${avg?avg.toFixed(1):'Sin calificaciones'} · ${Number(s.reviews||0)} opiniones · ${Number(summary?.followers||0)} seguidores</span></div><div class="v17-experience-actions"><button class="btn v16-glow-btn" id="v17KnowBusiness">🏪 <span>Conocer el negocio</span></button><button class="btn" id="v17Rate">★ <span>Calificar</span></button><button class="btn secondary" id="v17Opinions">${UI.review}<span>Opiniones</span></button><button class="btn secondary" id="v17Follow">${UI.check}<span>${summary?.following?'Siguiendo':'Seguir'}</span></button></div></div></div></div>`;
+  h.innerHTML=`<button class="v17-experience-toggle" id="v17ExperienceToggle" aria-expanded="false"><div><h3>Tu experiencia importa</h3><p>Califica el negocio, conoce el perfil, consulta opiniones y síguenos.</p></div><span class="v17-experience-chevron">${V17_ICON.chev}</span></button><div class="v17-experience-panel"><div><div class="v17-experience-inner"><div class="v17-experience-summary"><span class="v17-stars">${avg?'★'.repeat(Math.round(avg)):'☆☆☆☆☆'}</span><span>${avg?avg.toFixed(1):'Sin calificaciones'} · ${Number(s.reviews||0)} opiniones · ${Number(summary?.followers||0)} seguidores</span></div><div class="v17-experience-actions"><button class="btn v16-glow-btn" id="v17KnowBusiness">🏪 <span>Conocer el negocio</span></button><button class="btn" id="v17Rate">${V12I.comment}<span>Opiniones y calificar</span></button><button class="btn secondary" id="v17Follow">${UI.check}<span>${summary?.following?'Siguiendo':'Seguir'}</span></button></div></div></div></div>`;
   const toggle=document.getElementById('v17ExperienceToggle');toggle.onclick=()=>{const open=!h.classList.contains('open');h.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));clearTimeout(v17ExperienceTimer);if(open)v17ExperienceTimer=setTimeout(()=>{if(h.isConnected){h.classList.remove('open');toggle.setAttribute('aria-expanded','false')}},10*60*1000)};
-  document.getElementById('v17KnowBusiness').onclick=()=>openBusinessShowcase();document.getElementById('v17Rate').onclick=()=>openRateBusinessModal();document.getElementById('v17Opinions').onclick=()=>openRateBusinessModal(true);document.getElementById('v17Follow').onclick=async e=>{if(!customerSession){renderCustomerProfile();openModal('customerProfileModal');return toast('Inicia sesión para seguir al negocio.','info')}try{const r=await v16Community('toggle_follow',{});summary.following=r.following;summary.followers=r.followers;paintExperience()}catch(err){toast(err.message,'error')}};
+  document.getElementById('v17KnowBusiness').onclick=()=>openBusinessShowcase();document.getElementById('v17Rate').onclick=()=>openRateBusinessModal();document.getElementById('v17Follow').onclick=async e=>{if(!customerSession){renderCustomerProfile();openModal('customerProfileModal');return toast('Inicia sesión para seguir al negocio.','info')}try{const r=await v16Community('toggle_follow',{});summary.following=r.following;summary.followers=r.followers;paintExperience()}catch(err){toast(err.message,'error')}};
 };
 
 /* ---------- Ruta del usuario al local al pulsar el pin ---------- */
@@ -4294,7 +4302,7 @@ async function v18OpenBusiness(){
   try{const s=await v18Community('summary',{}),r=await v18Community('reviews',{});info={...info,...s,reviews:r.reviews||[]}}catch{}
   const m=v4Modal('v18BusinessModal','Información del negocio'),body=m.querySelector('.modal-body');m.classList.add('v18-business-modal');
   const socials=Object.entries(p.socials||{}).filter(([,url])=>url).map(([k,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(v18SocialLabel(k))}</a>`).join('');
-  body.innerHTML=`<div class="v18-business-shell"><section class="v18-business-hero"><div class="v18-business-cover" style="${p.cover?`background-image:url('${esc(p.cover)}')`:''}"></div><div class="v18-business-overlay">${p.avatar?`<img class="v18-business-avatar" src="${esc(p.avatar)}" alt="Perfil del negocio">`:`<div class="v18-business-avatar"></div>`}<div class="v18-business-title"><h2>${esc(state.config.businessName)}</h2><p>${esc(p.bio||state.config.tagline||'')}</p><div class="v18-business-meta"><span class="v18-business-chip">📍 ${esc(v18LocationText())}</span><span class="v18-business-chip">${status.open?'🟢':'🔴'} ${esc(status.text)}</span><span class="v18-business-chip">⭐ ${Number(info.scores?.overall||0)?Number(info.scores.overall).toFixed(1):'Sin calificaciones'} · ${Number(info.scores?.reviews||0)} opiniones</span></div></div><div class="v18-business-actions"><button class="btn" id="v18BusinessRate">★ <span>Calificar</span></button><button class="btn secondary" id="v18BusinessFollow">❤ <span>${info.following?'Siguiendo':'Seguir'}</span></button><button class="btn ghost" id="v18BusinessBack">↩ <span>Menú principal</span></button></div></div></section><div class="v18-business-body"><section class="v18-business-card"><h3>Horarios</h3><div class="v18-hours-status ${status.open?'open':'closed'}">${status.open?'●':'●'} ${esc(status.text)}</div>${v18HoursHtml()}</section><section class="v18-business-card"><h3>Ubicación y redes</h3><p>${esc(v18LocationText())}</p><div class="v18-business-socials">${socials||'<span class="small muted">Sin redes configuradas.</span>'}</div><div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="v18BusinessDirections">${UI.map}<span>Cómo llegar</span></button></div></section><section class="v18-business-card v18-business-reviews"><h3>Comentarios recientes</h3>${(info.reviews||[]).slice(0,6).map(x=>`<article class="v18-business-review"><div class="row between"><strong>${esc(x.display_name||'Cliente')}</strong><span>⭐ ${Number(x.overall_rating||5)}/5</span></div><p>${esc(x.comment||'')}</p><small class="muted">Servicio ${Number(x.service_rating||0)}/5 · Comida ${Number(x.food_rating||0)}/5</small></article>`).join('')||'<p class="small muted">Aún no hay comentarios.</p>'}</section></div></div>`;
+  body.innerHTML=`<div class="v18-business-shell"><section class="v18-business-hero"><div class="v18-business-cover" style="${p.cover?`background-image:url('${esc(p.cover)}')`:''}"></div><div class="v18-business-overlay">${(p.avatar||state.config.logo)?`<img class="v18-business-avatar" src="${esc(p.avatar||state.config.logo)}" alt="Perfil del negocio">`:`<div class="v18-business-avatar"></div>`}<div class="v18-business-title"><h2>${esc(state.config.businessName)}</h2><p>${esc(p.bio||state.config.tagline||'')}</p><div class="v18-business-meta"><span class="v18-business-chip">📍 ${esc(v18LocationText())}</span><span class="v18-business-chip">${status.open?'🟢':'🔴'} ${esc(status.text)}</span><span class="v18-business-chip">⭐ ${Number(info.scores?.overall||0)?Number(info.scores.overall).toFixed(1):'Sin calificaciones'} · ${Number(info.scores?.reviews||0)} opiniones</span><span class="v18-business-chip">👥 ${Number(info.followers||0)} seguidores</span></div></div><div class="v18-business-actions"><button class="btn" id="v18BusinessRate">★ <span>Calificar</span></button><button class="btn secondary" id="v18BusinessFollow">❤ <span>${info.following?'Siguiendo':'Seguir'}</span></button>${/^https:\/\//i.test(p.donation_url||'')?`<a class="btn secondary" href="${esc(p.donation_url)}" target="_blank" rel="noopener noreferrer">💝 <span>${esc(p.donation_label||'Apoyar con donación')}</span></a>`:''}<button class="btn ghost" id="v18BusinessBack">↩ <span>Menú principal</span></button></div></div></section><div class="v18-business-body"><section class="v18-business-card"><h3>Horarios</h3><div class="v18-hours-status ${status.open?'open':'closed'}">${status.open?'●':'●'} ${esc(status.text)}</div>${v18HoursHtml()}</section><section class="v18-business-card"><h3>Ubicación y redes</h3><p>${esc(v18LocationText())}</p><div class="v18-business-socials">${socials||'<span class="small muted">Sin redes configuradas.</span>'}</div><div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="v18BusinessDirections">${UI.map}<span>Cómo llegar</span></button></div></section><section class="v18-business-card v18-business-reviews"><h3>Comentarios recientes</h3>${(info.reviews||[]).slice(0,6).map(x=>`<article class="v18-business-review"><div class="row between"><strong>${esc(x.display_name||'Cliente')}</strong><span>⭐ ${Number(x.overall_rating||5)}/5</span></div><p>${esc(x.comment||'')}</p><small class="muted">Servicio ${Number(x.service_rating||0)}/5 · Comida ${Number(x.food_rating||0)}/5</small></article>`).join('')||'<p class="small muted">Aún no hay comentarios.</p>'}</section></div></div>`;
   document.getElementById('v18BusinessBack').onclick=()=>{closeModal(m.id);window.scrollTo({top:0,behavior:'smooth'})};
   document.getElementById('v18BusinessDirections').onclick=()=>window.v17RouteToBusiness?.();
   document.getElementById('v18BusinessRate').onclick=()=>{closeModal(m.id);if(typeof openRateBusinessModal==='function')openRateBusinessModal();else if(typeof v14OpenRating==='function')v14OpenRating()};
@@ -4351,6 +4359,91 @@ document.addEventListener('keydown',e=>{
 /* inicio */
 v18Cfg();v18EnsureMoreButton();v18RemoveDuplicateQuickActions();v18WireExperience();
 setTimeout(()=>{v18EnsureMoreButton();v18RemoveDuplicateQuickActions();v18WireExperience()},700);
+})();
+</script>
+
+
+<style id="ventacomida-v19-ui">
+/* Solo mostrar la herramienta administrativa después de comprobar permisos. */
+#adminBtn[hidden], #adminBtn:not([data-authorized="true"]){display:none!important}
+#brandLogo.v19-logo-action{cursor:pointer;border-radius:12px;outline-offset:4px}
+#brandLogo.v19-logo-action:focus-visible{outline:3px solid var(--primary)}
+.v19-logo-reuse{margin:12px 0 16px;display:flex;align-items:center;gap:9px}
+.v19-logo-reuse input{accent-color:var(--primary)}
+.v18-business-avatar{object-fit:cover}
+@media(max-width:760px){#brandLogo.v19-logo-action{touch-action:manipulation}}
+</style>
+<script id="ventacomida-v19-ui">
+(function(){
+'use strict';
+// The logo is the one public entry point to the complete business showcase.
+const logo=document.getElementById('brandLogo');
+if(logo){
+  logo.classList.add('v19-logo-action');
+  logo.setAttribute('role','button');
+  logo.setAttribute('tabindex','0');
+  logo.setAttribute('aria-label','Ver perfil, horarios, seguidores y opiniones del negocio');
+  logo.setAttribute('title','Conocer el negocio');
+  function openFromLogo(){
+    if(typeof window.v18OpenBusiness==='function')window.v18OpenBusiness();
+    else toast('El perfil del negocio aún no está disponible.','info');
+  }
+  logo.addEventListener('click',openFromLogo);
+  logo.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openFromLogo()}});
+}
+// Only show the admin gear after the server confirms the current user's access.
+// A previously cached role is never enough to expose the control.
+let confirmedAdminUser=null;
+const originalAdminVisibility=syncAdminVisibility;
+syncAdminVisibility=function(){
+  const btn=document.getElementById('adminBtn');
+  if(!btn)return;
+  const userId=adminSession?.user?.id;
+  const permitted=!!userId&&!!customerSession&&customerSession.user?.id===userId&&
+    confirmedAdminUser===userId&&!!(panelAccess?.master||panelAccess?.owner||panelAccess?.modules?.length);
+  btn.dataset.authorized=permitted?'true':'false';
+  btn.hidden=!permitted;
+  btn.style.display=permitted?'':'none';
+  btn.setAttribute('aria-hidden',String(!permitted));
+  btn.tabIndex=permitted?0:-1;
+};
+const originalPanelVerify=panelVerify;
+panelVerify=async function(){
+  confirmedAdminUser=null;
+  syncAdminVisibility();
+  const allowed=await originalPanelVerify();
+  if(!allowed||!supabaseClient||!adminSession){syncAdminVisibility();return false}
+  const uid=adminSession.user.id;
+  try{
+    const auth=await supabaseClient.auth.getUser();
+    if(auth.error||auth.data?.user?.id!==uid)throw Error('Sesión no válida');
+    const res=await supabaseClient.rpc('catalog_panel',{p_action:'access',p_payload:{}});
+    if(res.error||res.data?.error||adminSession?.user?.id!==uid)throw Error('No se pudieron verificar los permisos');
+    panelAccess={owner:false,master:false,modules:[],...res.data};
+    if(panelAccess.master||panelAccess.owner||panelAccess.modules?.length)confirmedAdminUser=uid;
+  }catch(e){
+    confirmedAdminUser=null;
+    panelAccess={owner:false,master:false,modules:[]};
+    console.warn('Permisos administrativos no confirmados:',e.message);
+  }
+  syncAdminVisibility();
+  return !!confirmedAdminUser;
+};
+syncAdminVisibility();
+// The single menu entry lets visitors read opinions AND submit a rating.
+const previousOpenMore=v12OpenMore;
+v12OpenMore=function(){
+  previousOpenMore();
+  const modal=document.getElementById('v12MoreModal');
+  const list=modal?.querySelector('.v12-menu-list');
+  if(!list)return;
+  list.querySelector('[data-v14-rating]')?.remove();
+  const reviews=list.querySelector('[data-v12-menu="reviews"]');
+  if(reviews){
+    reviews.innerHTML=V12I.comment+'<span>Opiniones y calificar</span>';
+    reviews.onclick=()=>{closeModal('v12MoreModal');openRateBusinessModal()};
+  }
+};
 })();
 </script>
 
