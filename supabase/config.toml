@@ -1,0 +1,7 @@
+project_id = "qgmlmtmtthqwjvgmvmpe"
+[functions.catalog-panel-admin]
+verify_jwt = true
+[functions.catalog-order]
+verify_jwt = false
+[functions.receipt-upload]
+verify_jwt = false

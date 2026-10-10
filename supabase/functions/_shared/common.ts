@@ -1,0 +1,6 @@
+import { createClient } from 'npm:@supabase/supabase-js@2.58.0';
+export { createClient };
+export const url=Deno.env.get('SUPABASE_URL')!,anon=Deno.env.get('SUPABASE_ANON_KEY')!,secret=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+export const admin=()=>createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
+export function responseTools(req:Request){const origin=req.headers.get('origin')||'',allowed=(Deno.env.get('ALLOWED_ORIGINS')||'').split(',').map(s=>s.trim()).filter(Boolean);const headers={'Content-Type':'application/json','Access-Control-Allow-Origin':allowed.includes(origin)?origin:'','Access-Control-Allow-Headers':'authorization,apikey,content-type,x-client-info','Access-Control-Allow-Methods':'POST,OPTIONS','Vary':'Origin'};const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers});const early=origin&&!allowed.includes(origin)?json({error:'Origen no permitido.'},403):req.method==='OPTIONS'?new Response(null,{status:204,headers}):req.method!=='POST'?json({error:'Método no permitido.'},405):null;return{json,early}}
+export const sha256=async(bytes:BufferSource)=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('');

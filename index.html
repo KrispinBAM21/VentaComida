@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Cargando negocio…</title>
-<style id="vc-boot-style">html.vc-booting body>*:not(#vcBootSplash):not(script):not(style){visibility:hidden!important}#vcBootSplash{display:none;position:fixed;inset:0;z-index:999999;background:#11151c;color:#f3f4f6;align-items:center;justify-content:center;flex-direction:column;gap:14px;font:600 16px system-ui,sans-serif;text-align:center;padding:24px}html.vc-booting #vcBootSplash{display:flex}#vcBootSplash button{background:#c62828;color:white;border:0;border-radius:10px;padding:10px 20px;cursor:pointer}#vcBootSplash small{color:#aeb7c5;max-width:500px}</style>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -375,7 +375,7 @@ function supabaseConfigured(){
 const STORE='foodCatalogApp_v1';
 const defaults={
  config:{
-  businessName:'Sazón Manzanillo',tagline:'Comida preparada al momento',logo:'',whatsapp:'5213141234567',adminPin:'1234',deliveryEnabled:true,
+  businessName:'Negocio',tagline:'',logo:'',whatsapp:'5213141234567',adminPin:'1234',deliveryEnabled:true,
   origin:{address:'Centro, Manzanillo, Colima, México',lat:19.0522,lng:-104.3158},
   map:{provider:'carto',apiKey:'',style:'voyager',attribution:'OpenStreetMap contributors, CARTO'},
   payments:[{id:'pay1',title:'Transferencia bancaria',data:'CLABE 012345678901234567'},{id:'pay2',title:'Depósito en tienda de conveniencia',data:'Referencia 1234567890'}],
@@ -1398,7 +1398,7 @@ const v8Pane=renderAdminPane;renderAdminPane=async function(id){if(id!=='subscri
 setInterval(()=>{if(!document.hidden&&billingAllowed())refreshBilling().catch(()=>{})},30000);
 </script><script>
 const ticketConfigV8=ticketConfig;
-ticketConfig=function(value){const d=ticketConfigV8(value);d.template=['classic','modern','minimal','invoice'].includes(d.template)?d.template:'classic';d.showFooterIcons=d.showFooterIcons!==false;d.footerIcons=(Array.isArray(d.footerIcons)?d.footerIcons:['utensils','motorcycle']).filter(k=>FOOD[k]).slice(0,8);return d};
+ticketConfig=function(value){const d=ticketConfigV8(value);d.template=['classic','modern','minimal','invoice'].includes(d.template)?d.template:'classic';d.showFooterIcons=d.showFooterIcons!==false;d.footerIcons=(Array.isArray(d.footerIcons)?d.footerIcons:['utensils','motorcycle']).filter(k=>FOOD[k]).slice(0,8);d.footerIconScale=Math.max(.45,Math.min(2,Number(d.footerIconScale)||.85));d.footerIconGap=Math.max(.1,Math.min(2,Number(d.footerIconGap)||.6));d.footerIconColor=/^#[0-9a-f]{6}$/i.test(d.footerIconColor||'')?d.footerIconColor:d.color;d.footerDivider=!!d.footerDivider;return d};
 TICKET_PRESETS.push({name:'Bosque',color:'#166534',accentColor:'#f59e0b',paperColor:'#ffffff',textColor:'#17251c',mutedColor:'#526058',borderColor:'#d1e5d6'},{name:'Ciruela',color:'#6b216d',accentColor:'#ea580c',paperColor:'#fffafd',textColor:'#321332',mutedColor:'#725b73',borderColor:'#ead6ea'},{name:'Grafito',color:'#252525',accentColor:'#d49a16',paperColor:'#ffffff',textColor:'#181818',mutedColor:'#666666',borderColor:'#dddddd'});
 function ticketModelV9(input,value,qr=''){
  const d=ticketConfig(value),order={...input,customer:{...input.customer}},w=800,mm=d.width==='a4'?210:Number(d.width),m=d.margin*w/mm,u=w-2*m,fs=d.fontSize*.3528*w/mm,lh=fs*1.42,font=d.font==='times'?'Georgia,serif':d.font==='courier'?'monospace':'Arial,DejaVu Sans,sans-serif',blocks=[];
@@ -1422,7 +1422,7 @@ function ticketModelV9(input,value,qr=''){
  paragraph('Entrega: '+(order.delivery?.label||'Recoger en el local'),true,d.color);if(d.showAddress&&order.delivery?.address)paragraph(order.delivery.address);if(order.delivery?.km)paragraph('Recorrido: '+order.delivery.km+' km');if(d.showNotes&&order.customer?.notes)paragraph(order.customer.notes);
  if(order.paymentReference)paragraph('Referencia: '+order.paymentReference);if(order.payerReference||order.transferReference)paragraph('Referencia del pago: '+(order.payerReference||order.transferReference));const snap=order.deliverySnapshot||{};if(d.showAddress&&snap.origin?.address)paragraph('Local: '+snap.origin.address);if(d.showAddress&&snap.details?.references)paragraph('Referencias de entrega: '+snap.details.references);if(d.showPhone&&order.customer?.callPhone&&order.customer.callPhone!==order.customer.phone)paragraph('Llamadas: '+order.customer.callPhone);if(order.estimatedReadyAt)paragraph('Hora estimada: '+new Date(order.estimatedReadyAt).toLocaleString('es-MX'));if(order.preparationMinutes)paragraph('Preparación: '+order.preparationMinutes+' minutos');
  if(qr&&d.showQR){const size=Math.min(u*.32,80*w/mm);add(size+lh,`<image href="${esc(qr)}" x="${(u-size)/2}" width="${size}" height="${size}"/>`)}
- if(d.footer)paragraph(d.footer,false,d.mutedColor);if(d.showFooterIcons&&d.footerIcons.length){const size=fs*1.8;add(size+lh*.5,d.footerIcons.map((k,i)=>icon(k,u/2+(i-(d.footerIcons.length-1)/2)*(size+lh*.5)-size/2,0,size)).join(''))}
+ if(d.footer)paragraph(d.footer,false,d.mutedColor);if(d.showFooterIcons&&d.footerIcons.length){const size=fs*(d.footerIconScale||1);const gap=lh*(d.footerIconGap||.6);const iconColor=d.footerIconColor||d.color;add(size+lh*.45,(d.footerDivider?'<line x1="0" y1="0" x2="'+u+'" y2="0" stroke="'+d.borderColor+'" stroke-width="2"/>':'')+d.footerIcons.map((k,i)=>icon(k,u/2+(i-(d.footerIcons.length-1)/2)*(size+gap)-size/2,lh*.18,size,iconColor)).join(''))}
  const cap=d.width==='a4'?(297-2*d.margin)*w/mm-lh*2:Math.min(6500,1000*w/mm)-2*m-lh*2;
  // Rows stay together. Balance the last pages by moving trailing rows when both fit.
  const pages=[];let current=[],sum=0;for(const b of blocks){if(current.length&&sum+b.h>cap){pages.push(current);current=[];sum=0}current.push(b);sum+=b.h}if(current.length)pages.push(current);
@@ -4533,6 +4533,14 @@ setTimeout(reconcileSession,1500);
 })();
 </script>
 
+<style id="vc-v24-style">
+.ticket-footer-icons{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px!important;align-items:start}
+.ticket-footer-icons label{display:flex!important;align-items:center;justify-content:center;gap:7px;min-height:42px;max-width:100%;overflow:hidden;padding:7px!important;border:1px solid #424751;border-radius:8px}
+.ticket-footer-icons svg,.ticket-footer-icons label svg{display:inline-block!important;width:21px!important;height:21px!important;min-width:21px!important;max-width:21px!important;min-height:21px!important;max-height:21px!important;flex:0 0 21px!important}
+.ticket-footer-icons input{width:16px;height:16px;flex:0 0 16px}
+.vc-business-pin{background:transparent;border:0}
+.vc-pin-emoji{width:45px;height:45px;border-radius:50% 50% 50% 8px;transform:rotate(-45deg);background:#fff;box-shadow:0 2px 8px #0007;border:2px solid #c62828;display:flex;align-items:center;justify-content:center;font-size:25px}
+</style>
 <style id="vc-v23-style">
 .vc-gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:14px 0}
 .vc-gallery-item{position:relative;background:var(--secondary);border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -4570,8 +4578,7 @@ function ready(){brand();document.documentElement.classList.remove('vc-booting')
 const loadBase=loadPublicCloudState;
 loadPublicCloudState=async function(){await loadBase();brand();ready()};
 const initBase=initSupabase;
-initSupabase=async function(){try{await initBase();if(!cloudReady)throw Error('No se pudo cargar la configuración del negocio.');ready()}catch(e){document.getElementById('vcBootMessage').textContent='No se pudo cargar el negocio';document.getElementById('vcBootDetail').textContent=e.message;document.getElementById('vcBootRetry').hidden=false;throw e}};
-setTimeout(()=>{if(document.documentElement.classList.contains('vc-booting')){document.getElementById('vcBootMessage').textContent='La conexión está tardando';document.getElementById('vcBootDetail').textContent='Comprueba tu conexión o vuelve a intentarlo.';document.getElementById('vcBootRetry').hidden=false}},12000);
+initSupabase=async function(){await initBase();brand()};
 const oldHeader=renderHeader;renderHeader=function(){oldHeader();brand()};
 const oldSave=saveLocal;saveLocal=function(){oldSave();brand()};
 const GALLERY_LIMIT=30,VIDEO_LIMIT=10;
@@ -4583,7 +4590,7 @@ function viewer(start){
  draw();document.body.append(host);host.addEventListener('click',e=>{if(e.target===host)host.remove()});
 }
 function galleryMarkup(){return items().map((x,i)=>'<button type="button" class="vc-gallery-item" data-vc-view="'+i+'">'+(x.type==='video'?'<video preload="metadata" muted src="'+esc(x.url)+'"></video>':'<img loading="lazy" src="'+esc(x.url)+'" alt="'+esc(x.name||'Producto')+'">')+'</button>').join('')}
-function showGallery(){const host=document.querySelector('#v18BusinessModal .v18-business-body');if(!host)return;host.querySelector('#vcPublicGallery')?.remove();const section=document.createElement('section');section.className='v18-business-card';section.id='vcPublicGallery';section.style.gridColumn='1/-1';section.innerHTML='<h3>Galería de productos</h3><div class="vc-gallery-grid">'+galleryMarkup()+'</div>';if(!items().length)return;host.prepend(section);section.querySelectorAll('[data-vc-view]').forEach(b=>b.onclick=()=>viewer(Number(b.dataset.vcView)))}
+function showGallery(){const host=document.querySelector('#v18BusinessModal .v18-business-shell');if(!host)return;host.querySelector('#vcPublicGallery')?.remove();const section=document.createElement('section');section.className='v18-business-card';section.id='vcPublicGallery';section.style.gridColumn='1/-1';section.innerHTML='<h3>Galería de productos</h3><div class="vc-gallery-grid">'+galleryMarkup()+'</div>';if(!items().length)return;host.append(section);section.querySelectorAll('[data-vc-view]').forEach(b=>b.onclick=()=>viewer(Number(b.dataset.vcView)))}
 const baseOpen=window.v18OpenBusiness;
 window.v18OpenBusiness=async function(){await baseOpen();showGallery()};
 function galleryAdmin(c){
@@ -4621,8 +4628,52 @@ function galleryAdmin(c){
  };
  draw();
 }
-const oldProfile=renderV16ProfileAdmin;
-renderV16ProfileAdmin=async function(c){await oldProfile(c);galleryAdmin(c)};
+const oldAdminPaneV23=renderAdminPane;
+renderAdminPane=async function(id){const result=await oldAdminPaneV23(id);if(id==='profile'){const c=document.getElementById('adminContent');if(c)galleryAdmin(c)}if(id==='business'){const c=document.getElementById('adminContent');if(c)pinAdmin(c)}return result};
+
+function pinSettings(){return state.config.map||{}}
+function pinIcon(){const m=pinSettings();if(m.pinImage)return L.icon({iconUrl:m.pinImage,iconSize:[46,58],iconAnchor:[23,56],popupAnchor:[0,-50]});if(m.pinEmoji){const emoji=esc(m.pinEmoji);return L.divIcon({className:'vc-business-pin',html:'<div class="vc-pin-emoji">'+emoji+'</div>',iconSize:[48,56],iconAnchor:[24,53]})}return labeledFoodPin('origin')}
+function applyBusinessPin(){if(typeof L==='undefined')return;try{publicFoodOrigin?.setIcon(pinIcon());originMarker?.setIcon(pinIcon())}catch(e){console.warn('Pin:',e)}}
+async function pinAdmin(c){
+ if(c.querySelector('#vcBusinessPinAdmin'))return;
+ const anchor=c.querySelector('#originMap')?.closest('.section-card')||c.querySelector('.section-card');
+ if(!anchor)return;
+ const section=document.createElement('section');section.className='section-card';section.id='vcBusinessPinAdmin';
+ const icons=['📍','🍔','🍕','🍟','🌮','🍗','🥗','🍣','🥐','☕','🍰','🏪','🍽️','🚚','⭐','❤️'];
+ section.innerHTML='<h3>Pin del negocio en el mapa</h3><p class="small muted">Elige un icono o sube una imagen PNG o WebP transparente para el marcador del negocio.</p><label class="field">Icono del negocio<select class="select" id="vcPinEmoji"><option value="">Pin clásico</option>'+icons.map(i=>'<option value="'+i+'">'+i+'</option>').join('')+'</select></label><label class="field">Imagen personalizada sin fondo (PNG/WebP, hasta 1 MB)<input class="input" id="vcPinFile" type="file" accept="image/png,image/webp"></label><div class="toolbar"><button type="button" class="btn secondary" id="vcPinRemove">Quitar imagen</button><button type="button" class="btn" id="vcPinSave">Guardar pin</button></div><p class="small muted" id="vcPinStatus"></p>';
+ anchor.after(section);const m=pinSettings(),select=section.querySelector('#vcPinEmoji');select.value=m.pinEmoji||'';
+ let newImage=m.pinImage||'';
+ select.onchange=()=>{if(select.value)newImage=''};
+ section.querySelector('#vcPinRemove').onclick=()=>{newImage='';section.querySelector('#vcPinStatus').textContent='Imagen eliminada de la selección. Guarda para aplicar.'};
+ section.querySelector('#vcPinFile').onchange=async e=>{
+  const f=e.target.files?.[0];if(!f)return;
+  if(!['image/png','image/webp'].includes(f.type)||f.size>1048576){toast('Utiliza PNG o WebP de máximo 1 MB.','error');return}
+  const path='pins/'+crypto.randomUUID()+(f.type==='image/png'?'.png':'.webp');
+  const {error}=await supabaseClient.storage.from('business-gallery').upload(path,f,{contentType:f.type});
+  if(error){toast(error.message,'error');return}
+  newImage=supabaseClient.storage.from('business-gallery').getPublicUrl(path).data.publicUrl;
+  section.querySelector('#vcPinStatus').textContent='Imagen subida. Pulsa Guardar pin.';
+ };
+ section.querySelector('#vcPinSave').onclick=async e=>panelRun(e.currentTarget,async()=>{
+  const map={...pinSettings(),pinImage:newImage,pinEmoji:select.value};
+  const {error}=await supabaseClient.rpc('catalog_config_save',{p_module:'business',p_data:{map}});
+  if(error)throw error;state.config.map=map;saveLocal();applyBusinessPin();
+ },'Pin del negocio guardado.');
+}
+function ticketExtras(c,getDraft,paint){
+ const controls=c.querySelector('.ticket-controls');if(!controls||c.querySelector('#vcTicketExtra'))return;
+ const d=getDraft();
+ const section=document.createElement('section');section.className='section-card';section.id='vcTicketExtra';
+ section.innerHTML='<h3>Personalización avanzada del ticket</h3><div class="admin-grid two"><label class="field">Tamaño de iconos del pie<select class="select" data-vc-ticket="footerIconScale"><option value=".55">Muy pequeño</option><option value=".75">Pequeño</option><option value=".85">Normal compacto</option><option value="1.1">Mediano</option><option value="1.5">Grande</option></select></label><label class="field">Separación de iconos<input class="input" type="range" min=".2" max="1.5" step=".1" data-vc-ticket="footerIconGap"></label><label class="field">Color de iconos<input class="input" type="color" data-vc-ticket="footerIconColor"></label><label class="row"><input type="checkbox" data-vc-ticket="footerDivider"> Mostrar línea separadora antes del pie</label></div><p class="small muted">El tamaño se aplica al PDF y a la vista previa. Los ajustes se guardan con el diseño del ticket.</p>';
+ controls.append(section);
+ const repaint=()=>{paint().catch?.(()=>{})};
+ section.querySelectorAll('[data-vc-ticket]').forEach(el=>{
+  const k=el.dataset.vcTicket;el.type==='checkbox'?el.checked=!!d[k]:el.value=d[k]||({footerIconScale:'.85',footerIconGap:'.6',footerIconColor:d.color||'#16324f'}[k]);
+  el.oninput=()=>{getDraft()[k]=el.type==='checkbox'?el.checked:el.type==='color'?el.value:Number(el.value);repaint()};
+ });
+}
+const ticketOptionsBaseV24=installTicketOptions;installTicketOptions=function(c,getDraft,paint){ticketOptionsBaseV24(c,getDraft,paint);ticketExtras(c,getDraft,paint)};
+
 function maps(){
  const map=publicFoodMap;if(!map)return;
  const host=document.getElementById('foodPublicMap');if(!host||document.getElementById('vcMapControls'))return;
@@ -4632,7 +4683,7 @@ function maps(){
  bar.querySelectorAll('[data-rotate]').forEach(b=>b.onclick=()=>{if(typeof map.setBearing==='function')map.setBearing(((map.getBearing?.()||0)+Number(b.dataset.rotate)+360)%360);else toast('La rotación no está disponible en este navegador.','info')});
  bar.querySelector('[data-reset]').onclick=()=>map.setBearing?.(0);
 }
-const oldMap=initFoodPublicMap;initFoodPublicMap=function(){oldMap();maps()};
+const oldMap=initFoodPublicMap;initFoodPublicMap=function(){oldMap();maps();applyBusinessPin()};
 const oldGps=foodGps;
 foodGps=async function(){
  if(!navigator.geolocation)throw Error('Este dispositivo no ofrece ubicación.');
