@@ -599,18 +599,28 @@ function showMapConfigNeeded(containerId){
   el.innerHTML=`<div class="empty-state" style="height:100%;min-height:220px;display:grid;place-items:center;padding:24px;text-align:center"><div>${UI.map}<strong style="display:block;margin:8px 0">Falta configurar CARTO</strong><span class="small muted">En Administración, Negocio, CARTO pega tu API key para activar los mapas.</span></div></div>`;
 }
 function addConfiguredTileLayer(map,containerId){
-  const url=cartoTileUrl();
-  if(!url){showMapConfigNeeded(containerId);return false}
-  try{
-    L.tileLayer(url,{
-      maxZoom:20,
-      attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attribution/">CARTO</a>'
-    }).addTo(map);
-    return true;
-  }catch(e){
-    showMapConfigNeeded(containerId);
-    return false;
-  }
+ const primary=cartoTileUrl(),fallback='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+ const attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>';
+ let current=null,done=false,errors=0,timeout=null;
+ function add(url,isFallback){
+  if(current){try{map.removeLayer(current)}catch(e){}}
+  errors=0;
+  const layer=L.tileLayer(url,{maxZoom:19,attribution:isFallback?attribution:attribution+', &copy; CARTO',crossOrigin:true});
+  current=layer;
+  layer.on('load',()=>{done=true;if(timeout)clearTimeout(timeout);setTimeout(()=>map.invalidateSize({pan:false}),80)});
+  layer.on('tileerror',()=>{if(!isFallback&&!done&&++errors>=2)useFallback()});
+  layer.addTo(map);
+  if(!isFallback)timeout=setTimeout(()=>{if(!done)useFallback()},6500);
+ }
+ function useFallback(){
+  if(done||!current)return;
+  if(timeout){clearTimeout(timeout);timeout=null}
+  done=true;
+  try{add(fallback,true)}catch(e){console.warn('Mapa alternativo:',e)}
+ }
+ try{add(primary||fallback,!primary)}
+ catch(e){console.warn('Error en mosaicos CARTO:',e);try{add(fallback,true)}catch(f){return false}}
+ return true;
 }
 
 function initClientMap(){if(!document.getElementById('clientMap')||typeof L==='undefined')return;const center=checkout.lat!=null?[checkout.lat,checkout.lng]:[state.config.origin.lat,state.config.origin.lng];if(clientMap){clientMap.remove();clientMap=null}clientMap=L.map('clientMap').setView(center,13);if(!addConfiguredTileLayer(clientMap,'clientMap')){clientMap.remove();clientMap=null;return;}customerMarker=L.marker(center,{draggable:true}).addTo(clientMap);customerMarker.on('dragend',async e=>{const ll=e.target.getLatLng();checkout.lat=ll.lat;checkout.lng=ll.lng;await computeClientRoute()});clientMap.on('click',e=>{customerMarker.setLatLng(e.latlng);checkout.lat=e.latlng.lat;checkout.lng=e.latlng.lng;computeClientRoute()})}
@@ -4683,7 +4693,14 @@ function maps(){
  bar.querySelectorAll('[data-rotate]').forEach(b=>b.onclick=()=>{if(typeof map.setBearing==='function')map.setBearing(((map.getBearing?.()||0)+Number(b.dataset.rotate)+360)%360);else toast('La rotación no está disponible en este navegador.','info')});
  bar.querySelector('[data-reset]').onclick=()=>map.setBearing?.(0);
 }
-const oldMap=initFoodPublicMap;initFoodPublicMap=function(){oldMap();maps();applyBusinessPin()};
+const oldMap=initFoodPublicMap;initFoodPublicMap=function(){
+ oldMap();maps();applyBusinessPin();
+ if(publicFoodMap){
+  requestAnimationFrame(()=>publicFoodMap.invalidateSize({pan:false}));
+  setTimeout(()=>publicFoodMap?.invalidateSize({pan:false}),350);
+  setTimeout(()=>publicFoodMap?.invalidateSize({pan:false}),1400);
+ }
+};
 const oldGps=foodGps;
 foodGps=async function(){
  if(!navigator.geolocation)throw Error('Este dispositivo no ofrece ubicación.');
