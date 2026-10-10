@@ -238,7 +238,7 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 <div class="modal admin-modal" id="adminModal"><div class="modal-head"><strong>Panel de administración</strong><button class="icon-btn" data-close-modal="adminModal" aria-label="Cerrar"></button></div><div class="modal-body"><div class="admin-layout"><nav class="admin-tabs" id="adminTabs"></nav><section class="admin-content" id="adminContent"></section></div></div></div>
 <div class="toast-wrap" id="toastWrap"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
+<!-- Leaflet estándar: se retira leaflet-rotate, incompatible con esta inicialización y causante del error reading rotate. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -4706,14 +4706,12 @@ function ticketExtras(c,getDraft,paint){
 const ticketOptionsBaseV24=installTicketOptions;installTicketOptions=function(c,getDraft,paint){ticketOptionsBaseV24(c,getDraft,paint);ticketExtras(c,getDraft,paint)};
 
 function maps(){
- const map=publicFoodMap;if(!map)return;
- const host=document.getElementById('foodPublicMap');if(!host||document.getElementById('vcMapControls'))return;
- const bar=document.createElement('div');bar.id='vcMapControls';bar.className='vc-map-controls';
- bar.innerHTML='<button type="button" data-rotate="-30">↶ Girar</button><button type="button" data-rotate="30">↷ Girar</button><button type="button" data-rotate="180">Invertir</button><button type="button" data-reset>Orientación norte</button>';
- host.after(bar);
- bar.querySelectorAll('[data-rotate]').forEach(b=>b.onclick=()=>{if(typeof map.setBearing==='function')map.setBearing(((map.getBearing?.()||0)+Number(b.dataset.rotate)+360)%360);else toast('La rotación no está disponible en este navegador.','info')});
- bar.querySelector('[data-reset]').onclick=()=>map.setBearing?.(0);
+ // La vista del mapa utiliza Leaflet estándar. La rotación opcional se elimina
+ // para evitar que un plugin modifique internamente el motor de mapas.
+ const old=document.getElementById('vcMapControls');
+ if(old)old.remove();
 }
+
 const oldMap=initFoodPublicMap;initFoodPublicMap=function(){
  oldMap();maps();applyBusinessPin();
  if(publicFoodMap){
