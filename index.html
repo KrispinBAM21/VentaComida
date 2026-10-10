@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="es-MX">
+<html lang="es-MX" class="vc-booting">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>VENTACOMIDA</title>
+<title>Cargando negocio…</title>
+<style id="vc-boot-style">html.vc-booting body>*:not(#vcBootSplash):not(script):not(style){visibility:hidden!important}#vcBootSplash{display:none;position:fixed;inset:0;z-index:999999;background:#11151c;color:#f3f4f6;align-items:center;justify-content:center;flex-direction:column;gap:14px;font:600 16px system-ui,sans-serif;text-align:center;padding:24px}html.vc-booting #vcBootSplash{display:flex}#vcBootSplash button{background:#c62828;color:white;border:0;border-radius:10px;padding:10px 20px;cursor:pointer}#vcBootSplash small{color:#aeb7c5;max-width:500px}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -198,7 +199,7 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 <style>.subscription-notice{margin-top:16px}.billing-method,.billing-payment{padding:16px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.billing-method .toolbar,.billing-payment .toolbar{flex-wrap:wrap}.billing-payment h4{margin:0 0 8px}.subscription-notice p{margin:0 0 12px}</style><style>.date-control{display:flex;align-items:center;gap:6px}.date-control>.input{min-width:0;flex:1}.date-control>.icon-btn{flex:0 0 40px;width:40px;height:40px}.date-control input{color-scheme:light}body.dark-mode .date-control input,#adminModal .date-control input{color-scheme:dark}.date-picker-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}.flash-offers{margin-top:16px;margin-bottom:18px}.flash-offer-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.flash-offer{padding:18px;border:1px solid var(--primary);border-radius:16px;background:var(--card);min-width:0}.flash-offer h3{margin:0 0 10px}.flash-clock{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums;font-size:.9rem;flex-wrap:wrap}.flash-clock svg,.offer-clock-icon{width:20px;height:20px;fill:none;stroke:currentColor;flex:0 0 20px}.combo-products{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.combo-item{border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}.combo-photo{height:150px;display:grid;place-items:center;overflow:hidden}.combo-photo img{height:100%;width:100%;object-fit:contain}.combo-photo svg{height:90px;width:90px;fill:none;stroke:currentColor}.combo-item .btn{width:100%}.product-card,.icon-btn,.btn,.icon-option{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.product-card:focus-within{border-color:var(--primary)}@media(hover:hover){.product-card:hover{transform:translateY(-4px);box-shadow:0 12px 26px #0002;border-color:var(--primary)}.icon-btn:hover svg,.btn:hover svg{transform:scale(1.12)}}.icon-btn svg,.btn svg{transition:transform .18s ease}.icon-btn:active,.btn:active{transform:scale(.97)}.product-card .product-visual img{transition:transform .3s ease}@media(hover:hover){.product-card:hover .product-visual img{transform:scale(1.025)}}.moderation-order{padding:14px 0;border-bottom:1px solid var(--line)}.moderation-order .toolbar{flex-wrap:wrap}.ticket-footer-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ticket-footer-options svg{width:24px;height:24px;fill:none;stroke:currentColor}.ticket-image-links{display:grid;gap:12px}.visitor-blocked #catalogGrid,.visitor-blocked #categoryChips,.visitor-blocked #foodDeliveryPlanner,.visitor-blocked #cartBtn,.visitor-blocked #searchWrap,.visitor-blocked #flashOffers,.visitor-blocked #orderChatBubble{display:none!important}@media(max-width:600px){.date-picker-fields{grid-template-columns:1fr}.ticket-footer-options{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){.product-card,.icon-btn,.btn,.icon-option,.icon-btn svg,.btn svg,.product-card .product-visual img{transition:none;transform:none!important}}
 </style><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body>
+<body><div id="vcBootSplash" role="status" aria-live="polite"><strong id="vcBootMessage">Preparando el negocio…</strong><small id="vcBootDetail">Cargando la configuración publicada.</small><button type="button" id="vcBootRetry" hidden onclick="location.reload()">Reintentar</button></div>
 <div class="topbar"><div class="container header">
   <div class="brand">
     <div class="brand-logo" id="brandLogo"></div>
@@ -228,6 +229,7 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 <div class="modal admin-modal" id="adminModal"><div class="modal-head"><strong>Panel de administración</strong><button class="icon-btn" data-close-modal="adminModal" aria-label="Cerrar"></button></div><div class="modal-body"><div class="admin-layout"><nav class="admin-tabs" id="adminTabs"></nav><section class="admin-content" id="adminContent"></section></div></div></div>
 <div class="toast-wrap" id="toastWrap"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -3900,6 +3902,7 @@ async function openRateBusinessModal(viewOnly=false){
   async function loadV16Reviews(){try{const r=await v16Community('reviews',{});document.getElementById('v16ReviewRows').innerHTML=(r.reviews||[]).map(x=>`<article class="v16-review-card"><div class="row between"><strong>${esc(x.display_name||'Cliente')}</strong><span class="v16-review-stars">${statStars(x.overall_rating||5)}</span></div><small class="muted">Servicio ${Number(x.service_rating||0)}/5 · Comida ${Number(x.food_rating||0)}/5</small><p>${esc(x.comment||'')}</p></article>`).join('')||'<p class="small muted">Aún no hay opiniones.</p>'}catch(e){document.getElementById('v16ReviewRows').innerHTML=`<p class="small muted">${esc(e.message||'No se pudieron cargar las opiniones.')}</p>`}}
   openModal(m.id); await loadV16Reviews();
 }
+window.vcOpenRatings=(viewOnly=false)=>openRateBusinessModal(viewOnly);
 
 function ensureBusinessTrigger(){
   const host=document.getElementById('v15Experience'); if(!host)return;
@@ -4309,7 +4312,7 @@ async function v18OpenBusiness(){
   body.innerHTML=`<div class="v18-business-shell"><section class="v18-business-hero"><div class="v18-business-cover" style="${p.cover?`background-image:url('${esc(p.cover)}')`:''}"></div><div class="v18-business-overlay">${(p.avatar||state.config.logo)?`<img class="v18-business-avatar" src="${esc(p.avatar||state.config.logo)}" alt="Perfil del negocio">`:`<div class="v18-business-avatar"></div>`}<div class="v18-business-title"><h2>${esc(state.config.businessName)}</h2><p>${esc(p.bio||state.config.tagline||'')}</p><div class="v18-business-meta"><span class="v18-business-chip">📍 ${esc(v18LocationText())}</span><span class="v18-business-chip">${status.open?'🟢':'🔴'} ${esc(status.text)}</span><span class="v18-business-chip">⭐ ${Number(info.scores?.overall||0)?Number(info.scores.overall).toFixed(1):'Sin calificaciones'} · ${Number(info.scores?.reviews||0)} opiniones</span><span class="v18-business-chip">👥 ${Number(info.followers||0)} seguidores</span></div></div><div class="v18-business-actions"><button class="btn" id="v18BusinessRate">★ <span>Calificar</span></button><button class="btn secondary" id="v18BusinessFollow">❤ <span>${info.following?'Siguiendo':'Seguir'}</span></button>${/^https:\/\//i.test(p.donation_url||'')?`<a class="btn secondary" href="${esc(p.donation_url)}" target="_blank" rel="noopener noreferrer">💝 <span>${esc(p.donation_label||'Apoyar con donación')}</span></a>`:''}<button class="btn ghost" id="v18BusinessBack">↩ <span>Menú principal</span></button></div></div></section><div class="v18-business-body"><section class="v18-business-card"><h3>Horarios</h3><div class="v18-hours-status ${status.open?'open':'closed'}">${status.open?'●':'●'} ${esc(status.text)}</div>${v18HoursHtml()}</section><section class="v18-business-card"><h3>Ubicación y redes</h3><p>${esc(v18LocationText())}</p><div class="v18-business-socials">${socials||'<span class="small muted">Sin redes configuradas.</span>'}</div><div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="v18BusinessDirections">${UI.map}<span>Cómo llegar</span></button></div></section><section class="v18-business-card v18-business-reviews"><h3>Comentarios recientes</h3>${(info.reviews||[]).slice(0,6).map(x=>`<article class="v18-business-review"><div class="row between"><strong>${esc(x.display_name||'Cliente')}</strong><span>⭐ ${Number(x.overall_rating||5)}/5</span></div><p>${esc(x.comment||'')}</p><small class="muted">Servicio ${Number(x.service_rating||0)}/5 · Comida ${Number(x.food_rating||0)}/5</small></article>`).join('')||'<p class="small muted">Aún no hay comentarios.</p>'}</section></div></div>`;
   document.getElementById('v18BusinessBack').onclick=()=>{closeModal(m.id);window.scrollTo({top:0,behavior:'smooth'})};
   document.getElementById('v18BusinessDirections').onclick=()=>window.v17RouteToBusiness?.();
-  document.getElementById('v18BusinessRate').onclick=()=>{closeModal(m.id);if(typeof openRateBusinessModal==='function')openRateBusinessModal();else if(typeof v14OpenRating==='function')v14OpenRating()};
+  document.getElementById('v18BusinessRate').onclick=()=>{closeModal(m.id);window.vcOpenRatings?.()};
   document.getElementById('v18BusinessFollow').onclick=async()=>{if(!customerSession){closeModal(m.id);renderCustomerProfile();openModal('customerProfileModal');return}try{await v18Community('toggle_follow',{});closeModal(m.id);v18OpenBusiness()}catch(e){toast(e.message,'error')}};
   openModal(m.id);
 }
@@ -4445,7 +4448,7 @@ v12OpenMore=function(){
   const reviews=list.querySelector('[data-v12-menu="reviews"]');
   if(reviews){
     reviews.innerHTML=V12I.comment+'<span>Opiniones y calificar</span>';
-    reviews.onclick=()=>{closeModal('v12MoreModal');openRateBusinessModal()};
+    reviews.onclick=()=>{closeModal('v12MoreModal');window.vcOpenRatings?.()};
   }
 };
 })();
