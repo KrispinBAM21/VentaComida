@@ -4660,19 +4660,19 @@ async function pinAdmin(c){
   if(error)throw error;state.config.map=map;saveLocal();applyBusinessPin();
  },'Pin del negocio guardado.');
 }
-function ticketExtras(c){
+function ticketExtras(c,getDraft,paint){
  const controls=c.querySelector('.ticket-controls');if(!controls||c.querySelector('#vcTicketExtra'))return;
- const d=state.config.ticket||{};
+ const d=getDraft();
  const section=document.createElement('section');section.className='section-card';section.id='vcTicketExtra';
  section.innerHTML='<h3>Personalización avanzada del ticket</h3><div class="admin-grid two"><label class="field">Tamaño de iconos del pie<select class="select" data-vc-ticket="footerIconScale"><option value=".55">Muy pequeño</option><option value=".75">Pequeño</option><option value=".85">Normal compacto</option><option value="1.1">Mediano</option><option value="1.5">Grande</option></select></label><label class="field">Separación de iconos<input class="input" type="range" min=".2" max="1.5" step=".1" data-vc-ticket="footerIconGap"></label><label class="field">Color de iconos<input class="input" type="color" data-vc-ticket="footerIconColor"></label><label class="row"><input type="checkbox" data-vc-ticket="footerDivider"> Mostrar línea separadora antes del pie</label></div><p class="small muted">El tamaño se aplica al PDF y a la vista previa. Los ajustes se guardan con el diseño del ticket.</p>';
  controls.append(section);
- const paint=()=>{const preview=c.querySelector('#ticketPreview,#panelTicketPreview,.ticket-preview');const fn=c.querySelector('#ticketPreviewRefresh');if(fn)fn.click();else if(preview&&typeof ticketSvg==='function'){try{preview.innerHTML=ticketSvg(ticketSample(),state.config.ticket)}catch{}}};
+ const repaint=()=>{paint().catch?.(()=>{})};
  section.querySelectorAll('[data-vc-ticket]').forEach(el=>{
   const k=el.dataset.vcTicket;el.type==='checkbox'?el.checked=!!d[k]:el.value=d[k]||({footerIconScale:'.85',footerIconGap:'.6',footerIconColor:d.color||'#16324f'}[k]);
-  el.oninput=()=>{state.config.ticket||={};state.config.ticket[k]=el.type==='checkbox'?el.checked:el.type==='color'?el.value:Number(el.value);paint()};
+  el.oninput=()=>{getDraft()[k]=el.type==='checkbox'?el.checked:el.type==='color'?el.value:Number(el.value);repaint()};
  });
 }
-const ticketBaseV24=panelTicket;panelTicket=async function(c,epoch,draft){await ticketBaseV24(c,epoch,draft);ticketExtras(c)};
+const ticketOptionsBaseV24=installTicketOptions;installTicketOptions=function(c,getDraft,paint){ticketOptionsBaseV24(c,getDraft,paint);ticketExtras(c,getDraft,paint)};
 
 function maps(){
  const map=publicFoodMap;if(!map)return;
