@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="es-MX">
+<html lang="es-MX" class="vc-booting">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>VENTACOMIDA</title>
+<title>Cargando negocio…</title>
+<style id="vc-boot-style">html.vc-booting body>*:not(#vcBootSplash):not(script):not(style){visibility:hidden!important}#vcBootSplash{display:none;position:fixed;inset:0;z-index:999999;background:#11151c;color:#f3f4f6;align-items:center;justify-content:center;flex-direction:column;gap:14px;font:600 16px system-ui,sans-serif;text-align:center;padding:24px}html.vc-booting #vcBootSplash{display:flex}#vcBootSplash button{background:#c62828;color:white;border:0;border-radius:10px;padding:10px 20px;cursor:pointer}#vcBootSplash small{color:#aeb7c5;max-width:500px}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -198,7 +199,7 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 <style>.subscription-notice{margin-top:16px}.billing-method,.billing-payment{padding:16px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.billing-method .toolbar,.billing-payment .toolbar{flex-wrap:wrap}.billing-payment h4{margin:0 0 8px}.subscription-notice p{margin:0 0 12px}</style><style>.date-control{display:flex;align-items:center;gap:6px}.date-control>.input{min-width:0;flex:1}.date-control>.icon-btn{flex:0 0 40px;width:40px;height:40px}.date-control input{color-scheme:light}body.dark-mode .date-control input,#adminModal .date-control input{color-scheme:dark}.date-picker-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}.flash-offers{margin-top:16px;margin-bottom:18px}.flash-offer-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.flash-offer{padding:18px;border:1px solid var(--primary);border-radius:16px;background:var(--card);min-width:0}.flash-offer h3{margin:0 0 10px}.flash-clock{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums;font-size:.9rem;flex-wrap:wrap}.flash-clock svg,.offer-clock-icon{width:20px;height:20px;fill:none;stroke:currentColor;flex:0 0 20px}.combo-products{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.combo-item{border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}.combo-photo{height:150px;display:grid;place-items:center;overflow:hidden}.combo-photo img{height:100%;width:100%;object-fit:contain}.combo-photo svg{height:90px;width:90px;fill:none;stroke:currentColor}.combo-item .btn{width:100%}.product-card,.icon-btn,.btn,.icon-option{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.product-card:focus-within{border-color:var(--primary)}@media(hover:hover){.product-card:hover{transform:translateY(-4px);box-shadow:0 12px 26px #0002;border-color:var(--primary)}.icon-btn:hover svg,.btn:hover svg{transform:scale(1.12)}}.icon-btn svg,.btn svg{transition:transform .18s ease}.icon-btn:active,.btn:active{transform:scale(.97)}.product-card .product-visual img{transition:transform .3s ease}@media(hover:hover){.product-card:hover .product-visual img{transform:scale(1.025)}}.moderation-order{padding:14px 0;border-bottom:1px solid var(--line)}.moderation-order .toolbar{flex-wrap:wrap}.ticket-footer-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ticket-footer-options svg{width:24px;height:24px;fill:none;stroke:currentColor}.ticket-image-links{display:grid;gap:12px}.visitor-blocked #catalogGrid,.visitor-blocked #categoryChips,.visitor-blocked #foodDeliveryPlanner,.visitor-blocked #cartBtn,.visitor-blocked #searchWrap,.visitor-blocked #flashOffers,.visitor-blocked #orderChatBubble{display:none!important}@media(max-width:600px){.date-picker-fields{grid-template-columns:1fr}.ticket-footer-options{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){.product-card,.icon-btn,.btn,.icon-option,.icon-btn svg,.btn svg,.product-card .product-visual img{transition:none;transform:none!important}}
 </style><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body>
+<body><div id="vcBootSplash" role="status" aria-live="polite"><strong id="vcBootMessage">Preparando el negocio…</strong><small id="vcBootDetail">Cargando la configuración publicada.</small><button type="button" id="vcBootRetry" hidden onclick="location.reload()">Reintentar</button></div>
 <div class="topbar"><div class="container header">
   <div class="brand">
     <div class="brand-logo" id="brandLogo"></div>
@@ -228,6 +229,7 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 <div class="modal admin-modal" id="adminModal"><div class="modal-head"><strong>Panel de administración</strong><button class="icon-btn" data-close-modal="adminModal" aria-label="Cerrar"></button></div><div class="modal-body"><div class="admin-layout"><nav class="admin-tabs" id="adminTabs"></nav><section class="admin-content" id="adminContent"></section></div></div></div>
 <div class="toast-wrap" id="toastWrap"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -3900,6 +3902,7 @@ async function openRateBusinessModal(viewOnly=false){
   async function loadV16Reviews(){try{const r=await v16Community('reviews',{});document.getElementById('v16ReviewRows').innerHTML=(r.reviews||[]).map(x=>`<article class="v16-review-card"><div class="row between"><strong>${esc(x.display_name||'Cliente')}</strong><span class="v16-review-stars">${statStars(x.overall_rating||5)}</span></div><small class="muted">Servicio ${Number(x.service_rating||0)}/5 · Comida ${Number(x.food_rating||0)}/5</small><p>${esc(x.comment||'')}</p></article>`).join('')||'<p class="small muted">Aún no hay opiniones.</p>'}catch(e){document.getElementById('v16ReviewRows').innerHTML=`<p class="small muted">${esc(e.message||'No se pudieron cargar las opiniones.')}</p>`}}
   openModal(m.id); await loadV16Reviews();
 }
+window.vcOpenRatings=(viewOnly=false)=>openRateBusinessModal(viewOnly);
 
 function ensureBusinessTrigger(){
   const host=document.getElementById('v15Experience'); if(!host)return;
@@ -4309,7 +4312,7 @@ async function v18OpenBusiness(){
   body.innerHTML=`<div class="v18-business-shell"><section class="v18-business-hero"><div class="v18-business-cover" style="${p.cover?`background-image:url('${esc(p.cover)}')`:''}"></div><div class="v18-business-overlay">${(p.avatar||state.config.logo)?`<img class="v18-business-avatar" src="${esc(p.avatar||state.config.logo)}" alt="Perfil del negocio">`:`<div class="v18-business-avatar"></div>`}<div class="v18-business-title"><h2>${esc(state.config.businessName)}</h2><p>${esc(p.bio||state.config.tagline||'')}</p><div class="v18-business-meta"><span class="v18-business-chip">📍 ${esc(v18LocationText())}</span><span class="v18-business-chip">${status.open?'🟢':'🔴'} ${esc(status.text)}</span><span class="v18-business-chip">⭐ ${Number(info.scores?.overall||0)?Number(info.scores.overall).toFixed(1):'Sin calificaciones'} · ${Number(info.scores?.reviews||0)} opiniones</span><span class="v18-business-chip">👥 ${Number(info.followers||0)} seguidores</span></div></div><div class="v18-business-actions"><button class="btn" id="v18BusinessRate">★ <span>Calificar</span></button><button class="btn secondary" id="v18BusinessFollow">❤ <span>${info.following?'Siguiendo':'Seguir'}</span></button>${/^https:\/\//i.test(p.donation_url||'')?`<a class="btn secondary" href="${esc(p.donation_url)}" target="_blank" rel="noopener noreferrer">💝 <span>${esc(p.donation_label||'Apoyar con donación')}</span></a>`:''}<button class="btn ghost" id="v18BusinessBack">↩ <span>Menú principal</span></button></div></div></section><div class="v18-business-body"><section class="v18-business-card"><h3>Horarios</h3><div class="v18-hours-status ${status.open?'open':'closed'}">${status.open?'●':'●'} ${esc(status.text)}</div>${v18HoursHtml()}</section><section class="v18-business-card"><h3>Ubicación y redes</h3><p>${esc(v18LocationText())}</p><div class="v18-business-socials">${socials||'<span class="small muted">Sin redes configuradas.</span>'}</div><div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="v18BusinessDirections">${UI.map}<span>Cómo llegar</span></button></div></section><section class="v18-business-card v18-business-reviews"><h3>Comentarios recientes</h3>${(info.reviews||[]).slice(0,6).map(x=>`<article class="v18-business-review"><div class="row between"><strong>${esc(x.display_name||'Cliente')}</strong><span>⭐ ${Number(x.overall_rating||5)}/5</span></div><p>${esc(x.comment||'')}</p><small class="muted">Servicio ${Number(x.service_rating||0)}/5 · Comida ${Number(x.food_rating||0)}/5</small></article>`).join('')||'<p class="small muted">Aún no hay comentarios.</p>'}</section></div></div>`;
   document.getElementById('v18BusinessBack').onclick=()=>{closeModal(m.id);window.scrollTo({top:0,behavior:'smooth'})};
   document.getElementById('v18BusinessDirections').onclick=()=>window.v17RouteToBusiness?.();
-  document.getElementById('v18BusinessRate').onclick=()=>{closeModal(m.id);if(typeof openRateBusinessModal==='function')openRateBusinessModal();else if(typeof v14OpenRating==='function')v14OpenRating()};
+  document.getElementById('v18BusinessRate').onclick=()=>{closeModal(m.id);window.vcOpenRatings?.()};
   document.getElementById('v18BusinessFollow').onclick=async()=>{if(!customerSession){closeModal(m.id);renderCustomerProfile();openModal('customerProfileModal');return}try{await v18Community('toggle_follow',{});closeModal(m.id);v18OpenBusiness()}catch(e){toast(e.message,'error')}};
   openModal(m.id);
 }
@@ -4445,7 +4448,7 @@ v12OpenMore=function(){
   const reviews=list.querySelector('[data-v12-menu="reviews"]');
   if(reviews){
     reviews.innerHTML=V12I.comment+'<span>Opiniones y calificar</span>';
-    reviews.onclick=()=>{closeModal('v12MoreModal');openRateBusinessModal()};
+    reviews.onclick=()=>{closeModal('v12MoreModal');window.vcOpenRatings?.()};
   }
 };
 })();
@@ -4527,6 +4530,130 @@ window.addEventListener('pageshow',()=>{setTimeout(reconcileSession,0)});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)reconcileSession()});
 setTimeout(reconcileSession,250);
 setTimeout(reconcileSession,1500);
+})();
+</script>
+
+<style id="vc-v23-style">
+.vc-gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:14px 0}
+.vc-gallery-item{position:relative;background:var(--secondary);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.vc-gallery-item img,.vc-gallery-item video{width:100%;height:150px;object-fit:cover}
+.vc-gallery-item button{margin:6px}
+.vc-gallery-viewer{position:fixed;inset:0;background:#090b0ff5;z-index:999999;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:14px;gap:12px}
+.vc-gallery-viewer img,.vc-gallery-viewer video{max-width:94vw;max-height:80dvh;object-fit:contain}
+.vc-gallery-viewer .toolbar{justify-content:center}
+.vc-gallery-viewer button{background:#272c34;color:#fff;border:1px solid #59606c;border-radius:10px;padding:9px 15px}
+.vc-gallery-viewer p{color:white;margin:0}
+.vc-map-controls{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.vc-map-controls button{padding:7px 12px;border-radius:9px;border:1px solid var(--line);background:var(--secondary);color:var(--text)}
+</style>
+<script id="vc-v23-features">
+(function(){
+'use strict';
+const safeName=()=>String(state.config.businessName||'Negocio').trim()||'Negocio';
+let lastBrand='';
+function brand(){
+ const name=safeName(),logo=state.config.logo||'';
+ if(lastBrand===name+'|'+logo)return;
+ lastBrand=name+'|'+logo;document.title=name;
+ let icon=document.querySelector('link[rel="icon"]');
+ if(!icon){icon=document.createElement('link');icon.rel='icon';document.head.append(icon)}
+ if(logo){icon.href=logo}else{
+ const letter=name.slice(0,2).toUpperCase().replace(/[&<>"]/g,'');
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="13" fill="#c62828"/><text x="32" y="43" font-size="27" font-family="sans-serif" font-weight="bold" text-anchor="middle" fill="white">'+letter+'</text></svg>';
+ icon.href='data:image/svg+xml,'+encodeURIComponent(svg);
+ }
+ let apple=document.querySelector('link[rel="apple-touch-icon"]');
+ if(!apple){apple=document.createElement('link');apple.rel='apple-touch-icon';document.head.append(apple)}
+ apple.href=icon.href;
+}
+function ready(){brand();document.documentElement.classList.remove('vc-booting')}
+const loadBase=loadPublicCloudState;
+loadPublicCloudState=async function(){await loadBase();brand();ready()};
+const initBase=initSupabase;
+initSupabase=async function(){try{await initBase();if(!cloudReady)throw Error('No se pudo cargar la configuración del negocio.');ready()}catch(e){document.getElementById('vcBootMessage').textContent='No se pudo cargar el negocio';document.getElementById('vcBootDetail').textContent=e.message;document.getElementById('vcBootRetry').hidden=false;throw e}};
+setTimeout(()=>{if(document.documentElement.classList.contains('vc-booting')){document.getElementById('vcBootMessage').textContent='La conexión está tardando';document.getElementById('vcBootDetail').textContent='Comprueba tu conexión o vuelve a intentarlo.';document.getElementById('vcBootRetry').hidden=false}},12000);
+const oldHeader=renderHeader;renderHeader=function(){oldHeader();brand()};
+const oldSave=saveLocal;saveLocal=function(){oldSave();brand()};
+const GALLERY_LIMIT=30,VIDEO_LIMIT=10;
+function items(){return Array.isArray(state.config.publicProfile?.gallery)?state.config.publicProfile.gallery:[]}
+function viewer(start){
+ const list=items();if(!list.length)return;let index=start;
+ const host=document.createElement('div');host.className='vc-gallery-viewer';host.setAttribute('role','dialog');host.setAttribute('aria-modal','true');
+ function draw(){const x=list[index];host.innerHTML='<div class="toolbar"><button data-act="prev">Anterior</button><button data-act="next">Siguiente</button><button data-act="close">Cerrar ✕</button></div>'+(x.type==='video'?'<video controls playsinline src="'+esc(x.url)+'"></video>':'<img src="'+esc(x.url)+'" alt="'+esc(x.name||'Producto')+'">')+'<p>'+(index+1)+' de '+list.length+'</p>';host.querySelector('[data-act="prev"]').onclick=()=>{index=(index-1+list.length)%list.length;draw()};host.querySelector('[data-act="next"]').onclick=()=>{index=(index+1)%list.length;draw()};host.querySelector('[data-act="close"]').onclick=()=>host.remove()}
+ draw();document.body.append(host);host.addEventListener('click',e=>{if(e.target===host)host.remove()});
+}
+function galleryMarkup(){return items().map((x,i)=>'<button type="button" class="vc-gallery-item" data-vc-view="'+i+'">'+(x.type==='video'?'<video preload="metadata" muted src="'+esc(x.url)+'"></video>':'<img loading="lazy" src="'+esc(x.url)+'" alt="'+esc(x.name||'Producto')+'">')+'</button>').join('')}
+function showGallery(){const host=document.querySelector('#v18BusinessModal .v18-business-body');if(!host)return;host.querySelector('#vcPublicGallery')?.remove();const section=document.createElement('section');section.className='v18-business-card';section.id='vcPublicGallery';section.style.gridColumn='1/-1';section.innerHTML='<h3>Galería de productos</h3><div class="vc-gallery-grid">'+galleryMarkup()+'</div>';if(!items().length)return;host.prepend(section);section.querySelectorAll('[data-vc-view]').forEach(b=>b.onclick=()=>viewer(Number(b.dataset.vcView)))}
+const baseOpen=window.v18OpenBusiness;
+window.v18OpenBusiness=async function(){await baseOpen();showGallery()};
+function galleryAdmin(c){
+ const profile=c.querySelector('#v16SaveProfile');if(!profile||c.querySelector('#vcGalleryAdmin'))return;
+ const section=document.createElement('section');section.id='vcGalleryAdmin';section.className='section-card';
+ section.innerHTML='<h3>Galería de productos</h3><p class="small muted">Hasta 30 fotografías y 10 videos de máximo 2 minutos. Los archivos se guardan en Supabase Storage.</p><label class="field">Agregar fotografías o videos<input id="vcGalleryFiles" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" multiple></label><p id="vcGalleryStatus" class="small" role="status"></p><div id="vcGalleryList" class="vc-gallery-grid"></div>';
+ profile.closest('.section-card').after(section);
+ const draw=()=>{section.querySelector('#vcGalleryList').innerHTML=items().map((x,i)=>'<div class="vc-gallery-item">'+(x.type==='video'?'<video controls preload="metadata" src="'+esc(x.url)+'"></video>':'<img src="'+esc(x.url)+'">')+'<button type="button" data-remove="'+i+'">Eliminar</button></div>').join('');section.querySelectorAll('[data-remove]').forEach(b=>b.onclick=async()=>{if(!confirm('¿Eliminar este elemento de la galería?'))return;const previous=items().slice(),next=previous.filter((_,i)=>i!==Number(b.dataset.remove));state.config.publicProfile.gallery=next;try{await saveGallery();draw()}catch(e){state.config.publicProfile.gallery=previous;toast(e.message,'error')}})};
+ async function saveGallery(){const {error}=await supabaseClient.rpc('catalog_config_save',{p_module:'business',p_data:{publicProfile:state.config.publicProfile}});if(error)throw error;saveLocal()}
+ async function duration(file){return await new Promise((resolve,reject)=>{const video=document.createElement('video'),url=URL.createObjectURL(file);video.preload='metadata';video.onloadedmetadata=()=>{const d=video.duration;URL.revokeObjectURL(url);resolve(d)};video.onerror=()=>{URL.revokeObjectURL(url);reject(Error('No se pudo leer el video.'))};video.src=url})}
+ section.querySelector('#vcGalleryFiles').onchange=async e=>{
+ const input=e.currentTarget,status=section.querySelector('#vcGalleryStatus'),files=[...input.files];input.disabled=true;
+ try{
+  if(!supabaseClient||!adminSession||!panelCan('business'))throw Error('Necesitas permiso de Negocio.');
+  const previous=items().slice(),newItems=previous.slice();
+  for(const file of files){
+   const video=file.type.startsWith('video/'),photo=file.type.startsWith('image/');
+   if(!video&&!photo)throw Error('Formato no permitido.');
+   if(file.size>50*1024*1024)throw Error('Máximo 50 MB por archivo.');
+   if(newItems.filter(x=>x.type==='video').length+(video?1:0)>VIDEO_LIMIT)throw Error('Máximo 10 videos.');
+   if(newItems.filter(x=>x.type==='image').length+(photo?1:0)>GALLERY_LIMIT)throw Error('Máximo 30 fotografías.');
+   if(video&&await duration(file)>120)throw Error('Los videos no pueden superar 2 minutos.');
+   status.textContent='Subiendo '+file.name+'…';
+   const ext=file.name.split('.').pop().toLowerCase(),path='public/'+crypto.randomUUID()+'.'+ext;
+   const {error}=await supabaseClient.storage.from('business-gallery').upload(path,file,{contentType:file.type,upsert:false});
+   if(error)throw error;
+   const {data}=supabaseClient.storage.from('business-gallery').getPublicUrl(path);
+   newItems.push({type:video?'video':'image',url:data.publicUrl,name:file.name});
+  }
+  state.config.publicProfile.gallery=newItems;
+  try{await saveGallery()}catch(error){state.config.publicProfile.gallery=previous;throw error}
+  status.textContent='Galería guardada.';draw();
+ }catch(error){status.textContent=error.message;toast(error.message,'error')}
+ finally{input.disabled=false;input.value=''}
+ };
+ draw();
+}
+const oldProfile=renderV16ProfileAdmin;
+renderV16ProfileAdmin=async function(c){await oldProfile(c);galleryAdmin(c)};
+function maps(){
+ const map=publicFoodMap;if(!map)return;
+ const host=document.getElementById('foodPublicMap');if(!host||document.getElementById('vcMapControls'))return;
+ const bar=document.createElement('div');bar.id='vcMapControls';bar.className='vc-map-controls';
+ bar.innerHTML='<button type="button" data-rotate="-30">↶ Girar</button><button type="button" data-rotate="30">↷ Girar</button><button type="button" data-rotate="180">Invertir</button><button type="button" data-reset>Orientación norte</button>';
+ host.after(bar);
+ bar.querySelectorAll('[data-rotate]').forEach(b=>b.onclick=()=>{if(typeof map.setBearing==='function')map.setBearing(((map.getBearing?.()||0)+Number(b.dataset.rotate)+360)%360);else toast('La rotación no está disponible en este navegador.','info')});
+ bar.querySelector('[data-reset]').onclick=()=>map.setBearing?.(0);
+}
+const oldMap=initFoodPublicMap;initFoodPublicMap=function(){oldMap();maps()};
+const oldGps=foodGps;
+foodGps=async function(){
+ if(!navigator.geolocation)throw Error('Este dispositivo no ofrece ubicación.');
+ let best=null;const start=Date.now();
+ return await new Promise((resolve,reject)=>{
+  let settled=false,watch=-1;
+  const done=(error)=>{if(settled)return;settled=true;if(watch!==-1)navigator.geolocation.clearWatch(watch);clearTimeout(timer);if(best)resolve(best);else reject(error||Error('No se obtuvo la ubicación.'))};
+  const timer=setTimeout(()=>done(Error('La ubicación tardó demasiado.')),11000);
+  watch=navigator.geolocation.watchPosition(p=>{if(!best||p.coords.accuracy<best.coords.accuracy)best=p;if(p.coords.accuracy<=25||Date.now()-start>6500)done()},e=>done(Error('Activa la ubicación precisa y permite el acceso GPS: '+e.message)),{enableHighAccuracy:true,maximumAge:0,timeout:10000});
+ });
+};
+const gpsButton=document.getElementById('foodGpsDestination');
+if(gpsButton)gpsButton.onclick=e=>panelRun(e.currentTarget,async()=>{
+ const p=await foodGps(),accuracy=Math.round(p.coords.accuracy);
+ checkout.address='Ubicación GPS aproximada ('+accuracy+' m)';
+ document.getElementById('foodDestination').value=checkout.address;
+ await chooseFoodDestination(p.coords.latitude,p.coords.longitude);
+ if(accuracy>100)toast('Precisión baja: '+accuracy+' m. Ajusta el pin a la entrada antes de confirmar.','info');
+});
+const baseQuote=quoteFoodRoute;
+quoteFoodRoute=async function(){const q=await baseQuote();if(!q?.geometry&&checkout.lat!=null&&publicFoodMap){try{const o=state.config.origin;const url='https://router.project-osrm.org/route/v1/driving/'+o.lng+','+o.lat+';'+checkout.lng+','+checkout.lat+'?overview=full&geometries=geojson';const r=await fetch(url,{signal:AbortSignal.timeout(9000)}),d=await r.json();if(d.routes?.[0]?.geometry){if(publicFoodRoute)publicFoodMap.removeLayer(publicFoodRoute);publicFoodRoute=L.geoJSON(d.routes[0].geometry,{style:{color:'#159aa3',weight:5}}).addTo(publicFoodMap);publicFoodMap.fitBounds(publicFoodRoute.getBounds(),{padding:[25,25]})}}catch(e){console.warn('Ruta visual no disponible:',e)}}return q};
 })();
 </script>
 </body>
