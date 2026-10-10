@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es-MX" class="vc-booting">
+<html lang="es-MX" class="vc-catalog-pending">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Cargando negocio…</title>
+<title>VentaComida</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -192,6 +192,16 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 .checkout-location h4{display:flex;align-items:center;gap:8px}.checkout-location h4>svg{width:20px;height:20px;flex:0 0 20px;fill:none;stroke:currentColor}#catalogGrid .product-visual{padding:0}.catalog-pages[hidden]{display:none}.checkout-grid .field{margin:0}.checkout-grid{margin:12px 0}
 </style><style>.header{flex-wrap:wrap}.header .brand{flex:1 1 200px}.account-labelled{width:auto!important;padding:9px 12px;gap:8px}.account-labelled span{font-size:.78rem;max-width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.followup-button{position:relative}.followup-count{position:absolute;right:-3px;top:-4px;min-width:17px;height:17px;display:grid;place-items:center;background:var(--primary);color:#fff;border-radius:20px;font-size:10px}.followup-list{display:grid;gap:12px}.followup-card{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--card);min-width:0}.followup-card h3{margin:0 0 9px}.followup-card p{font-size:.88rem;line-height:1.5;margin:7px 0;overflow-wrap:anywhere}.followup-stage{display:inline-flex;padding:5px 8px;border-radius:7px;background:var(--secondary);font-size:.78rem;font-weight:700}.followup-steps{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.followup-steps span{font-size:.75rem;border:1px solid var(--line);padding:5px 7px;border-radius:7px}.followup-steps .current{background:var(--primary);color:white}.preparation-info{font-size:.85rem;color:var(--muted);margin:8px 0}.order-chat-bubble{position:fixed;right:22px;bottom:94px;z-index:65;box-shadow:0 8px 24px #0004;max-width:220px;padding:12px 16px;background:var(--primary);color:white;border-radius:24px}.order-chat-bubble svg{width:22px;height:22px;fill:none;stroke:currentColor}.order-chat-bubble[hidden]{display:none}.chat-thread{max-height:48dvh;min-height:140px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px}.chat-message{max-width:88%;padding:10px 13px;border-radius:12px;background:var(--secondary);align-self:flex-start;overflow-wrap:anywhere;white-space:pre-wrap;font-size:.9rem}.chat-message.own{align-self:flex-end;background:color-mix(in srgb,var(--primary) 16%,var(--card))}.chat-message small{display:block;opacity:.65;font-size:.7rem;margin-top:6px}.chat-compose{display:flex;align-items:flex-end;gap:8px;margin-top:12px}.chat-compose textarea{min-height:70px;flex:1}.chat-compose button{flex:0 0 auto}.notification-item{padding:12px;border-bottom:1px solid var(--line);font-size:.9rem}.notification-item small{display:block;font-size:.75rem;color:var(--muted);margin-top:5px}.tracking-error{color:var(--danger);overflow-wrap:anywhere}.followup-card .toolbar .btn{flex:1 1 150px}.auth-feedback{display:block;padding:12px;margin:10px 0;border:1px solid var(--line);border-radius:10px}#foodAuthStatus:empty{display:none}.modal-followup{width:min(960px,96vw)}.prep-clock{font-variant-numeric:tabular-nums}@media(max-width:600px){.header{gap:7px}.header .brand{flex:1 1 100%}.account-labelled span{max-width:80px}.order-chat-bubble{right:14px;bottom:88px;max-width:190px}.chat-message{max-width:95%}.chat-compose{flex-wrap:wrap}.chat-compose button{width:100%}}
 </style>
+<style id="vc-v25-public-stability">
+/* La tienda es visible de inmediato; se evita mostrar un catálogo provisional. */
+html.vc-catalog-pending #catalogGrid,
+html.vc-catalog-pending #catalogPages,
+html.vc-catalog-pending #categoryChips,
+html.vc-catalog-pending .catalog-pages{display:none!important}
+#foodPublicMap{min-height:320px;position:relative}
+#vcMapLoadStatus{position:absolute;z-index:450;bottom:12px;left:12px;right:12px;background:rgba(17,24,39,.94);color:#fff;padding:12px 15px;border-radius:9px;font:500 13px system-ui}
+#vcMapLoadStatus button{margin-left:10px;color:#fff;background:#c62828;border:0;border-radius:6px;padding:6px 9px}
+</style>
 <style id="map-layer-fix-v7-1">
 /* Keep Leaflet panes and controls inside their map stacking context. */
 .leaflet-container{position:relative;z-index:0;isolation:isolate}
@@ -199,11 +209,11 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 <style>.subscription-notice{margin-top:16px}.billing-method,.billing-payment{padding:16px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.billing-method .toolbar,.billing-payment .toolbar{flex-wrap:wrap}.billing-payment h4{margin:0 0 8px}.subscription-notice p{margin:0 0 12px}</style><style>.date-control{display:flex;align-items:center;gap:6px}.date-control>.input{min-width:0;flex:1}.date-control>.icon-btn{flex:0 0 40px;width:40px;height:40px}.date-control input{color-scheme:light}body.dark-mode .date-control input,#adminModal .date-control input{color-scheme:dark}.date-picker-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}.flash-offers{margin-top:16px;margin-bottom:18px}.flash-offer-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.flash-offer{padding:18px;border:1px solid var(--primary);border-radius:16px;background:var(--card);min-width:0}.flash-offer h3{margin:0 0 10px}.flash-clock{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums;font-size:.9rem;flex-wrap:wrap}.flash-clock svg,.offer-clock-icon{width:20px;height:20px;fill:none;stroke:currentColor;flex:0 0 20px}.combo-products{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.combo-item{border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}.combo-photo{height:150px;display:grid;place-items:center;overflow:hidden}.combo-photo img{height:100%;width:100%;object-fit:contain}.combo-photo svg{height:90px;width:90px;fill:none;stroke:currentColor}.combo-item .btn{width:100%}.product-card,.icon-btn,.btn,.icon-option{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.product-card:focus-within{border-color:var(--primary)}@media(hover:hover){.product-card:hover{transform:translateY(-4px);box-shadow:0 12px 26px #0002;border-color:var(--primary)}.icon-btn:hover svg,.btn:hover svg{transform:scale(1.12)}}.icon-btn svg,.btn svg{transition:transform .18s ease}.icon-btn:active,.btn:active{transform:scale(.97)}.product-card .product-visual img{transition:transform .3s ease}@media(hover:hover){.product-card:hover .product-visual img{transform:scale(1.025)}}.moderation-order{padding:14px 0;border-bottom:1px solid var(--line)}.moderation-order .toolbar{flex-wrap:wrap}.ticket-footer-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ticket-footer-options svg{width:24px;height:24px;fill:none;stroke:currentColor}.ticket-image-links{display:grid;gap:12px}.visitor-blocked #catalogGrid,.visitor-blocked #categoryChips,.visitor-blocked #foodDeliveryPlanner,.visitor-blocked #cartBtn,.visitor-blocked #searchWrap,.visitor-blocked #flashOffers,.visitor-blocked #orderChatBubble{display:none!important}@media(max-width:600px){.date-picker-fields{grid-template-columns:1fr}.ticket-footer-options{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){.product-card,.icon-btn,.btn,.icon-option,.icon-btn svg,.btn svg,.product-card .product-visual img{transition:none;transform:none!important}}
 </style><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body><div id="vcBootSplash" role="status" aria-live="polite"><strong id="vcBootMessage">Preparando el negocio…</strong><small id="vcBootDetail">Cargando la configuración publicada.</small><button type="button" id="vcBootRetry" hidden onclick="location.reload()">Reintentar</button></div>
+<body>
 <div class="topbar"><div class="container header">
   <div class="brand">
     <div class="brand-logo" id="brandLogo"></div>
-    <div class="brand-copy"><h1 id="brandName">Sazón Manzanillo</h1><p id="brandTagline">Comida preparada al momento</p></div>
+    <div class="brand-copy"><h1 id="brandName">VentaComida</h1><p id="brandTagline"></p></div>
   </div>
   <button class="icon-btn theme-btn" id="themeBtn" aria-label="Cambiar tema"></button>
   <button class="icon-btn" id="adminBtn" hidden style="display:none" aria-label="Administración"></button>
@@ -599,28 +609,45 @@ function showMapConfigNeeded(containerId){
   el.innerHTML=`<div class="empty-state" style="height:100%;min-height:220px;display:grid;place-items:center;padding:24px;text-align:center"><div>${UI.map}<strong style="display:block;margin:8px 0">Falta configurar CARTO</strong><span class="small muted">En Administración, Negocio, CARTO pega tu API key para activar los mapas.</span></div></div>`;
 }
 function addConfiguredTileLayer(map,containerId){
- const primary=cartoTileUrl(),fallback='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
- const attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>';
- let current=null,done=false,errors=0,timeout=null;
- function add(url,isFallback){
-  if(current){try{map.removeLayer(current)}catch(e){}}
-  errors=0;
-  const layer=L.tileLayer(url,{maxZoom:19,attribution:isFallback?attribution:attribution+', &copy; CARTO',crossOrigin:true});
-  current=layer;
-  layer.on('load',()=>{done=true;if(timeout)clearTimeout(timeout);setTimeout(()=>map.invalidateSize({pan:false}),80)});
-  layer.on('tileerror',()=>{if(!isFallback&&!done&&++errors>=2)useFallback()});
-  layer.addTo(map);
-  if(!isFallback)timeout=setTimeout(()=>{if(!done)useFallback()},6500);
- }
- function useFallback(){
-  if(done||!current)return;
-  if(timeout){clearTimeout(timeout);timeout=null}
-  done=true;
-  try{add(fallback,true)}catch(e){console.warn('Mapa alternativo:',e)}
- }
- try{add(primary||fallback,!primary)}
- catch(e){console.warn('Error en mosaicos CARTO:',e);try{add(fallback,true)}catch(f){return false}}
- return true;
+  const carto=cartoTileUrl();
+  const fallback='https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const attrOSM='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>';
+  const host=document.getElementById(containerId);
+  if(map._vcTileLayer){try{map.removeLayer(map._vcTileLayer)}catch(e){}}
+  let layer=null,timer=null,loaded=false,fallbackStarted=false,errors=0;
+  const status=(message,retry)=>{
+    if(!host)return;
+    let el=host.querySelector('#vcMapLoadStatus');
+    if(!el){el=document.createElement('div');el.id='vcMapLoadStatus';el.setAttribute('role','status');host.append(el)}
+    el.textContent=message;
+    if(retry){const b=document.createElement('button');b.type='button';b.textContent='Reintentar';b.onclick=()=>{el.remove();addConfiguredTileLayer(map,containerId)};el.append(b)}
+  };
+  const clearStatus=()=>host?.querySelector('#vcMapLoadStatus')?.remove();
+  function install(url,secondary){
+    errors=0;
+    if(layer){layer.off();try{map.removeLayer(layer)}catch(e){}}
+    layer=L.tileLayer(url,{maxZoom:19,attribution:secondary?attrOSM:attrOSM+', &copy; CARTO',updateWhenIdle:false});
+    map._vcTileLayer=layer;
+    layer.on('tileload',()=>{loaded=true;if(timer)clearTimeout(timer);clearStatus()});
+    layer.on('tileerror',()=>{
+      if(loaded)return;
+      if(++errors>=3){
+        if(!secondary)startFallback();
+        else{if(timer)clearTimeout(timer);status('No se pudo descargar el mapa. Comprueba tu conexión.',true)}
+      }
+    });
+    layer.addTo(map);
+    if(!secondary)timer=setTimeout(()=>{if(!loaded)startFallback()},5500);
+    else timer=setTimeout(()=>{if(!loaded)status('No se pudo descargar el mapa. Comprueba tu conexión.',true)},8000);
+  }
+  function startFallback(){
+    if(fallbackStarted||loaded)return;
+    fallbackStarted=true;
+    if(timer)clearTimeout(timer);
+    try{install(fallback,true)}catch(e){status('No se pudo cargar el mapa.',true)}
+  }
+  try{install(carto||fallback,!carto);return true}
+  catch(e){console.warn('CARTO:',e);try{startFallback();return true}catch(err){status('No se pudo iniciar el mapa.',true);return false}}
 }
 
 function initClientMap(){if(!document.getElementById('clientMap')||typeof L==='undefined')return;const center=checkout.lat!=null?[checkout.lat,checkout.lng]:[state.config.origin.lat,state.config.origin.lng];if(clientMap){clientMap.remove();clientMap=null}clientMap=L.map('clientMap').setView(center,13);if(!addConfiguredTileLayer(clientMap,'clientMap')){clientMap.remove();clientMap=null;return;}customerMarker=L.marker(center,{draggable:true}).addTo(clientMap);customerMarker.on('dragend',async e=>{const ll=e.target.getLatLng();checkout.lat=ll.lat;checkout.lng=ll.lng;await computeClientRoute()});clientMap.on('click',e=>{customerMarker.setLatLng(e.latlng);checkout.lat=e.latlng.lat;checkout.lng=e.latlng.lng;computeClientRoute()})}
@@ -1173,7 +1200,7 @@ async function renderSubscription(c,epoch){await refreshSiteStatus();const histo
 const v4Catalog=renderCatalog;renderCatalog=function(){if(siteStatus&&!siteStatus.active&&!siteStatus.master){document.getElementById('catalogGrid').replaceChildren();return}v4Catalog()};
 state.orders=[];saveLocal();
 // Inicialización pública: el mapa no depende de iniciar sesión ni de guardar un domicilio.
-const foodPublic=document.createElement('section');foodPublic.id='foodDeliveryPlanner';foodPublic.className='food-delivery-planner';foodPublic.innerHTML=`<div class="section-card"><span class="eyebrow">UBICACIÓN Y ENTREGA</span><h2>Encuentra el local y calcula tu envío</h2><p class="small muted" id="foodOriginLabel">${esc(state.config.origin.address)}</p><div id="foodSavedAddresses"></div><div class="address-picker-row"><label class="field">Calle o dirección de entrega<input class="input" id="foodDestination" placeholder="Busca una calle o marca tu destino en el mapa"></label>${panelButton('foodSearchDestination','Buscar',UI.search,'secondary')}${panelButton('foodGpsDestination','Mi ubicación',UI.pin,'secondary')}</div><div class="map" id="foodPublicMap"></div><p class="small muted">El marcador Local indica el punto de salida. Ajusta el marcador de entrega a la entrada.</p></div><aside class="section-card"><h3>Resumen de costos</h3><div id="foodQuote">Selecciona un destino para consultar el recorrido.</div><div class="toolbar">${panelButton('foodCalculate','Actualizar recorrido',UI.refresh,'secondary')}${panelButton('foodGoCart','Revisar pedido',UI.cart)}</div><div id="foodSocials" class="toolbar"></div></aside>`;document.getElementById('catalogGrid').after(foodPublic);document.getElementById('foodGoCart').onclick=openDrawer;document.getElementById('foodCalculate').onclick=e=>panelRun(e.currentTarget,()=>quoteFoodRoute());document.getElementById('foodDestination').oninput=e=>{checkout.address=e.target.value;checkout.savedAddressId=''};document.getElementById('foodSearchDestination').onclick=e=>panelRun(e.currentTarget,async()=>{const p=await foodSearch(document.getElementById('foodDestination').value);checkout.address=p.address;document.getElementById('foodDestination').value=p.address;await chooseFoodDestination(p.lat,p.lng)});document.getElementById('foodGpsDestination').onclick=e=>panelRun(e.currentTarget,async()=>{const p=await foodGps();checkout.address=document.getElementById('foodDestination').value||'Ubicación actual';await chooseFoodDestination(p.coords.latitude,p.coords.longitude)});renderAccountButton();renderSavedAddressShortcut();setTimeout(initFoodPublicMap,200);const v4Cloud=loadPublicCloudState;loadPublicCloudState=async function(){await v4Cloud();const o=state.config.origin;document.getElementById('foodOriginLabel').textContent=o.address;publicFoodOrigin?.setLatLng([o.lat,o.lng]);renderSavedAddressShortcut()};
+const foodPublic=document.createElement('section');foodPublic.id='foodDeliveryPlanner';foodPublic.className='food-delivery-planner';foodPublic.innerHTML=`<div class="section-card"><span class="eyebrow">UBICACIÓN Y ENTREGA</span><h2>Encuentra el local y calcula tu envío</h2><p class="small muted" id="foodOriginLabel">${esc(state.config.origin.address)}</p><div id="foodSavedAddresses"></div><div class="address-picker-row"><label class="field">Calle o dirección de entrega<input class="input" id="foodDestination" placeholder="Busca una calle o marca tu destino en el mapa"></label>${panelButton('foodSearchDestination','Buscar',UI.search,'secondary')}${panelButton('foodGpsDestination','Mi ubicación',UI.pin,'secondary')}</div><div class="map" id="foodPublicMap"></div><p class="small muted">El marcador Local indica el punto de salida. Ajusta el marcador de entrega a la entrada.</p></div><aside class="section-card"><h3>Resumen de costos</h3><div id="foodQuote">Selecciona un destino para consultar el recorrido.</div><div class="toolbar">${panelButton('foodCalculate','Actualizar recorrido',UI.refresh,'secondary')}${panelButton('foodGoCart','Revisar pedido',UI.cart)}</div><div id="foodSocials" class="toolbar"></div></aside>`;document.getElementById('catalogGrid').after(foodPublic);document.getElementById('foodGoCart').onclick=openDrawer;document.getElementById('foodCalculate').onclick=e=>panelRun(e.currentTarget,()=>quoteFoodRoute());document.getElementById('foodDestination').oninput=e=>{checkout.address=e.target.value;checkout.savedAddressId=''};document.getElementById('foodSearchDestination').onclick=e=>panelRun(e.currentTarget,async()=>{const p=await foodSearch(document.getElementById('foodDestination').value);checkout.address=p.address;document.getElementById('foodDestination').value=p.address;await chooseFoodDestination(p.lat,p.lng)});document.getElementById('foodGpsDestination').onclick=e=>panelRun(e.currentTarget,async()=>{const p=await foodGps();checkout.address=document.getElementById('foodDestination').value||'Ubicación actual';await chooseFoodDestination(p.coords.latitude,p.coords.longitude)});renderAccountButton();renderSavedAddressShortcut();/* El mapa se inicializa después de cargar la configuración pública. */const v4Cloud=loadPublicCloudState;loadPublicCloudState=async function(){await v4Cloud();const o=state.config.origin;document.getElementById('foodOriginLabel').textContent=o.address;publicFoodOrigin?.setLatLng([o.lat,o.lng]);renderSavedAddressShortcut()};
 setInterval(()=>{if(!document.hidden&&supabaseClient){refreshSiteStatus().catch(()=>{});if(customerSession)panelVerify().catch(()=>{})}},30000);
 
 /* Estructura del panel y ticket basada en el index de maniobras adjunto. */
@@ -4584,7 +4611,7 @@ function brand(){
  if(!apple){apple=document.createElement('link');apple.rel='apple-touch-icon';document.head.append(apple)}
  apple.href=icon.href;
 }
-function ready(){brand();document.documentElement.classList.remove('vc-booting')}
+function ready(){brand()}
 const loadBase=loadPublicCloudState;
 loadPublicCloudState=async function(){await loadBase();brand();ready()};
 const initBase=initSupabase;
@@ -4701,6 +4728,52 @@ const oldMap=initFoodPublicMap;initFoodPublicMap=function(){
   setTimeout(()=>publicFoodMap?.invalidateSize({pan:false}),1400);
  }
 };
+// V25: el mapa público debe iniciarse con coordenadas y proveedor ya publicados.
+let vcMapLibraryPromise=null;
+function vcEnsureLeaflet(){
+ if(typeof L!=='undefined')return Promise.resolve();
+ if(vcMapLibraryPromise)return vcMapLibraryPromise;
+ vcMapLibraryPromise=new Promise((resolve,reject)=>{
+  if(!document.querySelector('link[data-vc-leaflet-backup]')){
+   const css=document.createElement('link');css.rel='stylesheet';css.dataset.vcLeafletBackup='1';css.href='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';document.head.append(css);
+  }
+  const script=document.createElement('script');script.src='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+  script.onload=()=>typeof L!=='undefined'?resolve():reject(Error('Leaflet no se pudo inicializar'));
+  script.onerror=()=>reject(Error('No se pudo descargar Leaflet'));
+  document.head.append(script);
+ }).catch(e=>{vcMapLibraryPromise=null;throw e});
+ return vcMapLibraryPromise;
+}
+async function vcEnsurePublicMap(){
+ const host=document.getElementById('foodPublicMap');if(!host)return;
+ try{
+  await vcEnsureLeaflet();
+  const origin=state.config.origin;
+  if(!Number.isFinite(Number(origin?.lat))||!Number.isFinite(Number(origin?.lng)))throw Error('Ubicación del negocio inválida');
+  if(!publicFoodMap)initFoodPublicMap();
+  if(!publicFoodMap)throw Error('No se pudo crear el mapa');
+  const tiles=Object.values(publicFoodMap._layers||{}).filter(x=>x instanceof L.TileLayer);
+  if(!tiles.length)addConfiguredTileLayer(publicFoodMap,'foodPublicMap');
+  publicFoodOrigin?.setLatLng([Number(origin.lat),Number(origin.lng)]);
+  publicFoodMap.invalidateSize({pan:false});
+  setTimeout(()=>publicFoodMap?.invalidateSize({pan:false}),300);
+  setTimeout(()=>publicFoodMap?.invalidateSize({pan:false}),1200);
+ }catch(e){
+  console.warn('Mapa público:',e);
+  if(!host.querySelector('#vcMapLoadStatus')){
+   const message=document.createElement('div');message.id='vcMapLoadStatus';message.setAttribute('role','status');message.textContent='El mapa no pudo iniciarse. ';
+   const button=document.createElement('button');button.textContent='Reintentar';button.onclick=()=>{message.remove();vcEnsurePublicMap()};
+   message.append(button);host.append(message);
+  }
+ }
+}
+const vcLoadCloudBase=loadPublicCloudState;
+loadPublicCloudState=async function(){
+ await vcLoadCloudBase();
+ document.documentElement.classList.remove('vc-catalog-pending');
+ await vcEnsurePublicMap();
+};
+
 const oldGps=foodGps;
 foodGps=async function(){
  if(!navigator.geolocation)throw Error('Este dispositivo no ofrece ubicación.');
@@ -4721,7 +4794,39 @@ if(gpsButton)gpsButton.onclick=e=>panelRun(e.currentTarget,async()=>{
  if(accuracy>100)toast('Precisión baja: '+accuracy+' m. Ajusta el pin a la entrada antes de confirmar.','info');
 });
 const baseQuote=quoteFoodRoute;
-quoteFoodRoute=async function(){const q=await baseQuote();if(!q?.geometry&&checkout.lat!=null&&publicFoodMap){try{const o=state.config.origin;const url='https://router.project-osrm.org/route/v1/driving/'+o.lng+','+o.lat+';'+checkout.lng+','+checkout.lat+'?overview=full&geometries=geojson';const r=await fetch(url,{signal:AbortSignal.timeout(9000)}),d=await r.json();if(d.routes?.[0]?.geometry){if(publicFoodRoute)publicFoodMap.removeLayer(publicFoodRoute);publicFoodRoute=L.geoJSON(d.routes[0].geometry,{style:{color:'#159aa3',weight:5}}).addTo(publicFoodMap);publicFoodMap.fitBounds(publicFoodRoute.getBounds(),{padding:[25,25]})}}catch(e){console.warn('Ruta visual no disponible:',e)}}return q};
+quoteFoodRoute=async function(){
+ if(checkout.lat==null||checkout.lng==null)return;
+ let quoteError=null;
+ const hasItems=cartItems().length>0;
+ if(hasItems){try{await baseQuote()}catch(e){quoteError=e}}
+ else{lastQuote=null;checkout.distance=0;checkout.shipping=0}
+ if(lastQuote?.geometry&&publicFoodMap)return lastQuote;
+ try{
+  await vcEnsurePublicMap();
+  const o=state.config.origin;
+  const url='https://router.project-osrm.org/route/v1/driving/'+o.lng+','+o.lat+';'+checkout.lng+','+checkout.lat+'?overview=full&geometries=geojson';
+  const response=await fetch(url,{signal:AbortSignal.timeout(12000)});
+  if(!response.ok)throw Error('Servicio de rutas no disponible');
+  const result=await response.json();
+  const route=result.routes?.[0];
+  if(!route?.geometry)throw Error('No se encontró una ruta para este destino');
+  if(publicFoodRoute)publicFoodMap.removeLayer(publicFoodRoute);
+  publicFoodRoute=L.geoJSON(route.geometry,{style:{color:'#159aa3',weight:5}}).addTo(publicFoodMap);
+  publicFoodMap.fitBounds(publicFoodRoute.getBounds(),{padding:[25,25]});
+  if(!hasItems||quoteError){
+   const km=(route.distance/1000).toFixed(2);
+   const minutes=Math.max(1,Math.round(route.duration/60));
+   const info=document.getElementById('foodQuote');
+   if(info)info.innerHTML='<div class="total-line"><span>Ruta por carretera</span><strong>'+km+' km · '+minutes+' min aprox.</strong></div><p class="small muted">'+(hasItems?'La ruta está disponible, pero no se pudo calcular el costo del pedido. Vuelve a intentar la cotización.':'Agrega productos al carrito para obtener el costo del envío.')+'</p>';
+  }
+ }catch(e){
+  console.warn('Ruta visual:',e);
+  if(quoteError)throw quoteError;
+  const info=document.getElementById('foodQuote');
+  if(info&&!hasItems)info.textContent='No se pudo trazar la ruta. Comprueba tu conexión o ajusta el destino.';
+ }
+ return lastQuote;
+};
 })();
 </script>
 </body>
