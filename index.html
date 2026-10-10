@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es-MX" class="vc-booting">
+<html lang="es-MX">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Cargando negocio…</title>
-<style id="vc-boot-style">html.vc-booting body>*:not(#vcBootSplash):not(script):not(style){visibility:hidden!important}#vcBootSplash{display:none;position:fixed;inset:0;z-index:999999;background:#11151c;color:#f3f4f6;align-items:center;justify-content:center;flex-direction:column;gap:14px;font:600 16px system-ui,sans-serif;text-align:center;padding:24px}html.vc-booting #vcBootSplash{display:flex}#vcBootSplash button{background:#c62828;color:white;border:0;border-radius:10px;padding:10px 20px;cursor:pointer}#vcBootSplash small{color:#aeb7c5;max-width:500px}</style>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -199,7 +199,7 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 <style>.subscription-notice{margin-top:16px}.billing-method,.billing-payment{padding:16px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.billing-method .toolbar,.billing-payment .toolbar{flex-wrap:wrap}.billing-payment h4{margin:0 0 8px}.subscription-notice p{margin:0 0 12px}</style><style>.date-control{display:flex;align-items:center;gap:6px}.date-control>.input{min-width:0;flex:1}.date-control>.icon-btn{flex:0 0 40px;width:40px;height:40px}.date-control input{color-scheme:light}body.dark-mode .date-control input,#adminModal .date-control input{color-scheme:dark}.date-picker-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}.flash-offers{margin-top:16px;margin-bottom:18px}.flash-offer-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.flash-offer{padding:18px;border:1px solid var(--primary);border-radius:16px;background:var(--card);min-width:0}.flash-offer h3{margin:0 0 10px}.flash-clock{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums;font-size:.9rem;flex-wrap:wrap}.flash-clock svg,.offer-clock-icon{width:20px;height:20px;fill:none;stroke:currentColor;flex:0 0 20px}.combo-products{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.combo-item{border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}.combo-photo{height:150px;display:grid;place-items:center;overflow:hidden}.combo-photo img{height:100%;width:100%;object-fit:contain}.combo-photo svg{height:90px;width:90px;fill:none;stroke:currentColor}.combo-item .btn{width:100%}.product-card,.icon-btn,.btn,.icon-option{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.product-card:focus-within{border-color:var(--primary)}@media(hover:hover){.product-card:hover{transform:translateY(-4px);box-shadow:0 12px 26px #0002;border-color:var(--primary)}.icon-btn:hover svg,.btn:hover svg{transform:scale(1.12)}}.icon-btn svg,.btn svg{transition:transform .18s ease}.icon-btn:active,.btn:active{transform:scale(.97)}.product-card .product-visual img{transition:transform .3s ease}@media(hover:hover){.product-card:hover .product-visual img{transform:scale(1.025)}}.moderation-order{padding:14px 0;border-bottom:1px solid var(--line)}.moderation-order .toolbar{flex-wrap:wrap}.ticket-footer-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.ticket-footer-options svg{width:24px;height:24px;fill:none;stroke:currentColor}.ticket-image-links{display:grid;gap:12px}.visitor-blocked #catalogGrid,.visitor-blocked #categoryChips,.visitor-blocked #foodDeliveryPlanner,.visitor-blocked #cartBtn,.visitor-blocked #searchWrap,.visitor-blocked #flashOffers,.visitor-blocked #orderChatBubble{display:none!important}@media(max-width:600px){.date-picker-fields{grid-template-columns:1fr}.ticket-footer-options{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){.product-card,.icon-btn,.btn,.icon-option,.icon-btn svg,.btn svg,.product-card .product-visual img{transition:none;transform:none!important}}
 </style><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body><div id="vcBootSplash" role="status" aria-live="polite"><strong id="vcBootMessage">Preparando el negocio…</strong><small id="vcBootDetail">Cargando la configuración publicada.</small><button type="button" id="vcBootRetry" hidden onclick="location.reload()">Reintentar</button></div>
+<body>
 <div class="topbar"><div class="container header">
   <div class="brand">
     <div class="brand-logo" id="brandLogo"></div>
@@ -375,7 +375,7 @@ function supabaseConfigured(){
 const STORE='foodCatalogApp_v1';
 const defaults={
  config:{
-  businessName:'Sazón Manzanillo',tagline:'Comida preparada al momento',logo:'',whatsapp:'5213141234567',adminPin:'1234',deliveryEnabled:true,
+  businessName:'Negocio',tagline:'',logo:'',whatsapp:'5213141234567',adminPin:'1234',deliveryEnabled:true,
   origin:{address:'Centro, Manzanillo, Colima, México',lat:19.0522,lng:-104.3158},
   map:{provider:'carto',apiKey:'',style:'voyager',attribution:'OpenStreetMap contributors, CARTO'},
   payments:[{id:'pay1',title:'Transferencia bancaria',data:'CLABE 012345678901234567'},{id:'pay2',title:'Depósito en tienda de conveniencia',data:'Referencia 1234567890'}],
@@ -4570,8 +4570,7 @@ function ready(){brand();document.documentElement.classList.remove('vc-booting')
 const loadBase=loadPublicCloudState;
 loadPublicCloudState=async function(){await loadBase();brand();ready()};
 const initBase=initSupabase;
-initSupabase=async function(){try{await initBase();if(!cloudReady)throw Error('No se pudo cargar la configuración del negocio.');ready()}catch(e){document.getElementById('vcBootMessage').textContent='No se pudo cargar el negocio';document.getElementById('vcBootDetail').textContent=e.message;document.getElementById('vcBootRetry').hidden=false;throw e}};
-setTimeout(()=>{if(document.documentElement.classList.contains('vc-booting')){document.getElementById('vcBootMessage').textContent='La conexión está tardando';document.getElementById('vcBootDetail').textContent='Comprueba tu conexión o vuelve a intentarlo.';document.getElementById('vcBootRetry').hidden=false}},12000);
+initSupabase=async function(){await initBase();brand()};
 const oldHeader=renderHeader;renderHeader=function(){oldHeader();brand()};
 const oldSave=saveLocal;saveLocal=function(){oldSave();brand()};
 const GALLERY_LIMIT=30,VIDEO_LIMIT=10;
@@ -4583,7 +4582,7 @@ function viewer(start){
  draw();document.body.append(host);host.addEventListener('click',e=>{if(e.target===host)host.remove()});
 }
 function galleryMarkup(){return items().map((x,i)=>'<button type="button" class="vc-gallery-item" data-vc-view="'+i+'">'+(x.type==='video'?'<video preload="metadata" muted src="'+esc(x.url)+'"></video>':'<img loading="lazy" src="'+esc(x.url)+'" alt="'+esc(x.name||'Producto')+'">')+'</button>').join('')}
-function showGallery(){const host=document.querySelector('#v18BusinessModal .v18-business-body');if(!host)return;host.querySelector('#vcPublicGallery')?.remove();const section=document.createElement('section');section.className='v18-business-card';section.id='vcPublicGallery';section.style.gridColumn='1/-1';section.innerHTML='<h3>Galería de productos</h3><div class="vc-gallery-grid">'+galleryMarkup()+'</div>';if(!items().length)return;host.prepend(section);section.querySelectorAll('[data-vc-view]').forEach(b=>b.onclick=()=>viewer(Number(b.dataset.vcView)))}
+function showGallery(){const host=document.querySelector('#v18BusinessModal .v18-business-shell');if(!host)return;host.querySelector('#vcPublicGallery')?.remove();const section=document.createElement('section');section.className='v18-business-card';section.id='vcPublicGallery';section.style.gridColumn='1/-1';section.innerHTML='<h3>Galería de productos</h3><div class="vc-gallery-grid">'+galleryMarkup()+'</div>';if(!items().length)return;host.append(section);section.querySelectorAll('[data-vc-view]').forEach(b=>b.onclick=()=>viewer(Number(b.dataset.vcView)))}
 const baseOpen=window.v18OpenBusiness;
 window.v18OpenBusiness=async function(){await baseOpen();showGallery()};
 function galleryAdmin(c){
@@ -4621,8 +4620,8 @@ function galleryAdmin(c){
  };
  draw();
 }
-const oldProfile=renderV16ProfileAdmin;
-renderV16ProfileAdmin=async function(c){await oldProfile(c);galleryAdmin(c)};
+const oldAdminPaneV23=renderAdminPane;
+renderAdminPane=async function(id){const result=await oldAdminPaneV23(id);if(id==='profile'){const c=document.getElementById('adminContent');if(c)galleryAdmin(c)}if(id==='business'){const c=document.getElementById('adminContent');if(c)pinAdmin(c)}return result};
 function maps(){
  const map=publicFoodMap;if(!map)return;
  const host=document.getElementById('foodPublicMap');if(!host||document.getElementById('vcMapControls'))return;
@@ -4632,7 +4631,7 @@ function maps(){
  bar.querySelectorAll('[data-rotate]').forEach(b=>b.onclick=()=>{if(typeof map.setBearing==='function')map.setBearing(((map.getBearing?.()||0)+Number(b.dataset.rotate)+360)%360);else toast('La rotación no está disponible en este navegador.','info')});
  bar.querySelector('[data-reset]').onclick=()=>map.setBearing?.(0);
 }
-const oldMap=initFoodPublicMap;initFoodPublicMap=function(){oldMap();maps()};
+const oldMap=initFoodPublicMap;initFoodPublicMap=function(){oldMap();maps();applyBusinessPin()};
 const oldGps=foodGps;
 foodGps=async function(){
  if(!navigator.geolocation)throw Error('Este dispositivo no ofrece ubicación.');
