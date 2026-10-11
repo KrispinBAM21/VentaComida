@@ -1156,21 +1156,7 @@ function ticketPrint(order,d){
   const win=window.open('','_blank');
   if(!win)return toast('Permite ventanas emergentes para imprimir.','error');
   win.document.open();
-  win.document.write('<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Ticket</title><style>@page{margin:0}body{margin:0}svg{width:100%;height:auto;display:block}</style></head><body><p>Preparando impresión…</p><style id="vc-v35-experience-row-final">
-/* Solo experiencia: aplicar al FINAL para superar estilos posteriores del documento. */
-@media (min-width: 1051px) {
-  #v15Experience.v15-experience-card {display:grid!important;grid-template-columns:minmax(0,1fr) max-content!important;align-items:center!important;gap:16px!important;}
-  #v15Experience.v15-experience-card > div:first-child {min-width:0!important;}
-  #v15Experience .v15-experience-actions {display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:flex-end!important;align-self:center!important;gap:8px!important;margin:0!important;transform:translateY(-2px)!important;}
-  #v15Experience .v15-experience-actions > .btn {flex:0 0 auto!important;margin:0!important;white-space:nowrap!important;}
-}
-@media (max-width: 1050px) {
-  #v15Experience.v15-experience-card {display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;}
-  #v15Experience .v15-experience-actions {justify-content:flex-start!important;transform:none!important;}
-}
-#v15Experience .v15-rating-summary {justify-content:flex-start!important;text-align:left!important;}
-</style>
-</body></html>');
+  win.document.write('<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Ticket</title><style>@page{margin:0}body{margin:0}svg{width:100%;height:auto;display:block}</style></head><body><p>Preparando impresión…</p></body></html>');
   win.document.close();
   ticketQr(d).then(qr=>{
     win.document.body.innerHTML=ticketSvg(order,d,qr);
@@ -5114,5 +5100,19 @@ window.addEventListener('pageshow',()=>{hideLoadingArtifacts();setTimeout(dailyN
 setInterval(()=>{if(!document.hidden){dailyNotice();openAccess()}},60000);
 })();
 </script>
+<style id="vc-v35-experience-row-final">
+/* Solo experiencia: aplicar al FINAL para superar estilos posteriores del documento. */
+@media (min-width: 1051px) {
+  #v15Experience.v15-experience-card {display:grid!important;grid-template-columns:minmax(0,1fr) max-content!important;align-items:center!important;gap:16px!important;}
+  #v15Experience.v15-experience-card > div:first-child {min-width:0!important;}
+  #v15Experience .v15-experience-actions {display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:flex-end!important;align-self:center!important;gap:8px!important;margin:0!important;transform:translateY(-2px)!important;}
+  #v15Experience .v15-experience-actions > .btn {flex:0 0 auto!important;margin:0!important;white-space:nowrap!important;}
+}
+@media (max-width: 1050px) {
+  #v15Experience.v15-experience-card {display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;}
+  #v15Experience .v15-experience-actions {justify-content:flex-start!important;transform:none!important;}
+}
+#v15Experience .v15-rating-summary {justify-content:flex-start!important;text-align:left!important;}
+</style>
 </body>
 </html>
