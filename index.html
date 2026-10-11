@@ -5114,18 +5114,17 @@ setInterval(()=>{if(!document.hidden){dailyNotice();openAccess()}},60000);
 }
 #v15Experience .v15-rating-summary {justify-content:flex-start!important;text-align:left!important;}
 </style>
-<style id="vc-v37-experience-alignment-only">
-/* Ajuste aislado: no modifica catálogo, mapas, pagos ni scripts. */
-@media (min-width: 1250px) {
-  #v15Experience.v15-experience-card {position:relative!important;display:block!important;min-height:116px!important;padding:16px!important;box-sizing:border-box!important;}
-  #v15Experience.v15-experience-card > div:first-child {max-width:calc(100% - 655px)!important;min-width:0!important;}
-  #v15Experience .v15-experience-actions {position:absolute!important;right:16px!important;top:50%!important;bottom:auto!important;left:auto!important;transform:translateY(-50%)!important;display:flex!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-end!important;width:auto!important;margin:0!important;gap:8px!important;}
-  #v15Experience .v15-experience-actions > .btn {flex:0 0 auto!important;white-space:nowrap!important;}
-}
-@media (min-width: 701px) and (max-width: 1249px) {
-  #v15Experience.v15-experience-card {display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;}
-  #v15Experience .v15-experience-actions {position:static!important;transform:none!important;display:flex!important;flex-wrap:wrap!important;justify-content:flex-start!important;align-self:flex-start!important;margin:0!important;}
-}
+<style id="vc-v38-experience-contained">
+/* Las acciones participan en el layout del recuadro, NUNCA position:absolute. */
+#v15Experience.v15-experience-card{position:relative!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;column-gap:18px!important;row-gap:10px!important;padding:18px 22px!important;box-sizing:border-box!important;min-height:116px!important;}
+#v15Experience.v15-experience-card > div:first-child{min-width:0!important;max-width:none!important;margin:0!important;padding:0!important;}
+#v15Experience.v15-experience-card h3{margin:0 0 9px!important;}
+#v15Experience.v15-experience-card p{margin:0!important;line-height:1.5!important;}
+#v15Experience .v15-rating-summary{margin-top:9px!important;justify-content:flex-start!important;}
+#v15Experience .v15-experience-actions{position:static!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;transform:none!important;grid-column:2!important;grid-row:1!important;display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:flex-end!important;align-self:center!important;justify-self:end!important;width:max-content!important;max-width:100%!important;margin:0!important;gap:8px!important;}
+#v15Experience .v15-experience-actions > .btn{flex:0 0 auto!important;margin:0!important;white-space:nowrap!important;}
+@media(max-width:1250px){#v15Experience.v15-experience-card{grid-template-columns:minmax(0,1fr)!important;}#v15Experience .v15-experience-actions{grid-column:1!important;grid-row:2!important;justify-self:start!important;justify-content:flex-start!important;flex-wrap:wrap!important;width:auto!important;}}
+@media(max-width:560px){#v15Experience.v15-experience-card{padding:16px 18px!important;}#v15Experience .v15-experience-actions>.btn{flex:1 1 145px!important;white-space:normal!important;}}
 </style>
 </body>
 </html>
