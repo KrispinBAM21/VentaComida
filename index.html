@@ -222,17 +222,20 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 @media(max-width:1050px){#v15Experience.v15-experience-card{grid-template-columns:minmax(0,1fr)}#v15Experience .v15-experience-actions{justify-content:flex-start}}
 @media(max-width:560px){#v15Experience .v15-experience-actions>.btn{flex:1 1 150px;white-space:normal}}
 </style>
-<style id="vc-v33-experience-only">
-#v15Experience{box-sizing:border-box}
-#v15Experience .v15-rating-summary,#v15Experience .v17-experience-summary{display:flex;align-items:center;justify-content:center;gap:9px 12px;flex-wrap:wrap;text-align:center;width:100%;margin-inline:auto}
-#v15Experience .v15-stars-text,#v15Experience .v17-stars{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;line-height:1.3}
-#v15Experience .v15-experience-actions,#v15Experience .v17-experience-actions{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;width:100%;margin-inline:auto}
-#v15Experience .v15-experience-actions .btn,#v15Experience .v17-experience-actions .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;line-height:1.25;margin:0;text-align:center;white-space:normal}
-#v15Experience .v15-experience-actions .btn svg,#v15Experience .v17-experience-actions .btn svg{flex:0 0 auto;vertical-align:middle}
-#v15Experience.v15-experience-card{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center;row-gap:12px}
-#v15Experience.v15-experience-card>div:first-child{width:100%}
-#v15Experience .v17-experience-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-@media(max-width:650px){#v15Experience .v15-experience-actions .btn,#v15Experience .v17-experience-actions .btn{flex:1 1 145px}}
+
+<style id="vc-v34-experience-alignment">
+/* Alcance exclusivo: panel de experiencia. Catálogo y productos intactos. */
+#v15Experience.v15-experience-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;justify-items:stretch;text-align:left;column-gap:22px;row-gap:8px;padding:14px 16px}
+#v15Experience.v15-experience-card>div:first-child{width:auto;min-width:0;text-align:left}
+#v15Experience.v15-experience-card h3{margin:0 0 6px}
+#v15Experience.v15-experience-card p{margin:0}
+#v15Experience .v15-rating-summary{display:flex;align-items:center;justify-content:flex-start;text-align:left;width:auto;margin:7px 0 0;gap:6px 10px;flex-wrap:wrap}
+#v15Experience .v15-stars-text{display:inline-flex;align-items:center;justify-content:flex-start;white-space:nowrap}
+#v15Experience .v15-experience-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;width:auto;margin:0;min-width:0}
+#v15Experience .v15-experience-actions .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;line-height:1.2;margin:0;white-space:nowrap}
+#v15Experience .v15-experience-actions .btn svg{flex:0 0 auto}
+@media(max-width:1150px){#v15Experience.v15-experience-card{grid-template-columns:minmax(0,1fr)}#v15Experience .v15-experience-actions{justify-content:flex-start}}
+@media(max-width:560px){#v15Experience .v15-experience-actions .btn{flex:1 1 145px;white-space:normal}}
 </style>
 </head>
 <body>
