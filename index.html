@@ -5123,8 +5123,18 @@ setInterval(()=>{if(!document.hidden){dailyNotice();openAccess()}},60000);
 #v15Experience .v15-rating-summary{margin-top:9px!important;justify-content:flex-start!important;}
 #v15Experience .v15-experience-actions{position:static!important;inset:auto!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;transform:none!important;grid-column:2!important;grid-row:1!important;display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:flex-end!important;align-self:center!important;justify-self:end!important;width:max-content!important;max-width:100%!important;margin:0!important;gap:8px!important;}
 #v15Experience .v15-experience-actions > .btn{flex:0 0 auto!important;margin:0!important;white-space:nowrap!important;}
-@media(max-width:1250px){#v15Experience.v15-experience-card{grid-template-columns:minmax(0,1fr)!important;}#v15Experience .v15-experience-actions{grid-column:1!important;grid-row:2!important;justify-self:start!important;justify-content:flex-start!important;flex-wrap:wrap!important;width:auto!important;}}
+@media(max-width:900px){#v15Experience.v15-experience-card{grid-template-columns:minmax(0,1fr)!important;}#v15Experience .v15-experience-actions{grid-column:1!important;grid-row:2!important;justify-self:start!important;justify-content:flex-start!important;flex-wrap:wrap!important;width:auto!important;}}
 @media(max-width:560px){#v15Experience.v15-experience-card{padding:16px 18px!important;}#v15Experience .v15-experience-actions>.btn{flex:1 1 145px!important;white-space:normal!important;}}
+</style>
+<style id="vc-v39-experience-final">
+/* Mantener texto y botones en la misma fila a anchuras de escritorio. */
+@media(min-width:901px){
+ #v15Experience.v15-experience-card{grid-template-columns:minmax(0,1fr) max-content!important;gap:20px!important;align-items:center!important;}
+ #v15Experience .v15-experience-actions{grid-column:2!important;grid-row:1!important;align-self:center!important;position:static!important;display:flex!important;flex-wrap:nowrap!important;max-width:none!important;}
+}
+#v15Experience.v15-experience-card{padding:18px 24px!important;overflow:visible!important;}
+#v15Experience.v15-experience-card>div:first-child{padding:0!important;margin:0!important;}
+#v15Experience .v15-experience-actions .btn{position:static!important;}
 </style>
 </body>
 </html>
