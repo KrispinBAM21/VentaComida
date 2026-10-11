@@ -3639,6 +3639,8 @@ async function community(action,payload={}){
  const {data,error}=await supabaseClient.rpc('catalog_community',{p_action:action,p_payload:payload});if(error)throw error;return data;
 }
 let summary={followers:0,following:false,scores:{overall:0,service:0,food:0,reviews:0}};
+window.vcExperienceSummary=()=>summary;
+window.vcRefreshExperience=()=>refreshExperience();
 async function refreshExperience(){
  try{summary=await community('summary',{})||summary}catch{}
  paintExperience();
@@ -3811,6 +3813,7 @@ function publicProfileCfg(){
   if(state.config.publicProfile.location_label===undefined)state.config.publicProfile.location_label='';
   return state.config.publicProfile;
 }
+window.vcBusinessLocationText=()=>businessLocationText();
 function businessLocationText(){
   const p=publicProfileCfg();
   const a=state.config.businessAddress||{};
@@ -4224,14 +4227,14 @@ const v17RenderAdminBase=renderAdmin;renderAdmin=function(){v17EnsureCouponTab()
 /* ---------- Tu experiencia: plegable y autocierre a 10 min ---------- */
 window.paintExperience=function(){
   let h=document.getElementById('v15Experience');if(!h){h=document.createElement('section');h.id='v15Experience';document.querySelector('.container.controls')?.before(h)}
-  h.className='container v17-experience';const s=summary?.scores||{},avg=Number(s.overall||0);
-  h.innerHTML=`<button class="v17-experience-toggle" id="v17ExperienceToggle" aria-expanded="false"><div><h3>Tu experiencia importa</h3><p>Califica el negocio, conoce el perfil, consulta opiniones y síguenos.</p></div><span class="v17-experience-chevron">${V17_ICON.chev}</span></button><div class="v17-experience-panel"><div><div class="v17-experience-inner"><div class="v17-experience-summary"><span class="v17-stars">${avg?'★'.repeat(Math.round(avg)):'☆☆☆☆☆'}</span><span>${avg?avg.toFixed(1):'Sin calificaciones'} · ${Number(s.reviews||0)} opiniones · ${Number(summary?.followers||0)} seguidores</span></div><div class="v17-experience-actions"><button class="btn v16-glow-btn" id="v17KnowBusiness">🏪 <span>Conocer el negocio</span></button><button class="btn" id="v17Rate">${V12I.comment}<span>Opiniones y calificar</span></button><button class="btn secondary" id="v17Follow">${UI.check}<span>${summary?.following?'Siguiendo':'Seguir'}</span></button></div></div></div></div>`;
+  h.className='container v17-experience';const s=window.vcExperienceSummary?.()?.scores||{},avg=Number(s.overall||0);
+  h.innerHTML=`<button class="v17-experience-toggle" id="v17ExperienceToggle" aria-expanded="false"><div><h3>Tu experiencia importa</h3><p>Califica el negocio, conoce el perfil, consulta opiniones y síguenos.</p></div><span class="v17-experience-chevron">${V17_ICON.chev}</span></button><div class="v17-experience-panel"><div><div class="v17-experience-inner"><div class="v17-experience-summary"><span class="v17-stars">${avg?'★'.repeat(Math.round(avg)):'☆☆☆☆☆'}</span><span>${avg?avg.toFixed(1):'Sin calificaciones'} · ${Number(s.reviews||0)} opiniones · ${Number(window.vcExperienceSummary?.()?.followers||0)} seguidores</span></div><div class="v17-experience-actions"><button class="btn v16-glow-btn" id="v17KnowBusiness">🏪 <span>Conocer el negocio</span></button><button class="btn" id="v17Rate">${V12I.comment}<span>Opiniones y calificar</span></button><button class="btn secondary" id="v17Follow">${UI.check}<span>${window.vcExperienceSummary?.()?.following?'Siguiendo':'Seguir'}</span></button></div></div></div></div>`;
   const toggle=document.getElementById('v17ExperienceToggle');toggle.onclick=()=>{const open=!h.classList.contains('open');h.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));clearTimeout(v17ExperienceTimer);if(open)v17ExperienceTimer=setTimeout(()=>{if(h.isConnected){h.classList.remove('open');toggle.setAttribute('aria-expanded','false')}},10*60*1000)};
-  document.getElementById('v17KnowBusiness').onclick=()=>openBusinessShowcase();document.getElementById('v17Rate').onclick=()=>openRateBusinessModal();document.getElementById('v17Follow').onclick=async e=>{if(!customerSession){renderCustomerProfile();openModal('customerProfileModal');return toast('Inicia sesión para seguir al negocio.','info')}try{const r=await v16Community('toggle_follow',{});summary.following=r.following;summary.followers=r.followers;paintExperience()}catch(err){toast(err.message,'error')}};
+  document.getElementById('v17KnowBusiness').onclick=()=>openBusinessShowcase();document.getElementById('v17Rate').onclick=()=>openRateBusinessModal();document.getElementById('v17Follow').onclick=async e=>{if(!customerSession){renderCustomerProfile();openModal('customerProfileModal');return toast('Inicia sesión para seguir al negocio.','info')}try{const r=await v16Community('toggle_follow',{});Object.assign(window.vcExperienceSummary?.()||{}, {following:r.following,followers:r.followers});paintExperience()}catch(err){toast(err.message,'error')}};
 };
 
 /* ---------- Ruta del usuario al local al pulsar el pin ---------- */
-function v17OriginPopup(){return `<div class="v17-route-popup"><h4>${esc(state.config.businessName)}</h4><p>${esc(businessLocationText())}</p><button class="btn" onclick="window.v17RouteToBusiness()">${V17_ICON.route}<span>Cómo llegar desde mi ubicación</span></button></div>`}
+function v17OriginPopup(){return `<div class="v17-route-popup"><h4>${esc(state.config.businessName)}</h4><p>${esc((window.vcBusinessLocationText?.()||state.config.businessName||'Local'))}</p><button class="btn" onclick="window.v17RouteToBusiness()">${V17_ICON.route}<span>Cómo llegar desde mi ubicación</span></button></div>`}
 async function v17GetPosition(){return await new Promise((resolve,reject)=>{if(!navigator.geolocation)return reject(Error('Tu navegador no ofrece ubicación.'));navigator.geolocation.getCurrentPosition(p=>resolve({lat:p.coords.latitude,lng:p.coords.longitude}),()=>reject(Error('No se pudo obtener tu ubicación. Activa el permiso de ubicación e inténtalo de nuevo.')),{enableHighAccuracy:true,timeout:12000,maximumAge:30000})})}
 window.v17RouteToBusiness=async function(){
   try{
@@ -4523,7 +4526,7 @@ async function checkReview(){
  reviewLoading=true;
  try{
    const {data,error}=await supabaseClient.from('business_reviews').select('id,comment').eq('user_id',id).eq('active',true).limit(1);
-   if(error)throw error;
+   if(error){if(error.code==='42501'||/permission denied|row.level security/i.test(error.message||'')){reviewOwner=id;reviewComplete=false;return}throw error;}
    if(customerSession?.user?.id!==id)return;
    reviewOwner=id;reviewComplete=!!data?.some(r=>typeof r.comment==='string'&&r.comment.trim().length>=3);
  }catch(e){console.warn('No se pudo comprobar la opinión:',e.message)}
@@ -4533,8 +4536,8 @@ const oldPaint=typeof window.paintExperience==='function'?window.paintExperience
 window.paintExperience=function(){oldPaint();syncPrompts();checkReview()};
 const oldAuth=customerAuthChanged;
 customerAuthChanged=async function(session){const previous=customerSession?.user?.id;await oldAuth(session);if(previous!==customerSession?.user?.id){reviewOwner=null;reviewComplete=false}syncPrompts();checkReview()};
-const oldRefresh=refreshExperience;
-refreshExperience=async function(){await oldRefresh();reviewOwner=null;reviewComplete=false;checkReview()};
+const oldRefresh=window.vcRefreshExperience;
+if(typeof oldRefresh==='function')window.vcRefreshExperience=async function(){await oldRefresh();reviewOwner=null;reviewComplete=false;checkReview()};
 new MutationObserver(()=>syncPrompts()).observe(document.body,{subtree:true,childList:true});
 syncPrompts();checkReview();
 })();
