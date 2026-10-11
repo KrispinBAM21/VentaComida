@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>VentaComida</title>
+<title>Las más buscadas</title>
+<script id="vc-v33-early-brand">(function(){try{const saved=JSON.parse(localStorage.getItem('foodCatalogApp_v1')||'null');const name=saved?.config?.businessName;if(name&&typeof name==='string'){document.title=name;window.__vcEarlyBrand=name}}catch(e){}})();</script>
 
 <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
 <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
@@ -221,12 +222,24 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 @media(max-width:1050px){#v15Experience.v15-experience-card{grid-template-columns:minmax(0,1fr)}#v15Experience .v15-experience-actions{justify-content:flex-start}}
 @media(max-width:560px){#v15Experience .v15-experience-actions>.btn{flex:1 1 150px;white-space:normal}}
 </style>
+<style id="vc-v33-experience-only">
+#v15Experience{box-sizing:border-box}
+#v15Experience .v15-rating-summary,#v15Experience .v17-experience-summary{display:flex;align-items:center;justify-content:center;gap:9px 12px;flex-wrap:wrap;text-align:center;width:100%;margin-inline:auto}
+#v15Experience .v15-stars-text,#v15Experience .v17-stars{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;line-height:1.3}
+#v15Experience .v15-experience-actions,#v15Experience .v17-experience-actions{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;width:100%;margin-inline:auto}
+#v15Experience .v15-experience-actions .btn,#v15Experience .v17-experience-actions .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;line-height:1.25;margin:0;text-align:center;white-space:normal}
+#v15Experience .v15-experience-actions .btn svg,#v15Experience .v17-experience-actions .btn svg{flex:0 0 auto;vertical-align:middle}
+#v15Experience.v15-experience-card{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center;row-gap:12px}
+#v15Experience.v15-experience-card>div:first-child{width:100%}
+#v15Experience .v17-experience-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+@media(max-width:650px){#v15Experience .v15-experience-actions .btn,#v15Experience .v17-experience-actions .btn{flex:1 1 145px}}
+</style>
 </head>
 <body>
 <div class="topbar"><div class="container header">
   <div class="brand">
     <div class="brand-logo" id="brandLogo"></div>
-    <div class="brand-copy"><h1 id="brandName">VentaComida</h1><p id="brandTagline"></p></div>
+    <div class="brand-copy"><h1 id="brandName">Las más buscadas</h1><p id="brandTagline"></p></div><script>(function(){if(window.__vcEarlyBrand)document.getElementById('brandName').textContent=window.__vcEarlyBrand})();</script>
   </div>
   <button class="icon-btn theme-btn" id="themeBtn" aria-label="Cambiar tema"></button>
   <button class="icon-btn" id="adminBtn" hidden style="display:none" aria-label="Administración"></button>
@@ -234,6 +247,7 @@ body.dialog-open{overflow:hidden}.ticket-editor{display:grid;grid-template-colum
 </div></div>
 <main>
   <section class="hero"><div class="container"><div class="hero-card"><h2 id="heroTitle">Sabor que llega hasta ti</h2><p id="heroText">Explora el menú, arma tu pedido y envíalo por WhatsApp con tu cuenta en PDF.</p></div></div></section>
+  <section id="v15Experience" class="container v15-experience-card" aria-label="Tu experiencia importa"><div><h3>Tu experiencia importa</h3><p>Califica el negocio, servicio y comida. También puedes consultar lo que opinan otros clientes.</p><div class="v15-rating-summary"><span class="v15-stars-text">☆☆☆☆☆</span><span>Consultando calificaciones…</span></div></div></section>
   <section class="container controls">
     <div class="search-wrap" id="searchWrap"><input id="searchInput" placeholder="Buscar platillos o bebidas" /></div>
     <div class="chips" id="categoryChips"></div>
@@ -421,6 +435,7 @@ const defaults={
  cart:{},orders:[],folioSeq:1
 };
 let state=load();
+const vc33HasCachedCatalog=(()=>{try{const v=JSON.parse(localStorage.getItem(STORE)||'null');return !!(v&&Array.isArray(v.products)&&v.config?.businessName)}catch{return false}})();
 let currentCategory='Todos',searchTerm='',customerMarker=null,clientMap=null,originMap=null,originMarker=null,tripMap=null,tripOriginMarker=null,tripDestMarker=null,tripRouteLayer=null,lastPdfBlob=null,lastPdfName='',lastOrderId=null;
 let checkout={delivery:'pickup',address:'',lat:null,lng:null,distance:0,shipping:0,name:'',phone:'',notes:'',paymentId:'',proofFile:null,proofUrl:'',proofName:''};
 function deepClone(o){return JSON.parse(JSON.stringify(o));}
@@ -573,7 +588,7 @@ function togglePublicTheme(){
    PUBLIC CATALOG
 ============================== */
 function productVisual(p){if(p.image)return `<img src="${esc(p.image)}" alt="${esc(p.name)}">`;return FOOD[p.icon]||FOOD.plate}
-function renderHeader(){applyPublicTheme();document.getElementById('brandName').textContent=state.config.businessName;document.getElementById('brandTagline').textContent=state.config.tagline;document.getElementById('heroTitle').textContent=`${state.config.businessName}`;const l=document.getElementById('brandLogo');l.innerHTML=state.config.logo?`<img src="${esc(state.config.logo)}" alt="Logo">`:FOOD.plate;document.getElementById('adminBtn').innerHTML=UI.settings;document.getElementById('cartBtn').innerHTML=UI.cart+`<span class="badge-count" id="cartCount">0</span>`;document.querySelector('[data-close-drawer]').innerHTML=UI.close;document.querySelectorAll('[data-close-modal]').forEach(b=>b.innerHTML=UI.close);document.getElementById('whatsappFab').innerHTML=UI.whatsapp;const sw=document.getElementById('searchWrap');if(!sw.querySelector('svg'))sw.insertAdjacentHTML('afterbegin',UI.search);document.getElementById('pinSubmit').innerHTML=UI.lock+' Entrar';updateCartCount()}
+function renderHeader(){document.title=state.config.businessName||'Las más buscadas';applyPublicTheme();document.getElementById('brandName').textContent=state.config.businessName;document.getElementById('brandTagline').textContent=state.config.tagline;document.getElementById('heroTitle').textContent=`${state.config.businessName}`;const l=document.getElementById('brandLogo');l.innerHTML=state.config.logo?`<img src="${esc(state.config.logo)}" alt="Logo">`:FOOD.plate;document.getElementById('adminBtn').innerHTML=UI.settings;document.getElementById('cartBtn').innerHTML=UI.cart+`<span class="badge-count" id="cartCount">0</span>`;document.querySelector('[data-close-drawer]').innerHTML=UI.close;document.querySelectorAll('[data-close-modal]').forEach(b=>b.innerHTML=UI.close);document.getElementById('whatsappFab').innerHTML=UI.whatsapp;const sw=document.getElementById('searchWrap');if(!sw.querySelector('svg'))sw.insertAdjacentHTML('afterbegin',UI.search);document.getElementById('pinSubmit').innerHTML=UI.lock+' Entrar';updateCartCount()}
 function categories(){return ['Todos',...new Set(state.products.filter(p=>p.active).map(p=>p.category).filter(Boolean))]}
 function renderCategories(){document.getElementById('categoryChips').innerHTML=categories().map(c=>`<button class="chip ${c===currentCategory?'active':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}
 function renderCatalog(){const arr=state.products.filter(p=>p.active&&(currentCategory==='Todos'||p.category===currentCategory)&&(`${p.name} ${p.description}`.toLowerCase().includes(searchTerm.toLowerCase())));document.getElementById('catalogGrid').innerHTML=arr.length?arr.map(p=>{const q=state.cart[p.id]||0;return `<article class="product-card"><div class="product-visual">${productVisual(p)}</div><div class="product-body"><div class="product-head"><h3 class="product-name">${esc(p.name)}</h3><div class="price">${money(p.price)}</div></div><p class="desc">${esc(p.description)}</p><div class="meta"><span>${esc(p.category)}</span><span>Stock: ${p.stock}</span></div><div class="qty-row">${p.stock<=0?'<span class="stock-out">Agotado</span>':`<div class="qty-control"><button class="icon-btn" data-dec="${p.id}" aria-label="Quitar cantidad" ${q<=0?'disabled':''}>${UI.minus}</button><span class="qty-value">${q}</span><button class="icon-btn" data-inc="${p.id}" aria-label="Agregar cantidad" ${q>=p.stock?'disabled':''}>${UI.plus}</button></div>`}<button class="btn secondary" data-inc="${p.id}" ${p.stock<=0||q>=p.stock?'disabled':''}>${UI.cart}<span>Agregar</span></button></div></div></article>`}).join(''):'<div class="section-card"><strong>No hay productos para mostrar.</strong></div>';updateCartCount()}
@@ -1019,7 +1034,7 @@ async function confirmOrder(){
 ============================== */
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.cat){currentCategory=b.dataset.cat;renderCategories();renderCatalog()}if(b.dataset.inc)changeQty(b.dataset.inc,1);if(b.dataset.dec)changeQty(b.dataset.dec,-1);if(b.dataset.remove){delete state.cart[b.dataset.remove];save();renderCart();renderCatalog()}if(b.dataset.closeDrawer!==undefined)closeDrawer();if(b.dataset.closeModal)closeModal(b.dataset.closeModal);if(b.dataset.copy){navigator.clipboard.writeText(b.dataset.copy).then(()=>{const n=document.getElementById('copy_'+b.dataset.copyId);n?.classList.add('show');setTimeout(()=>n?.classList.remove('show'),1600)}).catch(()=>toast('No se pudo copiar.','error'))}if(b.dataset.tab)renderAdminPane(b.dataset.tab)});
 document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e.target.value;renderCatalog()});document.getElementById('cartBtn').onclick=openDrawer;document.getElementById('themeBtn').onclick=togglePublicTheme;document.getElementById('adminBtn').onclick=openAdmin;document.getElementById('pinSubmit').onclick=checkPin;document.getElementById('adminEmailInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('adminPasswordInput').focus()});document.getElementById('adminPasswordInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin()});document.getElementById('overlay').onclick=()=>{closeDrawer();document.querySelectorAll('.modal.show').forEach(m=>closeModal(m.id))};document.getElementById('whatsappFab').onclick=()=>window.open(`https://wa.me/${state.config.whatsapp}?text=${encodeURIComponent(`Hola, quiero información de ${state.config.businessName}.`)}`,'_blank');
-applyDesign();renderHeader();renderCategories();renderCatalog();setTimeout(()=>initSupabase().catch(e=>{console.error('Supabase init:',e);toast(explainSupabaseError(e),'error')}),0);
+applyDesign();renderHeader();if(vc33HasCachedCatalog){renderCategories();renderCatalog()}else{document.getElementById('catalogGrid').innerHTML='<div class="section-card" role="status">Cargando productos del negocio…</div>';}setTimeout(()=>initSupabase().catch(e=>{console.error('Supabase init:',e);toast(explainSupabaseError(e),'error')}),0);
 </script>
 
 <script>
