@@ -4833,5 +4833,196 @@ quoteFoodRoute=async function(){
 };
 })();
 </script>
+<style>.vc-prep-card{padding:15px;margin:14px 0;border:1px solid var(--line);border-radius:14px;background:var(--card)}.vc-prep-card p{line-height:1.6}.vc-prep-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.vc-prep-card .toolbar{margin:10px 0}.vc-bank-private{overflow-wrap:anywhere}</style>
+<script>
+/* VentaComida: seguimiento de preparación y reembolsos, respaldado por RPC de Supabase. */
+(()=>{
+'use strict';
+let entries=[],cfg={base_minutes:30,delay_minutes:15},loading=false;
+const $=id=>document.getElementById(id);
+const txt=v=>String(v??'');
+const h=v=>txt(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const admin=()=>typeof panelCan==='function'&&(panelCan('orders')||panelCan('tracking')||panelCan('business'));
+async function rpc(action,orderId=null,data={}){
+ if(!supabaseClient)throw Error('No hay conexión a Supabase.');
+ const {data:result,error}=await supabaseClient.rpc('vc_preparation_rpc',{p_action:action,p_order_id:orderId,p_data:data});
+ if(error)throw Error(error.message||'Error de preparación');return result;
+}
+async function sync(){if(loading||!customerSession?.user&&!adminSession)return;loading=true;try{
+ const [a,b]=await Promise.all([rpc('list'),rpc('config_get')]);entries=Array.isArray(a)?a:[];cfg=b||cfg;
+ paintCustomer();paintAdmin();
+}catch(e){console.warn('Seguimiento de preparación:',e.message);const el=$('vcPrepError');if(el)el.textContent='No disponible: '+e.message;}finally{loading=false}}
+function eligible(r){return ['preparing','delayed'].includes(r.prep_status)&&r.payment_status==='APPROVED'&&(r.delayed_manually||r.started_at&&Date.now()>=Date.parse(r.started_at)+60000*r.base_minutes)}
+function clock(ms){const seconds=Math.max(0,Math.ceil(ms/1000));return Math.floor(seconds/3600)?`${Math.floor(seconds/3600)} h ${String(Math.floor(seconds%3600/60)).padStart(2,'0')} min ${String(seconds%60).padStart(2,'0')} s`:`${Math.floor(seconds/60)} min ${String(seconds%60).padStart(2,'0')} s`}
+function phase(r){
+ if(!r.started_at)return '<span>El tiempo comenzará al confirmar el pago y el inicio de preparación.</span>';
+ if(r.prep_status==='ready')return '<strong>Tu pedido está listo. Puedes pasar a recogerlo o esperar la entrega.</strong>';
+ if(r.prep_status==='refunded')return '<strong>Pedido cancelado y reembolsado.</strong>';
+ if(r.prep_status==='refund_requested')return 'Cancelación y reembolso solicitados; pendientes de autorización.';
+ if(r.prep_status==='refund_approved')return 'Reembolso autorizado; pendiente de entrega del dinero.';
+ if(r.prep_status==='refund_rejected')return 'Solicitud de reembolso rechazada. Contacta con el local.';
+ const elapsed=Date.now()-Date.parse(r.started_at),base=r.base_minutes*60000,delay=r.delay_minutes*60000;
+ if(elapsed<base&&!r.delayed_manually)return `<span>Preparación: <strong>${clock(base-elapsed)}</strong> restantes.</span>`;
+ if(elapsed<base+delay)return `<span>Disculpa la demora. Estamos trabajando para terminar tu pedido. Tiempo adicional: <strong>${clock(Math.max(0,base+delay-elapsed))}</strong>.</span>`;
+ return '<strong>Disculpa, el tiempo adicional también ha terminado. Puedes solicitar la cancelación y reembolso.</strong>';
+}
+function customerCard(r){
+ const refund=['refund_requested','refund_approved','refund_rejected','refunded'].includes(r.prep_status);
+ return `<section class="vc-prep-card" data-vc-prep-order="${h(r.id)}"><div class="vc-prep-head"><strong>Preparación · ${h(r.folio||r.id.slice(0,8))}</strong><span>${h(r.prep_status||'Pendiente')}</span></div><p data-vc-prep-clock="${h(r.id)}">${phase(r)}</p>
+ ${eligible(r)?`<button class="btn secondary" data-vc-refund="${h(r.id)}">Cancelar y solicitar reembolso</button>`:''}
+ ${refund?`<p>Estado: ${h({refund_requested:'Solicitud en revisión',refund_approved:'Reembolso aprobado',refund_rejected:'Solicitud rechazada',refunded:'Reembolso efectuado'}[r.prep_status])}. ${r.refund_method==='cash'?'Reembolso en efectivo: acudir al local.':r.refund_method==='transfer'?'Método: transferencia bancaria.':''}</p>`:''}
+ ${r.refunded_at?`<p>Fecha de reembolso: ${h(new Date(r.refunded_at).toLocaleString('es-MX'))}</p>`:''}
+ ${r.refund_proof_path?`<button class="btn secondary" data-vc-proof="${h(r.id)}">Ver comprobante del reembolso</button>`:''}
+ </section>`;
+}
+function paintCustomer(){const host=$('myOrdersModal')?.querySelector('.modal-body');if(!host)return;
+ host.querySelectorAll('.vc-prep-card').forEach(e=>e.remove());
+ const cards=entries.filter(e=>e.customer_user_id===customerSession?.user?.id);
+ for(const r of cards){let anchor=[...host.querySelectorAll('.followup-card')].find(e=>e.textContent.includes(r.folio||'__not_found__'));
+ if(!anchor)continue;anchor.insertAdjacentHTML('beforeend',customerCard(r));}
+ host.querySelectorAll('[data-vc-refund]').forEach(b=>b.onclick=()=>refundForm(b.dataset.vcRefund));
+ host.querySelectorAll('[data-vc-proof]').forEach(b=>b.onclick=()=>showProof(b.dataset.vcProof));
+}
+async function showProof(id){try{const r=entries.find(x=>x.id===id);if(!r?.refund_proof_path)return;
+ const {data,error}=await supabaseClient.storage.from('vc-refund-proofs').createSignedUrl(r.refund_proof_path,120);
+ if(error)throw error;window.open(data.signedUrl,'_blank','noopener,noreferrer');}catch(e){toast(e.message,'error')}}
+function refundForm(id){const r=entries.find(x=>x.id===id);if(!r||!eligible(r))return toast('El pedido no admite cancelación en este momento.','error');
+ const m=v4Modal('vcRefundModal','Solicitar cancelación y reembolso');const host=m.querySelector('.modal-body');host.innerHTML=`<div class="notice">Solicitud sujeta a autorización del negocio. No se realizará automáticamente ninguna transferencia. Si eliges efectivo, deberás acudir al local.</div>
+ <div class="field"><label>Método de reembolso</label><select class="select" id="vcRefundMethod"><option value="cash">Efectivo (recoger en el local)</option><option value="transfer">Transferencia bancaria</option></select></div>
+ <div id="vcRefundBankFields" hidden><div class="field"><label>Nombre(s)</label><input class="input" id="vcRefundFirst" autocomplete="given-name" maxlength="100"></div><div class="field"><label>Apellidos</label><input class="input" id="vcRefundLast" autocomplete="family-name" maxlength="100"></div><div class="field"><label>Nombre del banco</label><input class="input" id="vcRefundBank" maxlength="100"></div><div class="field"><label>CLABE (18 dígitos) o número de cuenta (10 a 18 dígitos)</label><input class="input" id="vcRefundAccount" inputmode="numeric" pattern="[0-9]{10,18}" maxlength="18" autocomplete="off"></div></div>
+ <button class="btn" id="vcRefundSubmit">Enviar solicitud</button>`;
+ $('vcRefundMethod').onchange=()=>{$('vcRefundBankFields').hidden=$('vcRefundMethod').value!=='transfer'};
+ $('vcRefundSubmit').onclick=async()=>{const button=$('vcRefundSubmit');button.disabled=true;try{const method=$('vcRefundMethod').value;
+ await rpc('refund_request',id,{method,first_name:$('vcRefundFirst')?.value.trim(),last_name:$('vcRefundLast')?.value.trim(),bank:$('vcRefundBank')?.value.trim(),account:$('vcRefundAccount')?.value.trim()});closeModal('vcRefundModal');toast('Solicitud enviada al negocio.','ok');await sync();}catch(e){toast(e.message,'error')}finally{button.disabled=false}};
+ openModal('vcRefundModal');
+}
+function adminCard(r){const relevant=r.payment_status==='APPROVED'||r.prep_status&&r.prep_status!=='waiting';if(!relevant)return '';
+ const canStart=r.payment_status==='APPROVED'&&!r.started_at&&r.prep_status!=='refunded';
+ const canReady=['preparing','delayed'].includes(r.prep_status);
+ return `<article class="vc-prep-card"><strong>${h(r.folio||r.id)} · ${h(r.customer_name)}</strong><p>${h(r.prep_status||'Sin iniciar')} · ${h(money(r.total))}</p><p data-vc-prep-clock="${h(r.id)}">${phase(r)}</p>
+ <div class="toolbar">${canStart?`<button class="btn" data-vc-action="start" data-vc-id="${h(r.id)}">Iniciar preparación</button>`:''}${canReady?`<button class="btn" data-vc-action="ready" data-vc-id="${h(r.id)}">Preparación terminada · Avisar</button><button class="btn secondary" data-vc-action="delay" data-vc-id="${h(r.id)}">Informar demora</button>`:''}
+ ${r.prep_status==='refund_requested'?`<button class="btn" data-vc-action="refund_approve" data-vc-id="${h(r.id)}">Aprobar reembolso</button><button class="btn secondary" data-vc-action="refund_reject" data-vc-id="${h(r.id)}">Rechazar con motivo</button>`:''}
+ ${r.prep_status==='refund_approved'?`<button class="btn" data-vc-action="refund_complete" data-vc-id="${h(r.id)}">Confirmar reembolso realizado</button>`:''}
+ ${r.refund_proof_path?`<button class="btn secondary" data-vc-proof="${h(r.id)}">Ver comprobante</button>`:''}</div>
+ ${r.refund_method?`<p class="small">Método: ${r.refund_method==='cash'?'Efectivo en el local':'Transferencia'}${r.refund_method==='transfer'?`<span class="vc-bank-private"> · Titular: ${h(r.refund_first_name)} ${h(r.refund_last_name)} · Banco: ${h(r.refund_bank)} · Cuenta: ${h(r.refund_account)}</span>`:''}</p>`:''}
+ ${r.refund_notes?`<p class="small">Observaciones: ${h(r.refund_notes)}</p>`:''}
+ ${r.refunded_at?`<p class="small">Reembolso confirmado el ${h(new Date(r.refunded_at).toLocaleString('es-MX'))}</p>`:''}</article>`;
+}
+async function adminAction(action,id){let data={};if(action==='refund_reject'){let notes=prompt('Motivo para el cliente:');if(notes===null)return;data.notes=notes;}
+ if(action==='refund_approve'&&!confirm('¿Autorizar el reembolso de este pedido?'))return;
+ if(action==='refund_complete'){
+   const r=entries.find(x=>x.id===id);if(!r)return;
+   if(r.refund_method==='transfer'){
+     const file=await chooseProof();if(!file)return;
+     if(!['image/jpeg','image/png','image/webp','application/pdf'].includes(file.type)||file.size>10485760)return toast('Archivo no admitido. PDF o imagen hasta 10 MB.','error');
+     const path=`${id}/${crypto.randomUUID()}.${file.type==='application/pdf'?'pdf':file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg'}`;
+     const up=await supabaseClient.storage.from('vc-refund-proofs').upload(path,file,{contentType:file.type,upsert:false});
+     if(up.error)throw up.error;data.proof_path=path;
+   }else if(!confirm('Confirma que el cliente ya recibió el efectivo en el local.'))return;
+ }
+ await rpc(action,id,data);toast('Estado guardado y disponible en el seguimiento del cliente.','ok');await sync();
+}
+function chooseProof(){return new Promise(resolve=>{const input=document.createElement('input');input.type='file';input.accept='image/jpeg,image/png,image/webp,application/pdf';input.style.display='none';document.body.append(input);input.onchange=()=>{const f=input.files?.[0];input.remove();resolve(f||null)};input.oncancel=()=>{input.remove();resolve(null)};input.click()})}
+function paintAdmin(){const host=$('vcPrepAdminList');if(!host)return;host.innerHTML=entries.map(adminCard).join('')||'<p>No hay pedidos pagados para preparar.</p>';
+ host.querySelectorAll('[data-vc-action]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await adminAction(b.dataset.vcAction,b.dataset.vcId)}catch(e){toast(e.message,'error')}finally{b.disabled=false}});
+ host.querySelectorAll('[data-vc-proof]').forEach(b=>b.onclick=()=>showProof(b.dataset.vcProof));
+}
+const oldPane=renderAdminPane;
+renderAdminPane=async function(id){if(id!=='vcpreparation')return oldPane(id);
+ if(!admin())return toast('Sin permisos.','error');activeAdmin=id;const host=$('adminContent');document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+ host.innerHTML=`<section class="section-card"><h3>Preparación y demoras</h3><p>El contador comienza al aprobarse el pago y al iniciar preparación. Los tiempos se congelan por pedido al empezar.</p><div id="vcPrepError" class="small muted"></div><div class="admin-grid two" id="vcPrepConfig"><div class="field"><label>Tiempo base (minutos)</label><input class="input" type="number" min="1" max="360" id="vcBaseTime"></div><div class="field"><label>Tiempo de demora (minutos)</label><input class="input" type="number" min="1" max="360" id="vcDelayTime"></div></div><div class="toolbar"><button class="btn" id="vcSavePrep">Guardar tiempos</button><button class="btn secondary" id="vcRefreshPrep">Actualizar seguimiento</button></div></section><section class="section-card"><h3>Pedidos pagados · Preparación y reembolsos</h3><div id="vcPrepAdminList">Cargando…</div></section>`;
+ if(!panelCan('business'))$('vcPrepConfig').hidden=$('vcSavePrep').hidden=true;
+ $('vcSavePrep').onclick=async()=>{try{await rpc('config_save',null,{base_minutes:+$('vcBaseTime').value,delay_minutes:+$('vcDelayTime').value});toast('Tiempos guardados.','ok');await sync()}catch(e){toast(e.message,'error')}};
+ $('vcRefreshPrep').onclick=sync;await sync();$('vcBaseTime').value=cfg.base_minutes;$('vcDelayTime').value=cfg.delay_minutes;
+};
+adminTabs.push(['vcpreparation','Preparación y reembolsos',UI.orders]);
+const oldCan=panelCan;panelCan=function(id){return id==='vcpreparation'?(oldCan('orders')||oldCan('tracking')||oldCan('business')):oldCan(id)};
+const oldMyOrders=paintMyOrders;paintMyOrders=function(){oldMyOrders();sync().catch(()=>{});paintCustomer()};
+setInterval(()=>{for(const el of document.querySelectorAll('[data-vc-prep-clock]')){const r=entries.find(x=>x.id===el.dataset.vcPrepClock);if(r)el.innerHTML=phase(r)};
+ const host=$('myOrdersModal')?.querySelector('.modal-body');if(host?.offsetParent){entries.filter(eligible).forEach(r=>{const card=host.querySelector(`[data-vc-prep-order="${CSS.escape(r.id)}"]`);if(card&&!card.querySelector('[data-vc-refund]'))paintCustomer()})}
+},1000);
+setInterval(()=>{if(customerSession?.user||adminSession)sync().catch(()=>{})},20000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync().catch(()=>{})});
+// Evita iniciar consultas en el bloqueo de autenticación; espera a una sesión estable.
+setTimeout(()=>sync().catch(()=>{}),3500);
+})();
+
+</script>
+<script>
+// Extensión del panel original. La referencia y confirmación siempre vienen del servidor.
+const paymentBridgeStyle=document.createElement('style');paymentBridgeStyle.textContent='#automaticSubscriptionCard{min-width:0;overflow-wrap:anywhere}#automaticSubscriptionCard .btn{max-width:100%;white-space:normal;text-align:center}#automaticSubscriptionCard .btn svg{flex-shrink:0}#automaticSubscriptionCard .toolbar{gap:8px;flex-wrap:wrap}#automaticSubscriptionCard select{min-width:0}';document.head.append(paymentBridgeStyle);
+let paymentBridgeView=null,paymentBridgeBusy=false;
+async function paymentBridgeCall(action,data={}){
+ const {data:result,error}=await supabaseClient.functions.invoke('subscription-bridge',{body:{action,...data}});
+ if(error||result?.error)throw Error(await commerceError(result,error,'No se pudo conectar la confirmación de pagos.'));
+ return result;
+}
+const paymentBridgeRenderBase=renderSubscription;
+renderSubscription=async function(host,epoch){
+ await paymentBridgeRenderBase(host,epoch);
+ if(epoch!==panelEpoch||!billingAllowed())return;
+ const section=document.createElement('section');section.className='section-card';section.id='automaticSubscriptionCard';
+ section.innerHTML='<h3>Confirmación automática de la suscripción</h3><p role="status">Consultando conexión…</p>';
+ host.prepend(section);
+ try{
+  const result=await paymentBridgeCall('refresh');
+  if(epoch!==panelEpoch||!billingAllowed())return;
+  paymentBridgeView=result;
+  const conf=result.configuration,open=result.payments.find(p=>p.bridge_status==='pending_review');
+  const labels={pending_review:'Esperando transferencia',approved:'Pago confirmado · Renovación aplicada',rejected:'Denegado',false:'Marcado como falso',cancelled:'Cancelado'};
+  if(result.enabled){
+   // Sustituye SOLO el formulario manual de renovación; los demás módulos se conservan.
+   for(const card of host.querySelectorAll('.section-card')){
+    if(card.querySelector('h3')?.textContent==='Reportar pago de renovación'&&!billingState?.payments.some(p=>!p.bridge_invoice&&['draft','pending_review'].includes(p.status)))card.remove();
+   }
+   for(const b of host.querySelectorAll('[data-bill-approve],[data-bill-reject]'))if(result.payments.some(p=>p.id===(b.dataset.billApprove||b.dataset.billReject)))b.remove();
+   for(const p of host.querySelectorAll('p'))if(p.textContent==='El pago se confirma manualmente por el creador. Enviar un comprobante no renueva la suscripción.')p.textContent='La renovación se aplica cuando el sistema verifica la transferencia. Adjuntar una imagen no confirma el dinero recibido.';
+  }
+  section.innerHTML=`<h3>Renovar suscripción</h3><p>${result.enabled?'Confirmación automática habilitada.':'Confirmación automática aún no habilitada.'}</p>${result.connection_error?`<div class="notice" role="status">${esc(result.connection_error)}. Tu solicitud permanece guardada.</div>`:''}${conf?`<p>Renovación de 30 días: <strong>${money(conf.price)}</strong></p>`:''}${result.enabled&&conf&&!open?`<label class="field">Cuenta para transferir<select class="select" id="bridgeBank">${conf.methods.map(m=>`<option value="${esc(m.id)}">${esc(m.title)}</option>`).join('')}</select></label>${conf.methods.length?panelButton('bridgePrepare','Obtener referencia y datos de pago',UI.receipt):'<p>El creador debe publicar una banca disponible.</p>'}`:''}${open&&open.reference?`<p>Solicitud: <strong>SUB-${esc(open.id.slice(0,8).toUpperCase())}</strong> · <strong>${money(open.expected_amount)}</strong></p><div class="notice"><strong>${esc(open.method_snapshot.title)}</strong><p style="white-space:pre-wrap">${esc(open.method_snapshot.details)}</p></div>${panelButton('bridgeCopyAccount','Copiar datos de la cuenta',UI.copy||UI.receipt,'secondary')}<div class="notice" style="margin-top:12px"><label class="field">Referencia para tu transferencia<input class="input" id="bridgeReference" readonly value="${esc(open.reference)}"></label>${panelButton('bridgeCopyReference','Copiar referencia',UI.copy||UI.receipt,'secondary')}<p class="small">Usa esta referencia antes de transferir. Si tu banco no la admite, tu pago quedará pendiente de revisión del creador.</p></div><p>Transfiere exactamente <strong>${money(open.expected_amount)}</strong>. Puedes salir a la aplicación del banco; esta solicitud se conserva en tu cuenta.</p>${open.status==='draft'?`<label class="field">Comprobante opcional · PNG, JPEG o PDF, hasta 8 MB<input type="file" id="bridgeProof" accept="image/png,image/jpeg,application/pdf"></label>`:''}<div class="toolbar">${panelButton('bridgeReported','Ya transferí · consultar confirmación',UI.check)}${panelButton('bridgeRefresh','Actualizar estado',UI.refresh,'secondary')}${panelButton('bridgeCancel','Cancelar solicitud',UI.close,'ghost')}</div><p class="small">La lectura bancaria puede tardar algunos minutos. El importe y la referencia deben coincidir; el comprobante no sustituye la verificación.</p>`:open?`<p>Solicitud guardada. Reintenta para recuperar la referencia.</p><label class="field">Banca<select class="select" id="bridgeBank">${(conf?.methods||[]).map(m=>`<option value="${esc(m.id)}">${esc(m.title)}</option>`).join('')}</select></label>${panelButton('bridgePrepare','Recuperar datos de pago',UI.refresh)}`:''}${result.master?`<div class="notice"><p>Conexión del servidor: <strong>${result.connected?'Disponible':'Pendiente de configuración'}</strong></p><p class="small">Los métodos y el precio automatizado proceden del registro central del creador. Los métodos de comida conservan su configuración independiente.</p><div class="toolbar">${panelButton('bridgeCheck','Comprobar conexión',UI.refresh,'secondary')}${panelButton('bridgeToggle',result.enabled?'Desactivar confirmación automática':'Activar confirmación automática',UI.check)}</div></div>`:''}<div id="bridgeFeedback" role="status" aria-live="polite"></div><h4>Historial de renovaciones conectadas</h4>${result.payments.map(p=>`<article class="billing-payment"><strong>${esc(labels[p.bridge_status]||p.bridge_status)}</strong><p>SUB-${esc(p.id.slice(0,8).toUpperCase())} · ${money(p.expected_amount)} · Referencia ${esc(p.reference||'Preparando')}</p>${p.new_expiry?`<p>Vigente hasta ${esc(new Date(p.new_expiry).toLocaleString('es-MX'))}</p>`:''}${p.review_note?`<p>${esc(p.review_note)}</p>`:''}${result.master&&result.manual_review_available&&p.bridge_status==='pending_review'?`<div class="toolbar"><button class="btn" data-bridge-review="approved" data-id="${esc(p.id)}">${UI.check}<span>Confirmar pago verificado</span></button><button class="btn secondary" data-bridge-review="rejected" data-id="${esc(p.id)}">${UI.close}<span>Denegar</span></button><button class="btn ghost" data-bridge-review="false" data-id="${esc(p.id)}">${UI.lock}<span>Marcar falso</span></button></div>`:''}</article>`).join('')||'<p>Aún no hay renovaciones conectadas.</p>'}`;
+  const bind=(id,fn)=>{const button=document.getElementById(id);if(button)button.onclick=e=>panelRun(e.currentTarget,fn);};
+  const reload=async()=>{await refreshSiteStatus();await refreshBilling();await renderAdminPane('subscription');};
+  const copy=async text=>{if(!navigator.clipboard?.writeText)throw Error('Selecciona y copia el texto mostrado.');await navigator.clipboard.writeText(text);toast('Copiado.','ok');};
+  bind('bridgeCopyAccount',()=>copy(open.method_snapshot.details));bind('bridgeCopyReference',()=>copy(open.reference));
+  bind('bridgePrepare',async()=>{
+   const k=billingDraftKey()+'.bridge-request';let id=localStorage.getItem(k);if(!id){id=crypto.randomUUID();localStorage.setItem(k,id);}
+   await paymentBridgeCall('prepare',{request_id:id,bank_id:document.getElementById('bridgeBank').value});
+   localStorage.removeItem(k);await reload();
+  });
+  bind('bridgeCheck',async()=>{const r=await paymentBridgeCall('config');if(!r.connected)throw Error(r.connection_error||'Falta configurar el servidor');toast('Conexión comprobada.','ok');await reload();});
+  bind('bridgeToggle',async()=>{await paymentBridgeCall('toggle',{enabled:!result.enabled});await reload();});
+  bind('bridgeRefresh',reload);
+  bind('bridgeCancel',async()=>{if(!confirm('Si ya transferiste, conserva la solicitud para verificar tu pago. ¿Cancelar?'))return;await paymentBridgeCall('cancel',{id:open.id});await reload();});
+  bind('bridgeReported',async()=>{
+   const file=document.getElementById('bridgeProof')?.files?.[0];
+   if(file&&!open.proof){if(file.size>8388608)throw Error('El comprobante no debe superar 8 MB.');const form=new FormData();form.append('id',open.id);form.append('file',file);const r=await supabaseClient.functions.invoke('subscription-receipt',{body:form});if(r.error||r.data?.error)throw Error(await commerceError(r.data,r.error,'No se pudo adjuntar el comprobante.'));}
+   await paymentBridgeCall('reported',{id:open.id});await reload();
+  });
+  for(const b of section.querySelectorAll('[data-bridge-review]'))b.onclick=e=>panelRun(e.currentTarget,async()=>{
+   if(b.dataset.bridgeReview==='approved'&&!confirm('Confirma solo después de verificar que el dinero llegó. Se renovará una sola vez por 30 días.'))return;
+   const note=prompt('Motivo o evidencia de la revisión:');if(!note)return;
+   await paymentBridgeCall('review',{id:b.dataset.id,status:b.dataset.bridgeReview,note});await reload();
+  });
+  if(result.sync?.failures?.length)document.getElementById('bridgeFeedback').textContent='No se pudo consultar algún pago. La solicitud sigue guardada; vuelve a actualizar.';
+  await refreshSiteStatus();
+ }catch(e){if(epoch===panelEpoch)section.innerHTML=`<h3>Conexión de suscripción</h3><p class="notice">${esc(e.message)}</p><p class="small">El creador debe desplegar subscription-bridge y configurar los secrets indicados en el paquete. Tus pagos existentes se conservan.</p>`;}
+};
+// Se reanuda al regresar desde el banco y al abrir el módulo. El cron trabaja aun con la web cerrada.
+async function paymentBridgePoll(){
+ if(paymentBridgeBusy||document.hidden||!billingAllowed()||activeAdmin!=='subscription'||!document.getElementById('automaticSubscriptionCard'))return;
+ paymentBridgeBusy=true;
+ try{const previous=paymentBridgeView?.payments||[],r=await paymentBridgeCall('refresh');const before=previous.map(p=>p.id+':'+p.bridge_status).join('|'),after=r.payments.map(p=>p.id+':'+p.bridge_status).join('|');if(before!==after){await refreshSiteStatus();await refreshBilling();await renderAdminPane('subscription');if(r.payments.some(p=>p.bridge_status==='approved'&&!previous.some(x=>x.id===p.id&&x.bridge_status==='approved')))toast('Pago confirmado; suscripción renovada.','ok');}}catch{}finally{paymentBridgeBusy=false;}
+}
+setInterval(paymentBridgePoll,15000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)paymentBridgePoll();});
+const paymentBridgeIntegrationsBase=renderIntegrationsAdmin;
+renderIntegrationsAdmin=function(host){
+ paymentBridgeIntegrationsBase(host);
+ if(!billingAllowed())return;
+ const card=document.createElement('section');card.className='section-card';
+ card.innerHTML='<h3>Confirmación de suscripciones</h3><p>Conecta la renovación de este sitio con las bancas del creador. Los pagos de comida mantienen su configuración.</p>'+panelButton('bridgeOpenSubscription','Abrir sitio y suscripción',UI.business,'secondary');
+ host.append(card);document.getElementById('bridgeOpenSubscription').onclick=openBillingPortal;
+};
+
+</script>
 </body>
 </html>
