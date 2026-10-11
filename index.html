@@ -5114,5 +5114,18 @@ setInterval(()=>{if(!document.hidden){dailyNotice();openAccess()}},60000);
 }
 #v15Experience .v15-rating-summary {justify-content:flex-start!important;text-align:left!important;}
 </style>
+<style id="vc-v37-experience-alignment-only">
+/* Ajuste aislado: no modifica catálogo, mapas, pagos ni scripts. */
+@media (min-width: 1250px) {
+  #v15Experience.v15-experience-card {position:relative!important;display:block!important;min-height:116px!important;padding:16px!important;box-sizing:border-box!important;}
+  #v15Experience.v15-experience-card > div:first-child {max-width:calc(100% - 655px)!important;min-width:0!important;}
+  #v15Experience .v15-experience-actions {position:absolute!important;right:16px!important;top:50%!important;bottom:auto!important;left:auto!important;transform:translateY(-50%)!important;display:flex!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-end!important;width:auto!important;margin:0!important;gap:8px!important;}
+  #v15Experience .v15-experience-actions > .btn {flex:0 0 auto!important;white-space:nowrap!important;}
+}
+@media (min-width: 701px) and (max-width: 1249px) {
+  #v15Experience.v15-experience-card {display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;}
+  #v15Experience .v15-experience-actions {position:static!important;transform:none!important;display:flex!important;flex-wrap:wrap!important;justify-content:flex-start!important;align-self:flex-start!important;margin:0!important;}
+}
+</style>
 </body>
 </html>
