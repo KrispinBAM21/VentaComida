@@ -4250,10 +4250,12 @@ const v17RenderAdminBase=renderAdmin;renderAdmin=function(){v17EnsureCouponTab()
 
 /* ---------- Tu experiencia: plegable y autocierre a 10 min ---------- */
 window.paintExperience=function(){
-  let h=document.getElementById('v15Experience');if(!h){h=document.createElement('section');h.id='v15Experience';document.querySelector('.container.controls')?.before(h)}
-  h.className='container v17-experience';const s=window.vcExperienceSummary?.()?.scores||{},avg=Number(s.overall||0);
-  h.innerHTML=`<button class="v17-experience-toggle" id="v17ExperienceToggle" aria-expanded="false"><div><h3>Tu experiencia importa</h3><p>Califica el negocio, conoce el perfil, consulta opiniones y síguenos.</p></div><span class="v17-experience-chevron">${V17_ICON.chev}</span></button><div class="v17-experience-panel"><div><div class="v17-experience-inner"><div class="v17-experience-summary"><span class="v17-stars">${avg?'★'.repeat(Math.round(avg)):'☆☆☆☆☆'}</span><span>${avg?avg.toFixed(1):'Sin calificaciones'} · ${Number(s.reviews||0)} opiniones · ${Number(window.vcExperienceSummary?.()?.followers||0)} seguidores</span></div><div class="v17-experience-actions"><button class="btn v16-glow-btn" id="v17KnowBusiness">🏪 <span>Conocer el negocio</span></button><button class="btn" id="v17Rate">${V12I.comment}<span>Opiniones y calificar</span></button><button class="btn secondary" id="v17Follow">${UI.check}<span>${window.vcExperienceSummary?.()?.following?'Siguiendo':'Seguir'}</span></button></div></div></div></div>`;
-  const toggle=document.getElementById('v17ExperienceToggle');toggle.onclick=()=>{const open=!h.classList.contains('open');h.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));clearTimeout(v17ExperienceTimer);if(open)v17ExperienceTimer=setTimeout(()=>{if(h.isConnected){h.classList.remove('open');toggle.setAttribute('aria-expanded','false')}},10*60*1000)};
+  let h=document.getElementById('v15Experience');
+  if(!h){h=document.createElement('section');h.id='v15Experience';document.querySelector('.container.controls')?.before(h)}
+  h.className='container vc-experience-fixed';
+  const summary=window.vcExperienceSummary?.()||{}, scores=summary.scores||{}, avg=Number(scores.overall||0);
+  h.innerHTML=`<div class="vc-experience-copy"><h3>Tu experiencia importa</h3><p>Califica el negocio, servicio y comida. También puedes consultar lo que opinan otros clientes.</p><div class="vc-experience-rating"><span class="vc-experience-stars">${avg?'★'.repeat(Math.round(avg))+'☆'.repeat(Math.max(0,5-Math.round(avg))):'★★★★★'}</span><span>${avg?avg.toFixed(1):'Sin calificaciones'} · ${Number(scores.reviews||0)} opiniones · ${Number(summary.followers||0)} seguidores</span></div></div><div class="vc-experience-buttons"><button type="button" class="btn" id="v17KnowBusiness">🏪 <span>Conocer el negocio</span></button><button type="button" class="btn" id="v17Rate">★ <span>Calificar negocio</span></button><button type="button" class="btn secondary" id="vcViewOpinions">${UI.review}<span>Ver opiniones</span></button><button type="button" class="btn secondary" id="v17Follow">${UI.check}<span>${summary.following?'Siguiendo':'Seguir'}</span></button></div>`;
+  document.getElementById('vcViewOpinions').onclick=()=>openRating(true);
   document.getElementById('v17KnowBusiness').onclick=()=>openBusinessShowcase();document.getElementById('v17Rate').onclick=()=>openRateBusinessModal();document.getElementById('v17Follow').onclick=async e=>{if(!customerSession){renderCustomerProfile();openModal('customerProfileModal');return toast('Inicia sesión para seguir al negocio.','info')}try{const r=await v16Community('toggle_follow',{});Object.assign(window.vcExperienceSummary?.()||{}, {following:r.following,followers:r.followers});paintExperience()}catch(err){toast(err.message,'error')}};
 };
 
@@ -5095,17 +5097,19 @@ setInterval(()=>{if(!document.hidden){dailyNotice();openAccess()}},60000);
 
 
 
-<style id="vc-v46-experience-layout">
-/* Regla única y acotada al panel; ninguna animación nueva. */
-#v15Experience.v15-experience-card {display:grid!important;grid-template-columns:minmax(0,1fr) max-content!important;align-items:center!important;column-gap:18px!important;min-height:0!important;height:auto!important;padding:14px 18px!important;margin:12px auto 0!important;box-sizing:border-box!important;overflow:visible!important;}
-#v15Experience.v15-experience-card > div:first-child {min-width:0!important;align-self:center!important;margin:0!important;padding:0!important;}
-#v15Experience.v15-experience-card h3 {margin:0 0 4px!important;line-height:1.25!important;}
-#v15Experience.v15-experience-card p {margin:0!important;line-height:1.35!important;}
-#v15Experience.v15-experience-card .v15-rating-summary {margin:6px 0 0!important;line-height:1.3!important;}
-#v15Experience.v15-experience-card > .v15-experience-actions {display:flex!important;position:static!important;align-self:center!important;justify-self:end!important;align-items:center!important;justify-content:flex-end!important;flex-flow:row nowrap!important;gap:8px!important;width:max-content!important;height:auto!important;inset:auto!important;float:none!important;transform:none!important;margin:0!important;padding:0!important;}
-#v15Experience.v15-experience-card > .v15-experience-actions > button {position:static!important;flex:none!important;margin:0!important;transform:none!important;white-space:nowrap!important;}
-@media(max-width:1150px){#v15Experience.v15-experience-card{column-gap:10px!important}#v15Experience.v15-experience-card > .v15-experience-actions{gap:5px!important}#v15Experience.v15-experience-card > .v15-experience-actions > button{padding:9px 8px!important;font-size:11px!important}}
-@media(max-width:850px){#v15Experience.v15-experience-card{grid-template-columns:minmax(0,1fr)!important;row-gap:10px!important}#v15Experience.v15-experience-card > .v15-experience-actions{justify-self:start!important;flex-wrap:wrap!important;width:auto!important}}
+<style id="vc-v47-experience-fixed">
+/* Componente único: sin panel plegable, sin posicionamiento absoluto y sin desbordamientos. */
+#v15Experience.vc-experience-fixed{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:clamp(12px,2vw,26px);width:min(1680px,calc(100% - 40px));margin:12px auto 0;padding:14px 18px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-sizing:border-box;min-width:0;max-width:100%;overflow:hidden}
+#v15Experience .vc-experience-copy{min-width:0;max-width:100%}
+#v15Experience .vc-experience-copy h3{margin:0 0 5px;font-size:1rem;line-height:1.25}
+#v15Experience .vc-experience-copy p{margin:0;color:var(--muted);font-size:.84rem;line-height:1.4;overflow-wrap:break-word}
+#v15Experience .vc-experience-rating{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:5px;font-size:.75rem;line-height:1.35}
+#v15Experience .vc-experience-stars{color:#ffb300;letter-spacing:1px;font-weight:900;white-space:nowrap}
+#v15Experience .vc-experience-buttons{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0;max-width:100%;flex-wrap:wrap}
+#v15Experience .vc-experience-buttons>.btn{position:static;display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:0 0 auto;min-height:36px;padding:8px 12px;font-size:.84rem;line-height:1.2;white-space:nowrap;transform:none;box-sizing:border-box}
+#v15Experience .vc-experience-buttons svg{width:16px;height:16px;flex:0 0 16px}
+@media(max-width:1150px){#v15Experience.vc-experience-fixed{grid-template-columns:minmax(0,1fr)}#v15Experience .vc-experience-buttons{justify-content:flex-start}}
+@media(max-width:799px){#v15Experience.vc-experience-fixed{width:calc(100% - 24px);padding:13px 14px}#v15Experience .vc-experience-buttons>.btn{flex:1 1 150px;white-space:normal}}
 </style>
 </body>
 </html>
