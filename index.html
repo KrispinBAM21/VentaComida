@@ -623,17 +623,19 @@ function showMapConfigNeeded(containerId){
   if(!el)return;
   el.innerHTML=`<div class="empty-state" style="height:100%;min-height:220px;display:grid;place-items:center;padding:24px;text-align:center"><div>${UI.map}<strong style="display:block;margin:8px 0">Falta configurar CARTO</strong><span class="small muted">En Administración, Negocio, CARTO pega tu API key para activar los mapas.</span></div></div>`;
 }
+/* MODIFICADO: selector accesible de capas, respaldo automático y vista satelital autorizada. */
 function addConfiguredTileLayer(map,containerId){
-  // Una misma URL de CARTO con ?key se utiliza en todos los mapas Leaflet.
   const host=document.getElementById(containerId);
   if(!map||!host||typeof L==='undefined')return false;
   if(map._vcTileCleanup)map._vcTileCleanup();
   const carto=cartoTileUrl();
   const providers=[
-    ...(carto?[{url:carto,name:'CARTO',isCarto:true}]:[]),
-    {url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',name:'OpenStreetMap (respaldo)',isCarto:false}
+    ...(carto?[{url:carto,name:'CARTO',isCarto:true,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}]:[]),
+    {url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',name:'OpenStreetMap',isCarto:false,attribution:'&copy; OpenStreetMap contributors'},
+    {url:'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',name:'Satélite · Esri World Imagery',isCarto:false,attribution:'Tiles &copy; Esri — Sources: Esri, Maxar, Earthstar Geographics, and the GIS User Community'}
   ];
-  let current=null,timer=null,providerIndex=0,errors=0,finished=false,disposed=false;
+  let current=null,timer=null,providerIndex=0,errors=0,finished=false,disposed=false,attempts=0,control=null,panel=null,toggle=null;
+  try{const selected=sessionStorage.getItem('vc.map.layer.'+containerId),index=providers.findIndex(p=>p.name===selected);if(index>=0)providerIndex=index}catch{}
   const status=(message,retry=false)=>{
     let el=host.querySelector('[data-vc-tile-status]');
     if(!el){el=document.createElement('div');el.dataset.vcTileStatus='1';el.className='vc-map-load-status';el.setAttribute('role','status');host.append(el)}
@@ -641,22 +643,38 @@ function addConfiguredTileLayer(map,containerId){
     if(retry){const button=document.createElement('button');button.type='button';button.textContent='Reintentar';button.onclick=()=>addConfiguredTileLayer(map,containerId);el.append(button)}
   };
   const clear=()=>host.querySelector('[data-vc-tile-status]')?.remove();
-  const detach=()=>{clearTimeout(timer);if(current){current.off('tileload',tileLoaded);current.off('tileerror',tileError);try{map.removeLayer(current)}catch(e){}current=null}};
-  const tileLoaded=()=>{if(disposed)return;finished=true;clearTimeout(timer);clear();};
-  const tileError=()=>{if(disposed||finished)return;if(++errors>=2)next();};
+  const detach=()=>{clearTimeout(timer);if(current){current.off('tileload',tileLoaded);current.off('tileerror',tileError);try{map.removeLayer(current)}catch(e){}if(map._vcTileLayer===current)map._vcTileLayer=null;current=null}};
+  const tileLoaded=()=>{if(disposed)return;finished=true;clearTimeout(timer);clear()};
+  const tileError=()=>{if(disposed||finished)return;if(++errors>=2)next()};
   function next(){
     if(disposed)return;
     detach();finished=false;errors=0;
-    if(providerIndex>=providers.length){status('No se descargaron las imágenes del mapa. Comprueba la clave CARTO, la red y el bloqueo de recursos del navegador.',true);return}
-    const p=providers[providerIndex++];
+    if(attempts>=providers.length){status('No se descargaron las imágenes del mapa. Comprueba la conexión o selecciona otra capa.',true);return}
+    const index=providerIndex%providers.length,p=providers[index];providerIndex=index+1;attempts++;
+    if(panel)panel.querySelectorAll('input').forEach(input=>input.checked=Number(input.value)===index);
+    if(toggle)toggle.setAttribute('aria-label','Cambiar capa del mapa. Capa actual: '+p.name);
     status('Cargando '+p.name+'…');
-    current=L.tileLayer(p.url,{maxZoom:19,subdomains:'abc',attribution:'&copy; OpenStreetMap contributors'+(p.isCarto?' &copy; CARTO':''),updateWhenIdle:false});
+    current=L.tileLayer(p.url,{maxZoom:19,subdomains:'abc',attribution:p.attribution,updateWhenIdle:false});
     map._vcTileLayer=current;
     current.on('tileload',tileLoaded);current.on('tileerror',tileError);
     try{current.addTo(map);map.invalidateSize({pan:false})}catch(e){console.warn('Mapa '+containerId,e);next();return}
     timer=setTimeout(()=>{if(!finished)next()},6500);
   }
-  map._vcTileCleanup=()=>{disposed=true;detach();clear()};
+  control=L.control({position:'topright'});
+  control.onAdd=function(){
+    const box=L.DomUtil.create('div','vc-map-layer-control');
+    toggle=document.createElement('button');toggle.type='button';toggle.className='vc-map-layer-toggle';toggle.title='Cambiar capa del mapa';toggle.setAttribute('aria-label','Cambiar capa del mapa');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-controls','vcLayerPanel-'+containerId);
+    toggle.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 10 6-10 6L2 8Zm-9 11 9 5 9-5M3 18l9 5 9-5"/></svg><span>Capas</span>';
+    panel=document.createElement('fieldset');panel.id='vcLayerPanel-'+containerId;panel.className='vc-map-layer-panel';panel.hidden=true;
+    const legend=document.createElement('legend');legend.textContent='Vista del mapa';panel.append(legend);
+    providers.forEach((p,i)=>{const label=document.createElement('label'),input=document.createElement('input'),text=document.createElement('span');input.type='radio';input.name='vc-layer-'+containerId;input.value=String(i);text.textContent=p.name;label.append(input,text);panel.append(label);input.onchange=()=>{if(!input.checked)return;providerIndex=i;attempts=0;try{sessionStorage.setItem('vc.map.layer.'+containerId,p.name)}catch{}next();panel.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.focus()}});
+    toggle.onclick=()=>{panel.hidden=!panel.hidden;toggle.setAttribute('aria-expanded',String(!panel.hidden));if(!panel.hidden)(panel.querySelector('input:checked')||panel.querySelector('input'))?.focus()};
+    box.onkeydown=e=>{if(e.key==='Escape'){panel.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.focus()}};
+    box.append(toggle,panel);L.DomEvent.disableClickPropagation(box);L.DomEvent.disableScrollPropagation(box);return box;
+  };
+  control.addTo(map);
+  const cleanup=()=>{if(disposed)return;disposed=true;detach();clear();control?.remove();map.off('unload',cleanup)};
+  map._vcTileCleanup=cleanup;map.on('unload',cleanup);
   next();return true;
 }
 
@@ -3829,7 +3847,11 @@ cfg();renderHeader();paintExperience();setTimeout(refreshExperience,900);
 /* NUEVO: SVG locales; no se añaden dependencias ni peticiones de tipografías. */
 (function(){
 'use strict';
+/* MODIFICADO: SVG exclusivos para opiniones y seguimiento. */
 const paths={
+ followSeal:'<path d="m12 2 3 2 4 1 1 4 2 3-2 3-1 4-4 1-3 2-3-2-4-1-1-4-2-3 2-3 1-4 4-1ZM8 12l3 3 5-6"/>',
+ opinionsDialog:'<path d="M3 3h13v11H8l-5 4ZM8 7h5M8 10h3M18 8h3v13l-5-3h-5v-2"/>',
+ followRibbon:'<path d="M5 3h14v18l-7-4-7 4ZM12 6v7M8.5 9.5h7"/>',
  businessIntro:'<path d="M3 10h18V5H3ZM5 10v11h14V10M8 21v-6h4v6M15 14h2M6 2v3M18 2v3"/>',
  quickRate:'<circle cx="12" cy="9" r="6"/><path d="m8 14-2 8 6-3 6 3-2-8m-6-5 2 2 3-4"/>',
  quickFollow:'<path d="M12 19 4 12a5 5 0 0 1 8-7 5 5 0 0 1 8 7M18 16v6m-3-3h6"/>',
@@ -4324,7 +4346,7 @@ window.paintExperience=function(){
   if(!h){h=document.createElement('section');h.id='v15Experience';document.querySelector('.container.controls')?.before(h)}
   h.className='container vc-experience-fixed';
   const summary=window.vcExperienceSummary?.()||{}, scores=summary.scores||{}, avg=Number(scores.overall||0);
-  h.innerHTML=`<div class="vc-experience-copy"><h3>Tu experiencia importa</h3><p>Califica el negocio, servicio y comida. También puedes consultar lo que opinan otros clientes.</p><div class="vc-experience-rating"><span class="vc-experience-stars"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('ratingStrip')}</span><span>${avg?avg.toFixed(1):'Sin calificaciones'} · ${Number(scores.reviews||0)} opiniones · ${Number(summary.followers||0)} seguidores</span></div></div><div class="vc-experience-buttons"><button type="button" class="btn" id="v17KnowBusiness"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('businessIntro')} <span>Conocer el negocio</span></button><button type="button" class="btn" id="v17Rate"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('quickRate')} <span>Calificar negocio</span></button><button type="button" class="btn secondary" id="vcViewOpinions">${UI.review}<span>Ver opiniones</span></button><button type="button" class="btn secondary" id="v17Follow"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('quickFollow')}<span>${summary.following?'Siguiendo':'Seguir'}</span></button></div>`;
+  h.innerHTML=`<div class="vc-experience-copy"><h3>Tu experiencia importa</h3><p>Califica el negocio, servicio y comida. También puedes consultar lo que opinan otros clientes.</p><div class="vc-experience-rating"><span class="vc-experience-stars"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('ratingStrip')}</span><span>${avg?avg.toFixed(1):'Sin calificaciones'} · ${Number(scores.reviews||0)} opiniones · ${Number(summary.followers||0)} seguidores</span></div></div><div class="vc-experience-buttons"><button type="button" class="btn" id="v17KnowBusiness"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('businessIntro')} <span>Conocer el negocio</span></button><button type="button" class="btn" id="v17Rate"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('quickRate')} <span>Calificar negocio</span></button><button type="button" class="btn secondary" id="vcViewOpinions"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('opinionsDialog')}<span>Ver opiniones</span></button><button type="button" class="btn secondary" id="v17Follow"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('followRibbon')}<span>${summary.following?'Siguiendo':'Seguir'}</span></button></div>`;
   document.getElementById('vcViewOpinions').onclick=()=>openRating(true);
   document.getElementById('v17KnowBusiness').onclick=()=>openBusinessShowcase();document.getElementById('v17Rate').onclick=()=>openRateBusinessModal();document.getElementById('v17Follow').onclick=async e=>{if(!customerSession){renderCustomerProfile();openModal('customerProfileModal');return toast('Inicia sesión para seguir al negocio.','info')}try{const r=await v16Community('toggle_follow',{});Object.assign(window.vcExperienceSummary?.()||{}, {following:r.following,followers:r.followers});paintExperience()}catch(err){toast(err.message,'error')}};
 };
@@ -4460,7 +4482,7 @@ async function v18OpenBusiness(){
   try{const s=await v18Community('summary',{}),r=await v18Community('reviews',{});info={...info,...s,reviews:r.reviews||[]}}catch{}
   const m=v4Modal('v18BusinessModal','Información del negocio'),body=m.querySelector('.modal-body');m.classList.add('v18-business-modal');
   const socials=Object.entries(p.socials||{}).filter(([,url])=>url).map(([k,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(v18SocialLabel(k))}</a>`).join('');
-  body.innerHTML=`<div class="v18-business-shell"><section class="v18-business-hero"><div class="v18-business-cover" style="${p.cover?`background-image:url('${esc(p.cover)}')`:''}"></div><div class="v18-business-overlay">${(p.avatar||state.config.logo)?`<img class="v18-business-avatar" src="${esc(p.avatar||state.config.logo)}" alt="Perfil del negocio">`:`<div class="v18-business-avatar"></div>`}<div class="v18-business-title"><h2>${esc(state.config.businessName)}</h2><p>${esc(p.bio||state.config.tagline||'')}</p><div class="v18-business-meta"><span class="v18-business-chip">${window.vcBusinessAssets.icon('location')} ${esc(v18LocationText())}</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('hours')} ${esc(status.text)}</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('medal')} ${Number(info.scores?.overall||0)?Number(info.scores.overall).toFixed(1):'Sin calificaciones'} · ${Number(info.scores?.reviews||0)} opiniones</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('people')} ${Number(info.followers||0)} seguidores</span></div></div><div class="v18-business-actions"><button class="btn" id="v18BusinessRate">${window.vcBusinessAssets.icon('rate')} <span>Calificar</span></button><button class="btn secondary" id="v18BusinessFollow">${window.vcBusinessAssets.icon('follow')} <span>${info.following?'Siguiendo':'Seguir'}</span></button>${/^https:\/\//i.test(p.donation_url||'')?`<a class="btn secondary" href="${esc(p.donation_url)}" target="_blank" rel="noopener noreferrer">${window.vcBusinessAssets.icon('donate')} <span>${esc(p.donation_label||'Apoyar con donación')}</span></a>`:''}<button class="btn ghost" id="v18BusinessBack">${window.vcBusinessAssets.icon('back')} <span>Menú principal</span></button></div></div></section><div class="v18-business-body"><section class="v18-business-card"><h3>Horarios</h3><div class="v18-hours-status ${status.open?'open':'closed'}">${window.vcBusinessAssets.icon('storefront')} ${esc(status.text)}</div>${v18HoursHtml()}</section><section class="v18-business-card"><h3>Ubicación y redes</h3><p>${esc(v18LocationText())}</p><div class="v18-business-socials">${socials||'<span class="small muted">Sin redes configuradas.</span>'}</div><div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="v18BusinessDirections">${window.vcBusinessAssets.icon('compass')}<span>Cómo llegar</span></button></div></section><section class="v18-business-card v18-business-reviews"><h3>Comentarios recientes</h3>${(info.reviews||[]).slice(0,6).map(x=>`<article class="v18-business-review"><div class="row between"><strong>${esc(x.display_name||'Cliente')}</strong><span>${window.vcBusinessAssets.icon('review')} ${Number(x.overall_rating||5)}/5</span></div><p>${esc(x.comment||'')}</p><small class="muted">Servicio ${Number(x.service_rating||0)}/5 · Comida ${Number(x.food_rating||0)}/5</small></article>`).join('')||'<p class="small muted">Aún no hay comentarios.</p>'}</section></div></div>`;
+  body.innerHTML=`<div class="v18-business-shell"><section class="v18-business-hero"><div class="v18-business-cover" style="${p.cover?`background-image:url('${esc(p.cover)}')`:''}"></div><div class="v18-business-overlay">${(p.avatar||state.config.logo)?`<img class="v18-business-avatar" src="${esc(p.avatar||state.config.logo)}" alt="Perfil del negocio">`:`<div class="v18-business-avatar"></div>`}<div class="v18-business-title"><h2>${esc(state.config.businessName)}</h2><p>${esc(p.bio||state.config.tagline||'')}</p><div class="v18-business-meta"><span class="v18-business-chip">${window.vcBusinessAssets.icon('location')} ${esc(v18LocationText())}</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('hours')} ${esc(status.text)}</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('medal')} ${Number(info.scores?.overall||0)?Number(info.scores.overall).toFixed(1):'Sin calificaciones'} · ${Number(info.scores?.reviews||0)} opiniones</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('people')} ${Number(info.followers||0)} seguidores</span></div></div><div class="v18-business-actions"><button class="btn" id="v18BusinessRate">${window.vcBusinessAssets.icon('rate')} <span>Calificar</span></button><button class="btn secondary" id="v18BusinessFollow"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('followSeal')} <span>${info.following?'Siguiendo':'Seguir'}</span></button>${/^https:\/\//i.test(p.donation_url||'')?`<a class="btn secondary" href="${esc(p.donation_url)}" target="_blank" rel="noopener noreferrer">${window.vcBusinessAssets.icon('donate')} <span>${esc(p.donation_label||'Apoyar con donación')}</span></a>`:''}<button class="btn ghost" id="v18BusinessBack">${window.vcBusinessAssets.icon('back')} <span>Menú principal</span></button></div></div></section><div class="v18-business-body"><section class="v18-business-card"><h3>Horarios</h3><div class="v18-hours-status ${status.open?'open':'closed'}">${window.vcBusinessAssets.icon('storefront')} ${esc(status.text)}</div>${v18HoursHtml()}</section><section class="v18-business-card"><h3>Ubicación y redes</h3><p>${esc(v18LocationText())}</p><div class="v18-business-socials">${socials||'<span class="small muted">Sin redes configuradas.</span>'}</div><div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="v18BusinessDirections">${window.vcBusinessAssets.icon('compass')}<span>Cómo llegar</span></button></div></section><section class="v18-business-card v18-business-reviews"><h3>Comentarios recientes</h3>${(info.reviews||[]).slice(0,6).map(x=>`<article class="v18-business-review"><div class="row between"><strong>${esc(x.display_name||'Cliente')}</strong><span>${window.vcBusinessAssets.icon('review')} ${Number(x.overall_rating||5)}/5</span></div><p>${esc(x.comment||'')}</p><small class="muted">Servicio ${Number(x.service_rating||0)}/5 · Comida ${Number(x.food_rating||0)}/5</small></article>`).join('')||'<p class="small muted">Aún no hay comentarios.</p>'}</section></div></div>`;
   document.getElementById('v18BusinessBack').onclick=()=>{closeModal(m.id);window.scrollTo({top:0,behavior:'smooth'})};
   document.getElementById('v18BusinessDirections').onclick=()=>window.v17RouteToBusiness?.();
   document.getElementById('v18BusinessRate').onclick=()=>{closeModal(m.id);window.vcOpenRatings?.()};
@@ -4749,6 +4771,8 @@ function viewer(start){
 }
 function galleryMarkup(){return items().map((x,i)=>'<button type="button" class="vc-gallery-item" data-vc-view="'+i+'">'+(x.type==='video'?/* MODIFICADO: reproducción pública sin sonido. */ '<video autoplay loop playsinline preload="metadata" muted src="'+esc(x.url)+'"></video>':'<img loading="lazy" src="'+esc(x.url)+'" alt="'+esc(x.name||'Producto')+'">')+'</button>').join('')}
 function showGallery(){const host=document.querySelector('#v18BusinessModal .v18-business-shell');if(!host)return;host.querySelector('#vcPublicGallery')?.remove();const section=document.createElement('section');section.className='v18-business-card';section.id='vcPublicGallery';section.style.gridColumn='1/-1';section.innerHTML='<!-- MODIFICADO --><h3>Fotos y videos del negocio</h3><div class="vc-gallery-grid">'+galleryMarkup()+'</div>';if(!items().length)return;host.append(section);section.querySelectorAll('[data-vc-view]').forEach(b=>b.onclick=()=>viewer(Number(b.dataset.vcView)))}
+/* NUEVO: refrescar medios al recibir cambios publicados. */
+window.vcRefreshPublicGallery=showGallery;
 const baseOpen=window.v18OpenBusiness;
 window.v18OpenBusiness=async function(){await baseOpen();showGallery()};
 /* MODIFICADO: editor compartido en Negocio y Perfil, conserva el almacenamiento existente. */
@@ -5301,13 +5325,14 @@ const {icon,pins}=window.vcBusinessAssets;
 window.vcEnhancedGallery=function(c){
  if(!c||c.querySelector('#vcGalleryAdmin'))return;
  const section=document.createElement('section');section.id='vcGalleryAdmin';section.className='section-card';
- section.innerHTML='<div class="vc-media-head"><h3>La historia de tu negocio</h3><div class="vc-media-count" id="vcMediaCount"></div></div><div class="vc-media-drop" id="vcMediaDrop"><div><strong>Fotos que invitan. Videos que muestran tu negocio.</strong><p>Arrastra archivos aquí o selecciona desde tu dispositivo. Hasta 15 fotos y 15 videos; 50 MB por archivo y 2 minutos por video.</p></div><div class="toolbar"><button type="button" class="btn" id="vcAddPhotos">'+icon('gallery')+'<span>Añadir fotos</span></button><button type="button" class="btn secondary" id="vcAddVideos">'+icon('film')+'<span>Añadir videos</span></button></div></div><input type="file" hidden id="vcGalleryFiles" multiple accept="image/png,image/jpeg,image/webp,video/mp4,video/webm"><input type="file" hidden id="vcMediaReplacement" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm"><p class="small" id="vcGalleryStatus" role="status" aria-live="polite"></p><progress class="vc-media-progress" id="vcMediaProgress" max="100" value="0" hidden></progress><div id="vcGalleryList" class="vc-media-grid"></div>';
+ section.innerHTML='<div class="vc-media-head"><h3>La historia de tu negocio</h3><div class="vc-media-count" id="vcMediaCount"></div></div><div class="vc-media-drop" id="vcMediaDrop"><div><strong>Fotos que invitan. Videos que muestran tu negocio.</strong><p>Arrastra archivos aquí o selecciona desde tu dispositivo. Hasta 15 fotos y 15 videos; 50 MB por archivo y 2 minutos por video.</p></div><div class="toolbar"><button type="button" class="btn" id="vcAddPhotos">'+icon('gallery')+'<span>Añadir fotos</span></button><button type="button" class="btn secondary" id="vcAddVideos">'+icon('film')+'<span>Añadir videos</span></button></div></div><input type="file" hidden id="vcGalleryFiles" multiple accept="image/png,image/jpeg,image/webp,video/mp4,video/webm"><input type="file" hidden id="vcMediaReplacement" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm"><p class="small" id="vcGalleryStatus" role="status" aria-live="polite"></p><!-- NUEVO --><p class="small" id="vcGallerySyncStatus" role="status" aria-live="polite"></p><progress class="vc-media-progress" id="vcMediaProgress" max="100" value="0" hidden></progress><div id="vcGalleryList" class="vc-media-grid"></div>';
  c.append(section);
  const list=()=>Array.isArray(state.config.publicProfile?.gallery)?state.config.publicProfile.gallery:[];
  const status=section.querySelector('#vcGalleryStatus'),input=section.querySelector('#vcGalleryFiles'),replacement=section.querySelector('#vcMediaReplacement'),progress=section.querySelector('progress'),drop=section.querySelector('#vcMediaDrop');let busy=false,replaceIndex=-1;
  function lock(value){busy=value;section.querySelectorAll('button,input').forEach(b=>b.disabled=value);drop.setAttribute('aria-busy',String(value))}
  function permitted(){if(!supabaseClient||!adminSession||!panelCan('business'))throw Error('Necesitas permiso de Negocio.')}
- async function persist(next){permitted();const previous=state.config.publicProfile||{},profile={...previous,gallery:next};const result=await supabaseClient.rpc('catalog_config_save',{p_module:'business',p_data:{publicProfile:profile}});if(result.error||result.data?.error)throw Error(result.error?.message||result.data.error);state.config.publicProfile=profile;saveLocal()}
+ /* MODIFICADO: coordinar guardado y lectura pública, sin aplicar consultas anteriores. */
+ async function persist(next){permitted();const previous=state.config.publicProfile||{},profile={...previous,gallery:next};let published=null;window.vcGallerySync?.begin();try{const result=await supabaseClient.rpc('catalog_config_save',{p_module:'business',p_data:{publicProfile:profile}});if(result.error||result.data?.error)throw Error(result.error?.message||result.data.error);state.config.publicProfile=profile;saveLocal();published=profile.gallery}finally{window.vcGallerySync?.end(published)}}
  function counts(next){return {photos:next.filter(x=>x.type==='image').length,videos:next.filter(x=>x.type==='video').length}}
  function draw(){const media=list(),count=counts(media);section.querySelector('#vcMediaCount').innerHTML='<span>'+count.photos+' / 15 fotos</span><span>'+count.videos+' / 15 videos</span>';if(count.photos>15||count.videos>15)status.textContent='La galería existente supera el límite nuevo. Tus archivos se conservan; puedes retirarlos o sustituirlos.';
  section.querySelector('#vcGalleryList').innerHTML=media.length?media.map((x,i)=>'<article class="vc-media-card"><div class="vc-media-preview">'+(x.type==='video'?'<video controls playsinline preload="metadata" src="'+esc(x.url)+'"></video>':'<img loading="lazy" src="'+esc(x.url)+'" alt="'+esc(x.name||'Foto del negocio')+'">')+'<span>'+(x.type==='video'?'Video':'Foto')+' '+(i+1)+'</span></div><div class="vc-media-tools"><label class="field">Nombre o descripción<input class="input" data-media-name="'+i+'" maxlength="160" value="'+esc(x.name||'')+'"></label><div class="toolbar"><button type="button" class="btn secondary" data-media-rename="'+i+'" title="Guardar nombre" aria-label="Guardar nombre del archivo '+(i+1)+'">'+icon('rename')+'</button><button type="button" class="btn secondary" data-media-replace="'+i+'" title="Cambiar archivo" aria-label="Cambiar archivo '+(i+1)+'">'+icon('replace')+'</button><button type="button" class="btn ghost" data-media-delete="'+i+'" title="Eliminar" aria-label="Eliminar archivo '+(i+1)+'">'+icon('delete')+'</button></div></div></article>').join(''):'<div class="vc-media-empty">Tu galería comienza aquí. Añade fotos o videos para mostrarlos a tus clientes.</div>';
@@ -5322,7 +5347,7 @@ window.vcEnhancedGallery=function(c){
  const simulated=index>=0?next.map((x,i)=>i===index?{type:types[0]}:x):next.concat(types.map(type=>({type})));const count=counts(simulated),before=counts(previous);if(count.photos>15&&count.photos>before.photos||count.videos>15&&count.videos>before.videos)throw Error('Máximo 15 fotos y 15 videos.');
  progress.hidden=false;progress.value=0;
  for(let n=0;n<files.length;n++){const file=files[n];status.textContent='Subiendo '+(n+1)+' de '+files.length+': '+file.name;const ext=({'image/png':'png','image/jpeg':'jpg','image/webp':'webp','video/mp4':'mp4','video/webm':'webm'})[file.type],path='public/'+crypto.randomUUID()+'.'+ext;const result=await supabaseClient.storage.from('business-gallery').upload(path,file,{contentType:file.type,upsert:false});if(result.error)throw result.error;const url=supabaseClient.storage.from('business-gallery').getPublicUrl(path).data?.publicUrl;if(!url)throw Error('No se pudo obtener la dirección del archivo.');const item={type:types[n],url,name:index>=0?previous[index].name||file.name:file.name};if(index>=0)next[index]={...previous[index],...item};else next.push(item);progress.value=Math.round((n+1)/files.length*100)}
- if(adminSession?.user?.id!==owner)throw Error('La sesión cambió durante la carga. Vuelve a iniciar sesión.');await persist(next);status.textContent=index>=0?'Archivo sustituido y publicado.':'Galería guardada y publicada.';
+ if(adminSession?.user?.id!==owner)throw Error('La sesión cambió durante la carga. Vuelve a iniciar sesión.');await persist(next);/* MODIFICADO: confirmar la publicación mediante lectura pública. */ status.textContent=index>=0?'Archivo sustituido.':'Galería guardada.';
  });progress.hidden=true;input.value='';replacement.value=''}
  section.querySelector('#vcAddPhotos').onclick=()=>{input.accept='image/png,image/jpeg,image/webp';input.click()};section.querySelector('#vcAddVideos').onclick=()=>{input.accept='video/mp4,video/webm';input.click()};input.onchange=()=>send([...input.files]);replacement.onchange=()=>send([...replacement.files],replaceIndex);
  drop.ondragover=e=>{e.preventDefault();if(!busy)drop.classList.add('dragging')};drop.ondragleave=()=>drop.classList.remove('dragging');drop.ondrop=e=>{e.preventDefault();drop.classList.remove('dragging');if(!busy)send([...e.dataTransfer.files])};draw();
@@ -5359,6 +5384,87 @@ let scheduled=false;
 function markPending(){scheduled=false;compactViewer();document.querySelectorAll('#adminContent .saved-address,#adminContent .billing-payment,#accountOrderList .saved-address').forEach(row=>{if(/emparejamiento por confirmar/i.test(row.textContent)&&!row.querySelector('.vc-pending-record')){const badge=document.createElement('span');badge.className='vc-pending-record';badge.textContent='Pendiente';row.append(badge)}})}
 new MutationObserver(()=>{if(!scheduled){scheduled=true;queueMicrotask(markPending)}}).observe(document.body,{childList:true,subtree:true});
 renderCategories();
+})();
+</script>
+
+<!-- NUEVO: capas, chef del carrito y sincronización pública de la galería -->
+<style id="vc-map-chef-gallery-styles">
+/* NUEVO */
+.vc-map-load-status{position:absolute;left:10px;bottom:32px;z-index:500;max-width:calc(100% - 20px);padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--text);font:500 12px/1.4 var(--font);box-shadow:0 3px 12px #0003;box-sizing:border-box}.vc-map-load-status button{background:var(--secondary);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:4px 7px;cursor:pointer}
+.vc-map-layer-control{position:relative;color:var(--text);font:500 13px/1.4 var(--font);max-width:calc(100vw - 80px)}
+.vc-map-layer-toggle{display:flex;align-items:center;gap:7px;min-height:42px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);box-shadow:0 3px 12px #0003;cursor:pointer}
+.vc-map-layer-toggle svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.vc-map-layer-toggle:focus-visible,.vc-map-layer-panel input:focus-visible{outline:3px solid var(--primary);outline-offset:3px}
+.vc-map-layer-panel{position:absolute;right:0;top:calc(100% + 7px);width:245px;max-width:calc(100vw - 95px);margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);box-shadow:0 8px 24px #0004;box-sizing:border-box}
+.vc-map-layer-panel legend{font-weight:800;background:var(--card);color:var(--text);padding:0 6px}.vc-map-layer-panel label{display:flex;align-items:center;gap:9px;padding:8px 0;cursor:pointer}.vc-map-layer-panel input{accent-color:var(--primary)}.vc-map-layer-panel[hidden]{display:none!important}
+.vc-chef-card{--chef-sky:#fff5df;--chef-floor:#ddbf89;--chef-plank:#fff9ee;--chef-ink:#382719;--chef-trim:#87603e;position:relative;overflow:hidden;margin:14px 0;border:1px solid var(--line);border-radius:17px;background:var(--card);color:var(--text)}
+body.dark-mode .vc-chef-card{--chef-sky:#18222e;--chef-floor:#4b3b2b;--chef-plank:#322b26;--chef-ink:#fff0d6;--chef-trim:#b78d58}
+.vc-chef-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 13px;border-bottom:1px solid var(--line)}.vc-chef-heading strong{font-size:.9rem}.vc-chef-heading span{display:block;font-size:.72rem;color:var(--muted);margin-top:3px}
+.vc-chef-scene{height:152px;position:relative;background:linear-gradient(0deg,var(--chef-floor) 0 22px,var(--chef-sky) 22px);isolation:isolate}
+.vc-chef-scene:before{content:"";position:absolute;bottom:9px;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,var(--chef-trim) 0 18px,transparent 18px 40px);opacity:.45}
+.vc-chef-sign{position:absolute;z-index:2;left:105px;right:13px;top:18px;min-height:71px;padding:10px 11px;border:3px solid var(--chef-trim);border-radius:8px;background:var(--chef-plank);color:var(--chef-ink);box-shadow:3px 4px 0 #0002;font-size:.86rem;font-weight:700;line-height:1.4;overflow-wrap:anywhere;display:flex;align-items:center}
+.vc-chef-sign:after{content:"";position:absolute;top:100%;right:19px;width:9px;height:39px;background:var(--chef-trim);z-index:-1}
+.vc-chef-walker{position:absolute;bottom:17px;left:5px;width:88px;height:112px;animation:vc-chef-walk 8s ease-in-out infinite}
+.vc-chef-avatar{position:relative;width:88px;height:112px;border:0;padding:0;display:block;background:transparent;cursor:pointer;transform-origin:center bottom;filter:drop-shadow(0 4px 1px #0003)}.vc-chef-avatar:focus-visible{outline:3px dashed var(--primary);outline-offset:0;border-radius:10px}
+.vc-chef-avatar svg{width:88px;height:112px;display:block;image-rendering:pixelated;overflow:visible}.vc-chef-left-leg{animation:vc-chef-step .5s steps(2,end) infinite;transform-origin:27px 53px}.vc-chef-right-leg{animation:vc-chef-step .5s steps(2,end) infinite reverse;transform-origin:38px 53px}.vc-chef-wave{animation:vc-chef-wave 3s steps(3,end) infinite;transform-origin:42px 34px}
+.vc-chef-card.is-cheering .vc-chef-avatar{animation:vc-chef-jump .7s ease}.vc-chef-actions{display:flex;gap:8px;padding:10px 12px;flex-wrap:wrap;background:var(--card);position:relative;z-index:3}.vc-chef-actions .btn{flex:1;font-size:.8rem;min-height:37px;padding:8px}.vc-chef-actions svg{width:18px;height:18px;flex-basis:18px}
+#cartDrawer:not(.show) .vc-chef-walker,#cartDrawer:not(.show) .vc-chef-avatar svg *{animation-play-state:paused}
+@keyframes vc-chef-walk{0%,100%{transform:translateX(0)}25%,75%{transform:translateX(15px)}50%{transform:translateX(4px)}}
+@keyframes vc-chef-step{0%{transform:translateY(-1px) rotate(-6deg)}100%{transform:translateY(1px) rotate(6deg)}}
+@keyframes vc-chef-wave{0%,70%,100%{transform:rotate(0)}80%{transform:rotate(-12deg)}90%{transform:rotate(8deg)}}
+@keyframes vc-chef-jump{0%,100%{transform:translateY(0)}40%{transform:translateY(-20px) rotate(-5deg)}65%{transform:translateY(-8px) rotate(4deg)}}
+@media(max-width:360px){.vc-chef-sign{left:94px;right:9px;font-size:.79rem;padding:8px}.vc-chef-walker,.vc-chef-avatar,.vc-chef-avatar svg{width:78px}.vc-chef-scene{height:158px}}
+@media(prefers-reduced-motion:reduce){.vc-chef-walker,.vc-chef-avatar,.vc-chef-avatar svg *{animation:none!important}.vc-chef-card.is-cheering .vc-chef-avatar{animation:none!important}}
+</style>
+<script id="vc-map-chef-gallery-enhancements">
+/* NUEVO: chef SVG original, sin recursos externos. */
+(function(){
+'use strict';
+const chefSvg='<svg viewBox="0 0 64 80" role="img" aria-label="Chef del menú, personaje de estilo RPG" shape-rendering="crispEdges"><g class="vc-chef-left-leg"><path fill="#2b2935" d="M22 52h10v16H20v-5h2z"/><path fill="#17151e" d="M18 67h14v7H16v-4h2z"/></g><g class="vc-chef-right-leg"><path fill="#343240" d="M33 52h10v16H33z"/><path fill="#17151e" d="M33 67h14v7H33z"/></g><path fill="#1d2635" d="M20 31h26v26H20z"/><path fill="#fff5df" d="M23 32h19v26H23z"/><path fill="#d5c6a9" d="M23 52h19v6H23z"/><path fill="#ce3836" d="M24 31h17v5H24zM30 35h5v7h-5z"/><path fill="#74462d" d="M22 14h23v17H22z"/><path fill="#e9ad76" d="M24 15h19v14H24zM21 19h3v7h-3zM43 19h3v7h-3z"/><path fill="#232732" d="M27 21h3v3h-3zM37 21h3v3h-3z"/><path fill="#8e5037" d="M31 26h6v2h-6z"/><path fill="#fff" d="M18 8h8V3h7V1h8v4h8v9h-4v5H22v-5h-4z"/><path fill="#cbd4dc" d="M22 14h23v4H22z"/><path fill="#fff5df" d="M15 34h8v16h-8z"/><path fill="#e9ad76" d="M15 47h8v7h-8z"/><g class="vc-chef-wave"><path fill="#fff5df" d="M42 34h8v13h-8z"/><path fill="#e9ad76" d="M47 29h7v13h-7z"/><path fill="#8f663d" d="M51 18h3v16h-3z"/><path fill="#b98c57" d="M48 12h9v8h-9z"/></g><path fill="#bd913f" d="M35 43h3v3h-3zM35 49h3v3h-3z"/></svg>';
+const talkIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v13H9l-6 5ZM7 7h10M7 11h6"/><circle cx="19" cy="19" r="2"/></svg>';
+const menuIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h7a3 3 0 0 1 3 3v15a4 4 0 0 0-4-3H4ZM14 6h6v15h-6M7 7h3M7 11h3"/></svg>';
+let phraseIndex=0,phraseContext='';
+function availablePromos(){if(siteStatus?.active===false||v6Pending)return [];return state.products.filter(p=>p.active&&p.stock>0&&!v12IsInternalProduct(p)&&offerForProduct(p)&&(state.cart[p.id]||0)<p.stock)}
+function lines(){if(v6Pending)return ['Tu pedido está pendiente de finalizar. Puedes retomarlo desde este carrito.','Revisa los detalles de tu pedido antes de continuar.'];const promos=availablePromos();if(promos.length)return ['¿Ya sabes qué ordenar? Hay promociones disponibles para explorar.','¿Qué te gustaría ordenar? Las sugerencias están justo debajo.','Puedes mirar '+promos[0].name+' y revisar su promoción.'];return ['¿Ya sabes qué ordenar? Dale una mirada al menú.','¿Qué te gustaría ordenar? Toca un producto para conocerlo mejor.','Estoy preparando ideas. Tú eliges qué añadir a tu pedido.']}
+function speak(jump=false){const card=document.getElementById('vcCartChef');if(!card)return;const context=availablePromos().map(p=>p.id).join('|')+'|'+!!v6Pending;if(context!==phraseContext){phraseContext=context;phraseIndex=0}const phrases=lines();card.querySelector('#vcChefSpeech').textContent=phrases[phraseIndex%phrases.length];card.querySelector('#vcChefContext').textContent=v6Pending?'Acompañando tu pedido':availablePromos().length?'Con sugerencias de promociones':'Ideas para explorar el menú';if(jump){card.classList.remove('is-cheering');void card.offsetWidth;card.classList.add('is-cheering');setTimeout(()=>card.classList.remove('is-cheering'),750)}}
+function mountChef(){const host=document.getElementById('cartBody');if(!host)return;let card=document.getElementById('vcCartChef');if(!card){card=document.createElement('section');card.id='vcCartChef';card.className='vc-chef-card';card.setAttribute('aria-label','Chef del carrito');card.innerHTML='<div class="vc-chef-heading"><div><strong>Tu chef del menú</strong><span id="vcChefContext"></span></div></div><div class="vc-chef-scene"><div class="vc-chef-sign" id="vcChefSpeech" role="status" aria-live="polite"></div><div class="vc-chef-walker"><button type="button" class="vc-chef-avatar" id="vcChefAvatar" aria-label="Hablar con el chef">'+chefSvg+'</button></div></div><div class="vc-chef-actions"><button type="button" class="btn secondary" id="vcChefTalk">'+talkIcon+'<span>Hablar con el chef</span></button><button type="button" class="btn secondary" id="vcChefMenu">'+menuIcon+'<span>Ver menú</span></button></div>';const suggestions=host.querySelector('#vcPromotionSuggestions');if(suggestions)suggestions.before(card);else host.append(card);const talk=()=>{phraseIndex++;speak(true)};card.querySelector('#vcChefTalk').onclick=talk;card.querySelector('#vcChefAvatar').onclick=talk;card.querySelector('#vcChefMenu').onclick=()=>{closeDrawer();document.getElementById('catalogGrid')?.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}}
+ speak();
+}
+const oldCart=renderCart;renderCart=function(){const result=oldCart.apply(this,arguments);mountChef();return result};
+const oldCatalog=renderCatalog;renderCatalog=function(){const result=oldCatalog.apply(this,arguments);if(document.getElementById('cartDrawer')?.classList.contains('show'))mountChef();return result};
+setInterval(()=>{if(document.hidden||!document.getElementById('cartDrawer')?.classList.contains('show'))return;phraseIndex++;speak()},8500);
+/* NUEVO: refresco público desde la configuración central, sin cambiar datos de pedidos. */
+let syncClient=null,channel=null,pendingRead=null,writing=0,epoch=0,expectedGallery=null,confirmationAttempts=0,viewSignature=null,viewRoot=null;
+function gallerySignature(gallery){return JSON.stringify(gallery,(_key,value)=>value&&typeof value==='object'&&!Array.isArray(value)?Object.keys(value).sort().reduce((result,key)=>(result[key]=value[key],result),{}):value)}
+function currentGallery(){return Array.isArray(state.config.publicProfile?.gallery)?state.config.publicProfile.gallery:[]}
+function editorOpen(){return !!document.querySelector('#adminModal.show #vcGalleryAdmin')}
+function paintGallery(){const root=document.querySelector('#v18BusinessModal .v18-business-shell');if(!root)return;const signature=gallerySignature(currentGallery());if(root===viewRoot&&signature===viewSignature)return;window.vcRefreshPublicGallery?.();viewSignature=signature;viewRoot=root}
+function installSync(){if(!supabaseClient||syncClient===supabaseClient)return;if(channel&&syncClient){try{Promise.resolve(syncClient.removeChannel(channel)).catch(()=>{})}catch{}}syncClient=supabaseClient;try{channel=syncClient.channel('vc-public-gallery-live').on('postgres_changes',{event:'*',schema:'public',table:'catalog_settings',filter:'id=eq.1'},()=>{if(pendingRead)pendingRead.finally(()=>void refreshGallery()).catch(()=>{});else void refreshGallery()}).subscribe()}catch(e){console.warn('Galería: se utilizará el refresco periódico.',e.message)}}
+async function refreshGallery(force=false){
+ installSync();if(!supabaseClient||writing||document.hidden&&!force||editorOpen()&&!force)return false;if(pendingRead)return pendingRead;
+ const client=supabaseClient,revision=epoch;
+ const task=(async()=>{try{
+  const result=await client.from('catalog_settings').select('data').eq('id',1).maybeSingle();if(result.error)throw result.error;if(!result.data?.data)return false;
+  if(client!==supabaseClient||revision!==epoch||writing||editorOpen()&&!force)return false;
+  const raw=result.data.data.publicProfile?.gallery,server=raw==null?[]:raw;
+  if(!Array.isArray(server)||server.some(item=>!item||!['image','video'].includes(item.type)||typeof item.url!=='string'))throw Error('La galería pública tiene un formato no reconocido.');
+  const signature=gallerySignature(server);
+  if(expectedGallery!==null&&signature!==expectedGallery){confirmationAttempts++;const message=document.getElementById('vcGallerySyncStatus');if(confirmationAttempts<3){if(message)message.textContent='El guardado respondió. Comprobando que los visitantes puedan ver la galería…';setTimeout(()=>void refreshGallery(true),1500)}else{expectedGallery=null;if(message)message.textContent='No se confirmó la publicación de estos cambios. La galería pública todavía muestra otra versión.'}return false}
+  if(expectedGallery!==null){expectedGallery=null;const message=document.getElementById('vcGallerySyncStatus');if(message)message.textContent='Publicación confirmada en la lectura pública.'}
+  if(signature!==gallerySignature(currentGallery())){state.config.publicProfile={...(state.config.publicProfile||{}),gallery:server};saveLocal()}
+  paintGallery();return true;
+ }catch(e){console.warn('No se pudo actualizar la galería pública:',e.message);return false}})();pendingRead=task;
+ try{return await task}finally{if(pendingRead===task)pendingRead=null}
+}
+window.vcGallerySync={
+ begin(){writing++;epoch++},
+ end(gallery){writing=Math.max(0,writing-1);epoch++;if(gallery){expectedGallery=gallerySignature(gallery);confirmationAttempts=0;paintGallery();setTimeout(()=>void refreshGallery(true),350)}},
+ refresh:refreshGallery
+};
+const oldPublicLoad=loadPublicCloudState;loadPublicCloudState=async function(){const result=await oldPublicLoad.apply(this,arguments);installSync();if(!writing)paintGallery();return result};
+const oldBusiness=window.v18OpenBusiness;if(typeof oldBusiness==='function')window.v18OpenBusiness=async function(){await refreshGallery(true);const result=await oldBusiness.apply(this,arguments);viewRoot=null;paintGallery();return result};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refreshGallery()});
+setInterval(()=>{if(!document.hidden)void refreshGallery()},15000);
+setTimeout(()=>void refreshGallery(),700);
 })();
 </script>
 
