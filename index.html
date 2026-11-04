@@ -3825,6 +3825,76 @@ cfg();renderHeader();paintExperience();setTimeout(refreshExperience,900);
 .v16-crop-thumb img{width:100%;height:100%;object-fit:cover}
 @media(max-width:860px){.v16-crop-layout{grid-template-columns:1fr}}
 </style>
+<script id="vc-business-editor-resources">
+/* NUEVO: SVG locales; no se añaden dependencias ni peticiones de tipografías. */
+(function(){
+'use strict';
+const paths={
+ businessIntro:'<path d="M3 10h18V5H3ZM5 10v11h14V10M8 21v-6h4v6M15 14h2M6 2v3M18 2v3"/>',
+ quickRate:'<circle cx="12" cy="9" r="6"/><path d="m8 14-2 8 6-3 6 3-2-8m-6-5 2 2 3-4"/>',
+ quickFollow:'<path d="M12 19 4 12a5 5 0 0 1 8-7 5 5 0 0 1 8 7M18 16v6m-3-3h6"/>',
+ ratingStrip:'<path d="m12 2 3 6 7 1-5 5 1 8-6-4-6 4 1-8-5-5 7-1Z"/>',
+ gallery:'<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8" cy="9" r="2"/><path d="m3 17 6-5 4 3 3-4 5 6"/>',
+ film:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v18M17 3v18M3 8h4M3 16h4M17 8h4M17 16h4m-6-4-5-3v6Z"/>',
+ replace:'<path d="M4 8h13l-3-3m3 3-3 3M20 16H7l3 3m-3-3 3-3"/><path d="M4 12V5M20 12v7"/>',
+ delete:'<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/>',
+ rename:'<path d="M3 7h8M7 3v8m4 9 2-6 6-6 3 3-6 6-5 3ZM17 10l3 3"/>',
+ save:'<path d="M4 3h13l4 4v14H3V3ZM7 3v6h9V3M7 21v-8h10v8"/>',
+ upload:'<path d="M4 15v6h16v-6M12 16V3m-5 5 5-5 5 5"/>',
+ close:'<circle cx="12" cy="12" r="9"/><path d="m8 8 8 8m0-8-8 8"/>',
+ previous:'<path d="M19 4v16M15 5l-9 7 9 7Z"/>',
+ next:'<path d="M5 4v16M9 5l9 7-9 7Z"/>',
+ location:'<path d="M12 22S4 14 4 9a8 8 0 1 1 16 0c0 5-8 13-8 13Z"/><circle cx="12" cy="9" r="3"/>',
+ hours:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/>',
+ medal:'<path d="m8 3 4 5 4-5M5 3h4M15 3h4"/><circle cx="12" cy="15" r="6"/><path d="m12 11 1 3 3 1-3 1-1 3-1-3-3-1 3-1Z"/>',
+ people:'<circle cx="9" cy="7" r="3"/><path d="M2 21v-4a7 7 0 0 1 14 0v4M17 4a3 3 0 0 1 0 6m3 11v-4a6 6 0 0 0-3-5"/>',
+ rate:'<path d="m12 3 3 5 6 1-4 5 1 7-6-3-6 3 1-7-4-5 6-1Z"/><path d="m10 12 2 2 4-4"/>',
+ follow:'<path d="M12 20S2 14 2 7a5 5 0 0 1 10-1A5 5 0 0 1 22 7c0 3-2 6-4 8M18 17v6m-3-3h6"/>',
+ donate:'<path d="M2 16h4l3-3h7a2 2 0 0 1 0 4h-4m-6 4h8l8-7M12 9S7 6 7 3a3 3 0 0 1 5-1 3 3 0 0 1 5 1c0 3-5 6-5 6Z"/>',
+ back:'<path d="m9 4-7 7 7 7M3 11h11a7 7 0 0 1 7 7v3"/>',
+ compass:'<circle cx="12" cy="12" r="9"/><path d="m16 8-3 5-5 3 3-5Z"/>',
+ review:'<path d="M3 4h18v13H9l-6 5ZM7 8h10M7 12h6"/>',
+ storefront:'<path d="M3 9h18l-2-6H5ZM4 9v12h16V9M9 21v-7h6v7M2 9a3 3 0 0 0 5 2 3 3 0 0 0 5 0 3 3 0 0 0 5 0 3 3 0 0 0 5-2"/>',
+ alias:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0M18 3h4M20 1v4"/>',
+ copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V3H3v13h5"/>',
+ filter:'<path d="M3 4h18l-7 8v7l-4 2v-9Z"/>',
+ fold:'<path d="M4 4h16v16H4ZM4 9h16m-12 6 4-3 4 3"/>',
+ burger:'<path d="M3 10a9 9 0 0 1 18 0ZM2 14h20M3 18h18l-2 3H5ZM7 6h.1M12 5h.1M17 7h.1"/>',
+ pizza:'<path d="m3 21 7-18a23 23 0 0 1 11 11ZM10 6a19 19 0 0 1 8 8"/><circle cx="10" cy="13" r="1.5"/><circle cx="7" cy="18" r="1"/>',
+ taco:'<path d="M2 19a10 10 0 0 1 20 0ZM5 18c1-9 12-9 14 0M7 12l2 2m2-4 2 3m2 0 2 2"/>',
+ cup:'<path d="M4 8h13v8a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5ZM17 9h2a3 3 0 0 1 0 6h-2M7 2v3M11 1v4M15 2v3"/>',
+ cake:'<path d="M3 12h18v9H3ZM3 16c3-3 6 3 9 0s6 3 9 0M7 12V8h10v4M12 8V5m0-4c-3 3 3 3 0 4"/>',
+ truck:'<path d="M2 5h12v12H2ZM14 9h4l4 5v3h-8M17 9v5h5"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/>',
+ fish:'<path d="M3 12c5-8 11-8 16 0-5 8-11 8-16 0ZM19 12l4-5v10ZM10 6v12"/><circle cx="7" cy="11" r=".7"/>',
+ leaf:'<path d="M20 3C6 2 0 12 7 19c7 6 17-3 13-16ZM4 22 16 8M9 17l-1-7m5 3h5"/>',
+ chicken:'<path d="M10 16C0 9 8 0 15 3c7 3 7 10-1 14l-5 5-3-3ZM6 19l-2-1a2 2 0 1 1-2-3 2 2 0 1 1 3-2l1 2"/>',
+ bottle:'<path d="M9 2h6v5l3 4v10H6V11l3-4ZM6 13h12M9 2v-1h6v1"/>',
+ icecream:'<path d="m6 11 6 12 6-12ZM4 11a5 5 0 0 1 3-8 5 5 0 0 1 10 0 5 5 0 0 1 3 8Z"/>',
+ bread:'<path d="M4 9a6 6 0 0 1 0-7h16a6 6 0 0 1 0 7v12H4ZM8 5v3M12 4v4M16 5v3"/>',
+ utensils:'<path d="M4 2v7a3 3 0 0 0 6 0V2M7 2v20M17 2c-4 5-4 9 0 10h3M20 2v20"/>',
+ pepper:'<path d="M16 6c8 3 3 15-13 16 8-5 3-17 13-16ZM16 6c-3-2-2-4 1-5M11 8l5 4 4-3"/>',
+ avocado:'<path d="M12 2C9 2 10 5 6 10c-8 11 10 17 14 7C23 10 15 2 12 2Z"/><circle cx="12" cy="15" r="4"/>',
+ fries:'<path d="m4 10 2 12h12l2-12ZM6 10V3h3v7M10 10V1h3v9M14 10V4h3v6"/>',
+ bowl:'<path d="M2 12h20a10 10 0 0 1-20 0ZM7 2c-4 4 4 4 0 8m5-8c-4 4 4 4 0 8m5-8c-4 4 4 4 0 8M7 22h10"/>',
+ sushi:'<ellipse cx="12" cy="6" rx="9" ry="4"/><path d="M3 6v12a9 4 0 0 0 18 0V6"/><ellipse cx="12" cy="6" rx="3" ry="1.5"/>',
+ shrimp:'<path d="M20 5C9-5-4 14 7 20c8 4 18-4 13-10M6 7l7 4M4 12l8 2M6 17l8-1M20 10l3 3v7l-5-4M20 5l3-4"/>',
+ cheese:'<path d="M3 10 17 2l4 8v11H3ZM3 10h18"/><circle cx="8" cy="15" r="2"/><circle cx="16" cy="17" r="1.5"/>',
+ corn:'<path d="M8 3c4-4 8 0 8 4v11c-4 4-8 0-8-4ZM8 9h8M8 13h8M12 1v18M3 10c1 8 5 11 9 12 5-2 9-6 9-12M3 10l9 12 9-12"/>',
+ pot:'<path d="M4 9h16v12H4ZM1 13h3M20 13h3M3 6h18M9 3h6M12 3v3"/>',
+ grill:'<path d="M2 10h20a10 10 0 0 1-20 0ZM7 19l-3 4M17 19l3 4M7 4V1M12 5V2M17 4V1M5 10v5M10 10v9M15 10v9M20 10v5"/>',
+ sandwich:'<path d="m2 9 10-7 10 7-10 7ZM2 13l10 7 10-7M2 17l10 6 10-6M6 8l6 4 6-4"/>',
+ teapot:'<path d="M7 7h11v11c0 5-11 5-11 0ZM7 9H2l5 7M18 9a5 5 0 0 1 0 9M8 4h9M12 1v3"/>',
+ donut:'<ellipse cx="12" cy="12" rx="10" ry="9"/><circle cx="12" cy="12" r="3"/><path d="m5 9 2 1m9-4 1 2m0 9 2-1M7 18l1-2"/>',
+ croissant:'<path d="M2 14C1 2 23 2 22 14l-5-4-2 9H9l-2-9ZM9 6l1 10m5-10-1 10M2 14l5 5 2-3m13-2-5 5-2-3"/>',
+ juice:'<path d="m5 7 2 15h10l2-15ZM4 7h16M12 7V3l6-2M7 12h10"/>',
+ home:'<path d="m2 11 10-9 10 9M5 10v12h14V10M10 22v-8h4v8"/>',
+ basket:'<path d="M2 9h20l-3 12H5ZM7 9l5-8 5 8M8 13v5M12 13v5M16 13v5"/>'
+};
+const pins=[['location','Ubicación'],['storefront','Tienda'],['burger','Hamburguesa'],['pizza','Pizza'],['taco','Tacos'],['cup','Café'],['cake','Pastel'],['truck','Reparto'],['fish','Pescado'],['leaf','Vegetariano'],['chicken','Pollo'],['bottle','Bebidas'],['icecream','Helado'],['bread','Pan'],['utensils','Restaurante'],['pepper','Picante'],['avocado','Aguacate'],['fries','Papas'],['bowl','Sopa'],['sushi','Sushi'],['shrimp','Mariscos'],['cheese','Queso'],['corn','Elote'],['pot','Cocina'],['grill','Parrilla'],['sandwich','Sándwich'],['teapot','Té'],['donut','Dona'],['croissant','Croissant'],['juice','Jugos'],['home','Casa'],['basket','Mercado']];
+function icon(key){return '<svg class="vc-asset-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'+(paths[key]||paths.location)+'</svg>'}
+window.vcBusinessAssets={icon,pins};
+})();
+</script>
 <script id="ventacomida-v16-fixes">
 (function(){
 'use strict';
@@ -3978,7 +4048,7 @@ window.vcOpenRatings=(viewOnly=false)=>openRateBusinessModal(viewOnly);
 function ensureBusinessTrigger(){
   const host=document.getElementById('v15Experience'); if(!host)return;
   const actions=host.querySelector('.v15-experience-actions'); if(!actions||actions.querySelector('#v16OpenBusiness'))return;
-  const btn=document.createElement('button'); btn.className='btn v16-glow-btn'; btn.id='v16OpenBusiness'; btn.innerHTML='🏪 <span>Conocer el negocio</span>'; btn.onclick=openBusinessShowcase; actions.prepend(btn);
+  const btn=document.createElement('button'); btn.className='btn v16-glow-btn'; btn.id='v16OpenBusiness'; /* MODIFICADO */ btn.innerHTML=window.vcBusinessAssets.icon('businessIntro')+'<span>Conocer el negocio</span>'; btn.onclick=openBusinessShowcase; actions.prepend(btn);
 }
 new MutationObserver(()=>ensureBusinessTrigger()).observe(document.body,{childList:true,subtree:true});
 
@@ -4254,7 +4324,7 @@ window.paintExperience=function(){
   if(!h){h=document.createElement('section');h.id='v15Experience';document.querySelector('.container.controls')?.before(h)}
   h.className='container vc-experience-fixed';
   const summary=window.vcExperienceSummary?.()||{}, scores=summary.scores||{}, avg=Number(scores.overall||0);
-  h.innerHTML=`<div class="vc-experience-copy"><h3>Tu experiencia importa</h3><p>Califica el negocio, servicio y comida. También puedes consultar lo que opinan otros clientes.</p><div class="vc-experience-rating"><span class="vc-experience-stars">${avg?'★'.repeat(Math.round(avg))+'☆'.repeat(Math.max(0,5-Math.round(avg))):'★★★★★'}</span><span>${avg?avg.toFixed(1):'Sin calificaciones'} · ${Number(scores.reviews||0)} opiniones · ${Number(summary.followers||0)} seguidores</span></div></div><div class="vc-experience-buttons"><button type="button" class="btn" id="v17KnowBusiness">🏪 <span>Conocer el negocio</span></button><button type="button" class="btn" id="v17Rate">★ <span>Calificar negocio</span></button><button type="button" class="btn secondary" id="vcViewOpinions">${UI.review}<span>Ver opiniones</span></button><button type="button" class="btn secondary" id="v17Follow">${UI.check}<span>${summary.following?'Siguiendo':'Seguir'}</span></button></div>`;
+  h.innerHTML=`<div class="vc-experience-copy"><h3>Tu experiencia importa</h3><p>Califica el negocio, servicio y comida. También puedes consultar lo que opinan otros clientes.</p><div class="vc-experience-rating"><span class="vc-experience-stars"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('ratingStrip')}</span><span>${avg?avg.toFixed(1):'Sin calificaciones'} · ${Number(scores.reviews||0)} opiniones · ${Number(summary.followers||0)} seguidores</span></div></div><div class="vc-experience-buttons"><button type="button" class="btn" id="v17KnowBusiness"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('businessIntro')} <span>Conocer el negocio</span></button><button type="button" class="btn" id="v17Rate"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('quickRate')} <span>Calificar negocio</span></button><button type="button" class="btn secondary" id="vcViewOpinions">${UI.review}<span>Ver opiniones</span></button><button type="button" class="btn secondary" id="v17Follow"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('quickFollow')}<span>${summary.following?'Siguiendo':'Seguir'}</span></button></div>`;
   document.getElementById('vcViewOpinions').onclick=()=>openRating(true);
   document.getElementById('v17KnowBusiness').onclick=()=>openBusinessShowcase();document.getElementById('v17Rate').onclick=()=>openRateBusinessModal();document.getElementById('v17Follow').onclick=async e=>{if(!customerSession){renderCustomerProfile();openModal('customerProfileModal');return toast('Inicia sesión para seguir al negocio.','info')}try{const r=await v16Community('toggle_follow',{});Object.assign(window.vcExperienceSummary?.()||{}, {following:r.following,followers:r.followers});paintExperience()}catch(err){toast(err.message,'error')}};
 };
@@ -4384,22 +4454,23 @@ function v18ProfileCfg(){state.config.publicProfile ||= {cover:'',avatar:'',bio:
 function v18LocationText(){const p=v18ProfileCfg(),a=state.config.businessAddress||{};return p.location_label||[[a.street,a.ext].filter(Boolean).join(' '),a.neighborhood||a.colony,a.municipality||a.city,a.state].filter(Boolean).join(', ')||state.config.origin?.address||'Ubicación del negocio'}
 function v18SocialLabel(k){return ({facebook:'Facebook',instagram:'Instagram',tiktok:'TikTok',x:'X',telegram:'Telegram',whatsapp:'WhatsApp',youtube:'YouTube',website:'Sitio web'})[k]||k}
 async function v18Community(action,payload={}){if(!supabaseClient)throw Error('Conectando con Supabase.');const {data,error}=await supabaseClient.rpc('catalog_community',{p_action:action,p_payload:payload});if(error)throw error;if(data?.error)throw Error(data.error);return data}
+/* MODIFICADO: SVG distintos por función en información del negocio. */
 async function v18OpenBusiness(){
   v18Cfg();const p=v18ProfileCfg(),status=v18HoursStatus();let info={followers:0,following:false,scores:{overall:0,reviews:0},reviews:[]};
   try{const s=await v18Community('summary',{}),r=await v18Community('reviews',{});info={...info,...s,reviews:r.reviews||[]}}catch{}
   const m=v4Modal('v18BusinessModal','Información del negocio'),body=m.querySelector('.modal-body');m.classList.add('v18-business-modal');
   const socials=Object.entries(p.socials||{}).filter(([,url])=>url).map(([k,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(v18SocialLabel(k))}</a>`).join('');
-  body.innerHTML=`<div class="v18-business-shell"><section class="v18-business-hero"><div class="v18-business-cover" style="${p.cover?`background-image:url('${esc(p.cover)}')`:''}"></div><div class="v18-business-overlay">${(p.avatar||state.config.logo)?`<img class="v18-business-avatar" src="${esc(p.avatar||state.config.logo)}" alt="Perfil del negocio">`:`<div class="v18-business-avatar"></div>`}<div class="v18-business-title"><h2>${esc(state.config.businessName)}</h2><p>${esc(p.bio||state.config.tagline||'')}</p><div class="v18-business-meta"><span class="v18-business-chip">📍 ${esc(v18LocationText())}</span><span class="v18-business-chip">${status.open?'🟢':'🔴'} ${esc(status.text)}</span><span class="v18-business-chip">⭐ ${Number(info.scores?.overall||0)?Number(info.scores.overall).toFixed(1):'Sin calificaciones'} · ${Number(info.scores?.reviews||0)} opiniones</span><span class="v18-business-chip">👥 ${Number(info.followers||0)} seguidores</span></div></div><div class="v18-business-actions"><button class="btn" id="v18BusinessRate">★ <span>Calificar</span></button><button class="btn secondary" id="v18BusinessFollow">❤ <span>${info.following?'Siguiendo':'Seguir'}</span></button>${/^https:\/\//i.test(p.donation_url||'')?`<a class="btn secondary" href="${esc(p.donation_url)}" target="_blank" rel="noopener noreferrer">💝 <span>${esc(p.donation_label||'Apoyar con donación')}</span></a>`:''}<button class="btn ghost" id="v18BusinessBack">↩ <span>Menú principal</span></button></div></div></section><div class="v18-business-body"><section class="v18-business-card"><h3>Horarios</h3><div class="v18-hours-status ${status.open?'open':'closed'}">${status.open?'●':'●'} ${esc(status.text)}</div>${v18HoursHtml()}</section><section class="v18-business-card"><h3>Ubicación y redes</h3><p>${esc(v18LocationText())}</p><div class="v18-business-socials">${socials||'<span class="small muted">Sin redes configuradas.</span>'}</div><div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="v18BusinessDirections">${UI.map}<span>Cómo llegar</span></button></div></section><section class="v18-business-card v18-business-reviews"><h3>Comentarios recientes</h3>${(info.reviews||[]).slice(0,6).map(x=>`<article class="v18-business-review"><div class="row between"><strong>${esc(x.display_name||'Cliente')}</strong><span>⭐ ${Number(x.overall_rating||5)}/5</span></div><p>${esc(x.comment||'')}</p><small class="muted">Servicio ${Number(x.service_rating||0)}/5 · Comida ${Number(x.food_rating||0)}/5</small></article>`).join('')||'<p class="small muted">Aún no hay comentarios.</p>'}</section></div></div>`;
+  body.innerHTML=`<div class="v18-business-shell"><section class="v18-business-hero"><div class="v18-business-cover" style="${p.cover?`background-image:url('${esc(p.cover)}')`:''}"></div><div class="v18-business-overlay">${(p.avatar||state.config.logo)?`<img class="v18-business-avatar" src="${esc(p.avatar||state.config.logo)}" alt="Perfil del negocio">`:`<div class="v18-business-avatar"></div>`}<div class="v18-business-title"><h2>${esc(state.config.businessName)}</h2><p>${esc(p.bio||state.config.tagline||'')}</p><div class="v18-business-meta"><span class="v18-business-chip">${window.vcBusinessAssets.icon('location')} ${esc(v18LocationText())}</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('hours')} ${esc(status.text)}</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('medal')} ${Number(info.scores?.overall||0)?Number(info.scores.overall).toFixed(1):'Sin calificaciones'} · ${Number(info.scores?.reviews||0)} opiniones</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('people')} ${Number(info.followers||0)} seguidores</span></div></div><div class="v18-business-actions"><button class="btn" id="v18BusinessRate">${window.vcBusinessAssets.icon('rate')} <span>Calificar</span></button><button class="btn secondary" id="v18BusinessFollow">${window.vcBusinessAssets.icon('follow')} <span>${info.following?'Siguiendo':'Seguir'}</span></button>${/^https:\/\//i.test(p.donation_url||'')?`<a class="btn secondary" href="${esc(p.donation_url)}" target="_blank" rel="noopener noreferrer">${window.vcBusinessAssets.icon('donate')} <span>${esc(p.donation_label||'Apoyar con donación')}</span></a>`:''}<button class="btn ghost" id="v18BusinessBack">${window.vcBusinessAssets.icon('back')} <span>Menú principal</span></button></div></div></section><div class="v18-business-body"><section class="v18-business-card"><h3>Horarios</h3><div class="v18-hours-status ${status.open?'open':'closed'}">${window.vcBusinessAssets.icon('storefront')} ${esc(status.text)}</div>${v18HoursHtml()}</section><section class="v18-business-card"><h3>Ubicación y redes</h3><p>${esc(v18LocationText())}</p><div class="v18-business-socials">${socials||'<span class="small muted">Sin redes configuradas.</span>'}</div><div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="v18BusinessDirections">${window.vcBusinessAssets.icon('compass')}<span>Cómo llegar</span></button></div></section><section class="v18-business-card v18-business-reviews"><h3>Comentarios recientes</h3>${(info.reviews||[]).slice(0,6).map(x=>`<article class="v18-business-review"><div class="row between"><strong>${esc(x.display_name||'Cliente')}</strong><span>${window.vcBusinessAssets.icon('review')} ${Number(x.overall_rating||5)}/5</span></div><p>${esc(x.comment||'')}</p><small class="muted">Servicio ${Number(x.service_rating||0)}/5 · Comida ${Number(x.food_rating||0)}/5</small></article>`).join('')||'<p class="small muted">Aún no hay comentarios.</p>'}</section></div></div>`;
   document.getElementById('v18BusinessBack').onclick=()=>{closeModal(m.id);window.scrollTo({top:0,behavior:'smooth'})};
   document.getElementById('v18BusinessDirections').onclick=()=>window.v17RouteToBusiness?.();
   document.getElementById('v18BusinessRate').onclick=()=>{closeModal(m.id);window.vcOpenRatings?.()};
-  document.getElementById('v18BusinessFollow').onclick=async()=>{if(!customerSession){closeModal(m.id);renderCustomerProfile();openModal('customerProfileModal');return}try{await v18Community('toggle_follow',{});closeModal(m.id);v18OpenBusiness()}catch(e){toast(e.message,'error')}};
+  document.getElementById('v18BusinessFollow').onclick=async()=>{if(!customerSession){closeModal(m.id);renderCustomerProfile();openModal('customerProfileModal');return}try{await v18Community('toggle_follow',{});closeModal(m.id);window.v18OpenBusiness()}catch(e){toast(e.message,'error')}};
   openModal(m.id);
 }
 window.v18OpenBusiness=v18OpenBusiness;
 
 /* Reemplaza el botón del bloque plegable para que sí abra el perfil V18. */
-function v18WireExperience(){const b=document.getElementById('v17KnowBusiness')||document.getElementById('v16OpenBusiness');if(b)b.onclick=v18OpenBusiness}
+function v18WireExperience(){const b=document.getElementById('v17KnowBusiness')||document.getElementById('v16OpenBusiness');/* MODIFICADO: incluir la galería pública. */ if(b)b.onclick=()=>window.v18OpenBusiness()}
 new MutationObserver(()=>v18WireExperience()).observe(document.body,{subtree:true,childList:true});
 
 /* ---------- Domicilios: búsqueda estructurada + GPS + pin movible + reverse geocode ---------- */
@@ -4667,58 +4738,26 @@ const initBase=initSupabase;
 initSupabase=async function(){await initBase();brand()};
 const oldHeader=renderHeader;renderHeader=function(){oldHeader();brand()};
 const oldSave=saveLocal;saveLocal=function(){oldSave();brand()};
-const GALLERY_LIMIT=30,VIDEO_LIMIT=10;
+/* MODIFICADO: límites autorizados; no se recortan galerías existentes. */
+const GALLERY_LIMIT=15,VIDEO_LIMIT=15;
 function items(){return Array.isArray(state.config.publicProfile?.gallery)?state.config.publicProfile.gallery:[]}
 function viewer(start){
  const list=items();if(!list.length)return;let index=start;
  const host=document.createElement('div');host.className='vc-gallery-viewer';host.setAttribute('role','dialog');host.setAttribute('aria-modal','true');
- function draw(){const x=list[index];host.innerHTML='<div class="toolbar"><button data-act="prev">Anterior</button><button data-act="next">Siguiente</button><button data-act="close">Cerrar ✕</button></div>'+(x.type==='video'?'<video controls playsinline src="'+esc(x.url)+'"></video>':'<img src="'+esc(x.url)+'" alt="'+esc(x.name||'Producto')+'">')+'<p>'+(index+1)+' de '+list.length+'</p>';host.querySelector('[data-act="prev"]').onclick=()=>{index=(index-1+list.length)%list.length;draw()};host.querySelector('[data-act="next"]').onclick=()=>{index=(index+1)%list.length;draw()};host.querySelector('[data-act="close"]').onclick=()=>host.remove()}
+ function draw(){const x=list[index];host.innerHTML='<div class="toolbar"><button data-act="prev">Anterior</button><button data-act="next">Siguiente</button><button data-act="close">Cerrar '+window.vcBusinessAssets.icon('close')+'</button></div>'+(x.type==='video'?/* MODIFICADO: reproducción del visor. */ '<video autoplay muted controls playsinline src="'+esc(x.url)+'"></video>':'<img src="'+esc(x.url)+'" alt="'+esc(x.name||'Producto')+'">')+'<p>'+(index+1)+' de '+list.length+'</p>';host.querySelector('[data-act="prev"]').onclick=()=>{index=(index-1+list.length)%list.length;draw()};host.querySelector('[data-act="next"]').onclick=()=>{index=(index+1)%list.length;draw()};host.querySelector('[data-act="close"]').onclick=()=>host.remove()}
  draw();document.body.append(host);host.addEventListener('click',e=>{if(e.target===host)host.remove()});
 }
-function galleryMarkup(){return items().map((x,i)=>'<button type="button" class="vc-gallery-item" data-vc-view="'+i+'">'+(x.type==='video'?'<video preload="metadata" muted src="'+esc(x.url)+'"></video>':'<img loading="lazy" src="'+esc(x.url)+'" alt="'+esc(x.name||'Producto')+'">')+'</button>').join('')}
-function showGallery(){const host=document.querySelector('#v18BusinessModal .v18-business-shell');if(!host)return;host.querySelector('#vcPublicGallery')?.remove();const section=document.createElement('section');section.className='v18-business-card';section.id='vcPublicGallery';section.style.gridColumn='1/-1';section.innerHTML='<h3>Galería de productos</h3><div class="vc-gallery-grid">'+galleryMarkup()+'</div>';if(!items().length)return;host.append(section);section.querySelectorAll('[data-vc-view]').forEach(b=>b.onclick=()=>viewer(Number(b.dataset.vcView)))}
+function galleryMarkup(){return items().map((x,i)=>'<button type="button" class="vc-gallery-item" data-vc-view="'+i+'">'+(x.type==='video'?/* MODIFICADO: reproducción pública sin sonido. */ '<video autoplay loop playsinline preload="metadata" muted src="'+esc(x.url)+'"></video>':'<img loading="lazy" src="'+esc(x.url)+'" alt="'+esc(x.name||'Producto')+'">')+'</button>').join('')}
+function showGallery(){const host=document.querySelector('#v18BusinessModal .v18-business-shell');if(!host)return;host.querySelector('#vcPublicGallery')?.remove();const section=document.createElement('section');section.className='v18-business-card';section.id='vcPublicGallery';section.style.gridColumn='1/-1';section.innerHTML='<!-- MODIFICADO --><h3>Fotos y videos del negocio</h3><div class="vc-gallery-grid">'+galleryMarkup()+'</div>';if(!items().length)return;host.append(section);section.querySelectorAll('[data-vc-view]').forEach(b=>b.onclick=()=>viewer(Number(b.dataset.vcView)))}
 const baseOpen=window.v18OpenBusiness;
 window.v18OpenBusiness=async function(){await baseOpen();showGallery()};
-function galleryAdmin(c){
- const profile=c.querySelector('#v16SaveProfile');if(!profile||c.querySelector('#vcGalleryAdmin'))return;
- const section=document.createElement('section');section.id='vcGalleryAdmin';section.className='section-card';
- section.innerHTML='<h3>Galería de productos</h3><p class="small muted">Hasta 30 fotografías y 10 videos de máximo 2 minutos. Los archivos se guardan en Supabase Storage.</p><label class="field">Agregar fotografías o videos<input id="vcGalleryFiles" type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" multiple></label><p id="vcGalleryStatus" class="small" role="status"></p><div id="vcGalleryList" class="vc-gallery-grid"></div>';
- profile.closest('.section-card').after(section);
- const draw=()=>{section.querySelector('#vcGalleryList').innerHTML=items().map((x,i)=>'<div class="vc-gallery-item">'+(x.type==='video'?'<video controls preload="metadata" src="'+esc(x.url)+'"></video>':'<img src="'+esc(x.url)+'">')+'<button type="button" data-remove="'+i+'">Eliminar</button></div>').join('');section.querySelectorAll('[data-remove]').forEach(b=>b.onclick=async()=>{if(!confirm('¿Eliminar este elemento de la galería?'))return;const previous=items().slice(),next=previous.filter((_,i)=>i!==Number(b.dataset.remove));state.config.publicProfile.gallery=next;try{await saveGallery();draw()}catch(e){state.config.publicProfile.gallery=previous;toast(e.message,'error')}})};
- async function saveGallery(){const {error}=await supabaseClient.rpc('catalog_config_save',{p_module:'business',p_data:{publicProfile:state.config.publicProfile}});if(error)throw error;saveLocal()}
- async function duration(file){return await new Promise((resolve,reject)=>{const video=document.createElement('video'),url=URL.createObjectURL(file);video.preload='metadata';video.onloadedmetadata=()=>{const d=video.duration;URL.revokeObjectURL(url);resolve(d)};video.onerror=()=>{URL.revokeObjectURL(url);reject(Error('No se pudo leer el video.'))};video.src=url})}
- section.querySelector('#vcGalleryFiles').onchange=async e=>{
- const input=e.currentTarget,status=section.querySelector('#vcGalleryStatus'),files=[...input.files];input.disabled=true;
- try{
-  if(!supabaseClient||!adminSession||!panelCan('business'))throw Error('Necesitas permiso de Negocio.');
-  const previous=items().slice(),newItems=previous.slice();
-  for(const file of files){
-   const video=file.type.startsWith('video/'),photo=file.type.startsWith('image/');
-   if(!video&&!photo)throw Error('Formato no permitido.');
-   if(file.size>50*1024*1024)throw Error('Máximo 50 MB por archivo.');
-   if(newItems.filter(x=>x.type==='video').length+(video?1:0)>VIDEO_LIMIT)throw Error('Máximo 10 videos.');
-   if(newItems.filter(x=>x.type==='image').length+(photo?1:0)>GALLERY_LIMIT)throw Error('Máximo 30 fotografías.');
-   if(video&&await duration(file)>120)throw Error('Los videos no pueden superar 2 minutos.');
-   status.textContent='Subiendo '+file.name+'…';
-   const ext=file.name.split('.').pop().toLowerCase(),path='public/'+crypto.randomUUID()+'.'+ext;
-   const {error}=await supabaseClient.storage.from('business-gallery').upload(path,file,{contentType:file.type,upsert:false});
-   if(error)throw error;
-   const {data}=supabaseClient.storage.from('business-gallery').getPublicUrl(path);
-   newItems.push({type:video?'video':'image',url:data.publicUrl,name:file.name});
-  }
-  state.config.publicProfile.gallery=newItems;
-  try{await saveGallery()}catch(error){state.config.publicProfile.gallery=previous;throw error}
-  status.textContent='Galería guardada.';draw();
- }catch(error){status.textContent=error.message;toast(error.message,'error')}
- finally{input.disabled=false;input.value=''}
- };
- draw();
-}
+/* MODIFICADO: editor compartido en Negocio y Perfil, conserva el almacenamiento existente. */
+function galleryAdmin(c){if(window.vcEnhancedGallery)window.vcEnhancedGallery(c)}
 const oldAdminPaneV23=renderAdminPane;
 renderAdminPane=async function(id){const result=await oldAdminPaneV23(id);if(id==='profile'){const c=document.getElementById('adminContent');if(c)galleryAdmin(c)}if(id==='business'){const c=document.getElementById('adminContent');if(c)pinAdmin(c)}return result};
 
 function pinSettings(){return state.config.map||{}}
-function pinIcon(){const m=pinSettings();if(m.pinImage)return L.icon({iconUrl:m.pinImage,iconSize:[46,58],iconAnchor:[23,56],popupAnchor:[0,-50]});if(m.pinEmoji){const emoji=esc(m.pinEmoji);return L.divIcon({className:'vc-business-pin',html:'<div class="vc-pin-emoji">'+emoji+'</div>',iconSize:[48,56],iconAnchor:[24,53]})}return labeledFoodPin('origin')}
+function pinIcon(){/* MODIFICADO: pines SVG locales además de selecciones existentes. */ const m=pinSettings();if(m.pinImage)return L.icon({iconUrl:m.pinImage,iconSize:[46,58],iconAnchor:[23,56],popupAnchor:[0,-50]});if(m.pinEmoji?.startsWith('svg:')&&window.vcBusinessAssets){const key=m.pinEmoji.slice(4);if(window.vcBusinessAssets.pins.some(p=>p[0]===key))return L.divIcon({className:'vc-business-pin',html:'<div class="vc-pin-svg">'+window.vcBusinessAssets.icon(key)+'</div>',iconSize:[46,54],iconAnchor:[23,53],popupAnchor:[0,-48]})}if(m.pinEmoji){const emoji=esc(m.pinEmoji);return L.divIcon({className:'vc-business-pin',html:'<div class="vc-pin-emoji">'+emoji+'</div>',iconSize:[48,56],iconAnchor:[24,53]})}return labeledFoodPin('origin')}
 function applyBusinessPin(){if(typeof L==='undefined')return;try{publicFoodOrigin?.setIcon(pinIcon());originMarker?.setIcon(pinIcon())}catch(e){console.warn('Pin:',e)}}
 async function pinAdmin(c){
  if(c.querySelector('#vcBusinessPinAdmin'))return;
@@ -5222,6 +5261,104 @@ function suggestions(){
 const oldCart=renderCart;renderCart=function(){const result=oldCart();suggestions();return result};
 const oldCatalog=renderCatalog;renderCatalog=function(){const result=oldCatalog();updateTimes();if(document.getElementById('cartDrawer')?.classList.contains('show'))suggestions();return result};
 renderCategories();v12HomeNav();updateTimes();
+})();
+</script>
+
+<!-- NUEVO: recursos del negocio, perfil, tipografías y categorías -->
+<style id="vc-business-editor-styles">
+/* NUEVO */
+.vc-asset-icon{display:inline-block;width:21px;height:21px;flex:0 0 21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle}
+.v18-business-chip{display:inline-flex;align-items:center;gap:7px}.v18-business-chip .vc-asset-icon{width:16px;height:16px;flex-basis:16px}.v18-business-review .vc-asset-icon{width:15px;height:15px}
+.v18-hours-status{display:inline-flex;align-items:center;gap:6px}.v18-business-actions .vc-asset-icon{color:inherit}
+#vcGalleryAdmin{background:var(--card);color:var(--text);overflow:hidden}
+.vc-media-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.vc-media-head h3{margin:0}.vc-media-count{display:flex;gap:8px;flex-wrap:wrap}.vc-media-count span{padding:7px 10px;border:1px solid var(--line);background:var(--secondary);border-radius:30px;font-size:.8rem}
+.vc-media-drop{margin:18px 0;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:22px;border:2px dashed var(--line);border-radius:16px;background:var(--secondary);color:var(--text)}
+.vc-media-drop.dragging{border-color:var(--primary);outline:2px solid var(--primary);outline-offset:3px}.vc-media-drop strong{display:block;font-size:1rem}.vc-media-drop p{margin:7px 0 0;max-width:560px;color:var(--muted);font-size:.85rem}
+.vc-media-drop .toolbar{margin:0}.vc-media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-top:14px}
+.vc-media-card{border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden;min-width:0}.vc-media-preview{position:relative;background:var(--secondary);aspect-ratio:16/10}.vc-media-preview img,.vc-media-preview video{width:100%;height:100%;object-fit:contain;display:block}.vc-media-preview>span{position:absolute;left:8px;top:8px;padding:4px 7px;border-radius:7px;background:#111827e8;color:#fff;font-size:.72rem}
+.vc-media-tools{padding:11px;display:grid;gap:9px}.vc-media-tools .toolbar{margin:0;gap:6px}.vc-media-tools button{flex:1;padding:8px;min-width:36px}.vc-media-tools .input{font-size:.83rem}.vc-media-empty{grid-column:1/-1;text-align:center;padding:30px 16px;border:1px solid var(--line);border-radius:12px;color:var(--muted)}
+#vcGalleryStatus{min-height:1.5em;overflow-wrap:anywhere}.vc-media-progress{width:100%;height:8px;accent-color:var(--primary)}
+#vcPublicGallery .vc-gallery-grid{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}#vcPublicGallery .vc-gallery-item{padding:0;cursor:zoom-in;background:var(--secondary);color:var(--text)}#vcPublicGallery .vc-gallery-item img,#vcPublicGallery .vc-gallery-item video{height:210px;object-fit:contain;display:block}
+.vc-pin-library{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px;margin:12px 0;max-height:350px;overflow:auto;padding:4px}.vc-pin-choice{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:10px 5px;border:1px solid var(--line);border-radius:12px;background:var(--secondary);color:var(--text);cursor:pointer}.vc-pin-choice[aria-pressed="true"]{border:2px solid var(--primary);box-shadow:0 0 0 2px var(--card)}.vc-pin-choice svg{width:29px;height:29px}.vc-pin-choice span{font-size:.72rem;text-align:center}.vc-pin-svg{width:46px;height:54px;display:grid;place-items:center;background:var(--primary,#c62828);color:#fff;border:2px solid #fff;border-radius:50% 50% 50% 8px;box-shadow:0 3px 9px #0005}.vc-pin-svg svg{width:28px;height:28px;transform:rotate(0deg)}
+.vc-font-preview{margin:12px 0;border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--secondary);color:var(--text);font-size:1.2rem}.vc-font-note{color:var(--muted);font-size:.8rem}
+#vcCategoryControl{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:8px;margin-bottom:8px;color:var(--text)}#vcCategoryControl .select{flex:1 1 180px;width:auto;min-width:0;background:var(--card);color:var(--text)}#vcCategoryControl .btn{flex:0 0 auto}
+#categoryChips{display:flex;flex-wrap:wrap;overflow:visible;max-width:100%;height:auto;gap:7px;min-width:0}#categoryChips .chip{flex:0 0 auto;max-width:100%;white-space:normal;overflow-wrap:anywhere}#categoryChips[hidden]{display:none!important}.controls{min-width:0}.controls>*{min-width:0}
+.vc-alias-card .input[readonly]{font-family:monospace;font-size:.8rem;overflow-wrap:anywhere}.vc-alias-card .toolbar{flex-wrap:wrap}.vc-pending-record{display:inline-flex;color:var(--text);border:1px solid var(--primary);background:var(--secondary);padding:5px 8px;border-radius:7px;font-weight:700;font-size:.8rem}
+/* NUEVO: visor compacto, con opiniones desplegables. */
+.product-viewer.vc-compact-viewer{height:min(92dvh,840px)!important;max-height:92dvh!important;display:flex;flex-direction:column}
+.product-viewer.vc-compact-viewer .modal-head{flex:0 0 auto;padding:13px 18px}.product-viewer.vc-compact-viewer .modal-body{flex:1;min-height:0;height:auto!important;max-height:none!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(300px,1fr);grid-template-rows:minmax(0,1fr);gap:16px;padding:16px;overflow:hidden!important}
+.product-viewer.vc-compact-viewer .product-large-view{grid-column:1;grid-row:1;height:100%!important;max-height:100%!important;margin:0!important;background:var(--secondary);color:var(--text)}
+.product-viewer.vc-compact-viewer .product-large-view #productZoomImage{min-height:0!important;overflow:hidden}.product-viewer.vc-compact-viewer .product-large-view svg{width:min(65%,260px)!important;height:min(65%,260px)!important;max-height:75%!important;fill:none;stroke:var(--product-icon-color);color:var(--product-icon-color);padding:10px}
+.vc-viewer-info{min-height:0;min-width:0;overflow:auto;display:flex;flex-direction:column;gap:9px;color:var(--text)}.vc-viewer-info>h3{margin:2px 0;font-size:1.12rem}.vc-viewer-info>p{margin:0;font-size:.9rem;line-height:1.4}.vc-viewer-info>.field{margin:0;font-size:.8rem}.vc-viewer-info>.notice{padding:9px 11px;font-size:.82rem}.vc-viewer-info>.btn{flex:0 0 auto;min-height:42px}.vc-viewer-info>.v11-customizer-grid{max-height:none!important;overflow:visible!important}.vc-viewer-info details{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);padding:10px}.vc-viewer-info summary{cursor:pointer;font-size:.87rem;font-weight:700}.vc-viewer-info #v12ProductSocial{max-height:none!important;overflow:visible!important;margin:8px 0 0;padding:8px}.vc-viewer-info input[type="range"]{width:100%}
+@media(max-width:650px){.product-viewer.vc-compact-viewer .modal-body{display:flex!important;flex-direction:column;padding:10px;gap:10px;overflow:auto!important}.product-viewer.vc-compact-viewer .product-large-view{height:23dvh!important;min-height:135px!important;flex:0 0 23dvh}.vc-viewer-info{overflow:visible;flex:1 0 auto}.vc-media-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.vc-media-drop{padding:15px}.vc-media-drop .toolbar{width:100%}.vc-media-drop .btn{flex:1}.vc-pin-library{grid-template-columns:repeat(auto-fill,minmax(75px,1fr))}}
+</style>
+<script id="vc-business-editor-enhancements">
+/* NUEVO */
+(function(){
+'use strict';
+const {icon,pins}=window.vcBusinessAssets;
+/* NUEVO: editor de medios, con guardado de cambios por operación. */
+window.vcEnhancedGallery=function(c){
+ if(!c||c.querySelector('#vcGalleryAdmin'))return;
+ const section=document.createElement('section');section.id='vcGalleryAdmin';section.className='section-card';
+ section.innerHTML='<div class="vc-media-head"><h3>La historia de tu negocio</h3><div class="vc-media-count" id="vcMediaCount"></div></div><div class="vc-media-drop" id="vcMediaDrop"><div><strong>Fotos que invitan. Videos que muestran tu negocio.</strong><p>Arrastra archivos aquí o selecciona desde tu dispositivo. Hasta 15 fotos y 15 videos; 50 MB por archivo y 2 minutos por video.</p></div><div class="toolbar"><button type="button" class="btn" id="vcAddPhotos">'+icon('gallery')+'<span>Añadir fotos</span></button><button type="button" class="btn secondary" id="vcAddVideos">'+icon('film')+'<span>Añadir videos</span></button></div></div><input type="file" hidden id="vcGalleryFiles" multiple accept="image/png,image/jpeg,image/webp,video/mp4,video/webm"><input type="file" hidden id="vcMediaReplacement" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm"><p class="small" id="vcGalleryStatus" role="status" aria-live="polite"></p><progress class="vc-media-progress" id="vcMediaProgress" max="100" value="0" hidden></progress><div id="vcGalleryList" class="vc-media-grid"></div>';
+ c.append(section);
+ const list=()=>Array.isArray(state.config.publicProfile?.gallery)?state.config.publicProfile.gallery:[];
+ const status=section.querySelector('#vcGalleryStatus'),input=section.querySelector('#vcGalleryFiles'),replacement=section.querySelector('#vcMediaReplacement'),progress=section.querySelector('progress'),drop=section.querySelector('#vcMediaDrop');let busy=false,replaceIndex=-1;
+ function lock(value){busy=value;section.querySelectorAll('button,input').forEach(b=>b.disabled=value);drop.setAttribute('aria-busy',String(value))}
+ function permitted(){if(!supabaseClient||!adminSession||!panelCan('business'))throw Error('Necesitas permiso de Negocio.')}
+ async function persist(next){permitted();const previous=state.config.publicProfile||{},profile={...previous,gallery:next};const result=await supabaseClient.rpc('catalog_config_save',{p_module:'business',p_data:{publicProfile:profile}});if(result.error||result.data?.error)throw Error(result.error?.message||result.data.error);state.config.publicProfile=profile;saveLocal()}
+ function counts(next){return {photos:next.filter(x=>x.type==='image').length,videos:next.filter(x=>x.type==='video').length}}
+ function draw(){const media=list(),count=counts(media);section.querySelector('#vcMediaCount').innerHTML='<span>'+count.photos+' / 15 fotos</span><span>'+count.videos+' / 15 videos</span>';if(count.photos>15||count.videos>15)status.textContent='La galería existente supera el límite nuevo. Tus archivos se conservan; puedes retirarlos o sustituirlos.';
+ section.querySelector('#vcGalleryList').innerHTML=media.length?media.map((x,i)=>'<article class="vc-media-card"><div class="vc-media-preview">'+(x.type==='video'?'<video controls playsinline preload="metadata" src="'+esc(x.url)+'"></video>':'<img loading="lazy" src="'+esc(x.url)+'" alt="'+esc(x.name||'Foto del negocio')+'">')+'<span>'+(x.type==='video'?'Video':'Foto')+' '+(i+1)+'</span></div><div class="vc-media-tools"><label class="field">Nombre o descripción<input class="input" data-media-name="'+i+'" maxlength="160" value="'+esc(x.name||'')+'"></label><div class="toolbar"><button type="button" class="btn secondary" data-media-rename="'+i+'" title="Guardar nombre" aria-label="Guardar nombre del archivo '+(i+1)+'">'+icon('rename')+'</button><button type="button" class="btn secondary" data-media-replace="'+i+'" title="Cambiar archivo" aria-label="Cambiar archivo '+(i+1)+'">'+icon('replace')+'</button><button type="button" class="btn ghost" data-media-delete="'+i+'" title="Eliminar" aria-label="Eliminar archivo '+(i+1)+'">'+icon('delete')+'</button></div></div></article>').join(''):'<div class="vc-media-empty">Tu galería comienza aquí. Añade fotos o videos para mostrarlos a tus clientes.</div>';
+ section.querySelectorAll('[data-media-delete]').forEach(b=>b.onclick=()=>change(async()=>{if(!confirm('¿Retirar este archivo de la galería pública?'))return;await persist(list().filter((_,i)=>i!==Number(b.dataset.mediaDelete)));status.textContent='Archivo retirado de la galería.'}));
+ section.querySelectorAll('[data-media-rename]').forEach(b=>b.onclick=()=>change(async()=>{const i=Number(b.dataset.mediaRename),name=section.querySelector('[data-media-name="'+i+'"]').value.trim();await persist(list().map((x,n)=>n===i?{...x,name}:x));status.textContent='Nombre actualizado.'}));
+ section.querySelectorAll('[data-media-replace]').forEach(b=>b.onclick=()=>{if(busy)return;replaceIndex=Number(b.dataset.mediaReplace);replacement.value='';replacement.click()});
+ }
+ async function change(task){if(busy)return;lock(true);try{permitted();await task();draw()}catch(e){status.textContent=e.message;toast(e.message,'error')}finally{lock(false)}}
+ function duration(file){return new Promise((resolve,reject)=>{const video=document.createElement('video'),url=URL.createObjectURL(file);let done=false;const timer=setTimeout(()=>finish(Error('No se pudo leer la duración del video.')),12000);function finish(error){if(done)return;done=true;clearTimeout(timer);const n=video.duration;video.removeAttribute('src');video.load();URL.revokeObjectURL(url);error?reject(error):resolve(n)}video.preload='metadata';video.onloadedmetadata=()=>finish();video.onerror=()=>finish(Error('El formato del video no se pudo leer.'));video.src=url})}
+ async function send(files,index=-1){if(!files.length||busy)return;await change(async()=>{const owner=adminSession.user.id,previous=list().slice(),next=previous.slice(),types=[];if(index>=0&&files.length!==1)throw Error('Selecciona un solo archivo para sustituir.');if(index>=previous.length)throw Error('El archivo seleccionado ya no está en la galería.');
+ for(const file of files){if(!['image/png','image/jpeg','image/webp','video/mp4','video/webm'].includes(file.type))throw Error('Usa PNG, JPEG, WebP, MP4 o WebM.');if(file.size>50*1024*1024)throw Error('Máximo 50 MB por archivo.');const type=file.type.startsWith('video/')?'video':'image';if(type==='video'){const seconds=await duration(file);if(!Number.isFinite(seconds)||seconds<=0||seconds>120)throw Error('El video debe durar como máximo 2 minutos.')}types.push(type)}
+ const simulated=index>=0?next.map((x,i)=>i===index?{type:types[0]}:x):next.concat(types.map(type=>({type})));const count=counts(simulated),before=counts(previous);if(count.photos>15&&count.photos>before.photos||count.videos>15&&count.videos>before.videos)throw Error('Máximo 15 fotos y 15 videos.');
+ progress.hidden=false;progress.value=0;
+ for(let n=0;n<files.length;n++){const file=files[n];status.textContent='Subiendo '+(n+1)+' de '+files.length+': '+file.name;const ext=({'image/png':'png','image/jpeg':'jpg','image/webp':'webp','video/mp4':'mp4','video/webm':'webm'})[file.type],path='public/'+crypto.randomUUID()+'.'+ext;const result=await supabaseClient.storage.from('business-gallery').upload(path,file,{contentType:file.type,upsert:false});if(result.error)throw result.error;const url=supabaseClient.storage.from('business-gallery').getPublicUrl(path).data?.publicUrl;if(!url)throw Error('No se pudo obtener la dirección del archivo.');const item={type:types[n],url,name:index>=0?previous[index].name||file.name:file.name};if(index>=0)next[index]={...previous[index],...item};else next.push(item);progress.value=Math.round((n+1)/files.length*100)}
+ if(adminSession?.user?.id!==owner)throw Error('La sesión cambió durante la carga. Vuelve a iniciar sesión.');await persist(next);status.textContent=index>=0?'Archivo sustituido y publicado.':'Galería guardada y publicada.';
+ });progress.hidden=true;input.value='';replacement.value=''}
+ section.querySelector('#vcAddPhotos').onclick=()=>{input.accept='image/png,image/jpeg,image/webp';input.click()};section.querySelector('#vcAddVideos').onclick=()=>{input.accept='video/mp4,video/webm';input.click()};input.onchange=()=>send([...input.files]);replacement.onchange=()=>send([...replacement.files],replaceIndex);
+ drop.ondragover=e=>{e.preventDefault();if(!busy)drop.classList.add('dragging')};drop.ondragleave=()=>drop.classList.remove('dragging');drop.ondrop=e=>{e.preventDefault();drop.classList.remove('dragging');if(!busy)send([...e.dataTransfer.files])};draw();
+};
+/* NUEVO: biblioteca local de pines SVG, conserva imágenes y pines anteriores. */
+function mountPins(c){const host=c?.querySelector('#vcBusinessPinAdmin'),select=host?.querySelector('#vcPinEmoji');if(!select||host.querySelector('.vc-pin-library'))return;const selected=state.config.map?.pinEmoji||'';
+ const group=document.createElement('div');group.className='vc-pin-library';group.setAttribute('role','group');group.setAttribute('aria-label','Biblioteca de iconos para el pin');
+ pins.forEach(([key,label])=>{const value='svg:'+key;if(![...select.options].some(o=>o.value===value)){const option=document.createElement('option');option.value=value;option.textContent=label+' · SVG';select.append(option)}const b=document.createElement('button');b.type='button';b.className='vc-pin-choice';b.dataset.pinValue=value;b.setAttribute('aria-pressed',String(selected===value));b.innerHTML=icon(key)+'<span>'+esc(label)+'</span>';b.onclick=()=>{select.value=value;select.dispatchEvent(new Event('change',{bubbles:true}));paint()};group.append(b)});
+ if([...select.options].some(o=>o.value===selected))select.value=selected;function paint(){group.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(select.value===b.dataset.pinValue)))}select.addEventListener('change',paint);select.closest('.field').after(group);
+}
+const basePane=renderAdminPane;renderAdminPane=async function(id){const result=await basePane(id);if(activeAdmin!==id)return result;const c=document.getElementById('adminContent');if(id==='business'&&panelCan('business'))window.vcEnhancedGallery(c);if(id==='business')mountPins(c);return result};
+/* NUEVO: catálogo de familias locales; las cuatro fuentes web existentes se mantienen. */
+const fontGroups={
+ 'Fuentes incluidas':['Inter','Nunito','Poppins','Roboto'],
+ 'Sans serif del dispositivo':['Arial','Arial Narrow','Arial Rounded MT Bold','Helvetica','Helvetica Neue','Verdana','Tahoma','Trebuchet MS','Segoe UI','Segoe UI Variable','Calibri','Candara','Century Gothic','Gill Sans','Gill Sans MT','Optima','Corbel','Aptos','Bahnschrift','Franklin Gothic Medium'],
+ 'Serif del dispositivo':['Georgia','Times New Roman','Cambria','Constantia','Palatino','Palatino Linotype','Book Antiqua','Baskerville','Garamond','Bookman Old Style','Century Schoolbook','Didot','Rockwell'],
+ 'Monoespaciadas del dispositivo':['Consolas','Courier New','Lucida Console','Monaco','Menlo','Cascadia Code','SFMono-Regular'],
+ 'Decorativas del dispositivo':['Impact','Copperplate','Papyrus','Brush Script MT','Lucida Handwriting','Comic Sans MS']
+};
+const baseDesign=renderDesignAdmin;renderDesignAdmin=function(c){baseDesign(c);const select=c.querySelector('#fontSelect');if(!select)return;const current=state.config.design.font;select.innerHTML=Object.entries(fontGroups).map(([label,fonts])=>'<optgroup label="'+esc(label)+'">'+fonts.map(font=>'<option value="'+esc(font)+'"'+(font===current?' selected':'')+'>'+esc(font)+'</option>').join('')+'</optgroup>').join('');if(![...select.options].some(o=>o.value===current)){const option=document.createElement('option');option.value=current;option.textContent=current;option.selected=true;select.append(option)}const preview=document.createElement('div');preview.className='vc-font-preview';preview.textContent='Así se lee tu menú · ÁÉÍÓÚ ñ · 0123456789';select.closest('.field').append(preview);const note=document.createElement('p');note.className='vc-font-note';note.textContent='Las fuentes del dispositivo se muestran si están instaladas. Si no están disponibles, se utiliza la fuente de respaldo.';preview.after(note);function paint(){preview.style.fontFamily='"'+select.value.replace(/"/g,'')+'", sans-serif'}select.addEventListener('change',paint);paint()};
+/* NUEVO: ID de cuenta visible y alias de presentación editable. */
+const baseProfile=renderCustomerProfile;renderCustomerProfile=function(){baseProfile();if(!customerSession||customerAuthView==='update')return;const host=document.querySelector('#customerProfileModal .modal-body');if(!host||host.querySelector('#vcPublicAlias'))return;const uid=customerSession.user.id,section=document.createElement('section');section.className='section-card vc-alias-card';section.innerHTML='<h3>Mi identificación</h3><label class="field">ID de la cuenta<input class="input" id="vcAccountUuid" readonly value="'+esc(uid)+'"></label><label class="field">Alias público editable<input class="input" id="vcPublicAlias" maxlength="32" autocomplete="nickname" value="'+esc(customerSession.user.user_metadata?.public_alias||'')+'" placeholder="Tu alias"></label><p class="small muted">Tu alias es un nombre de presentación; puede coincidir con el de otra persona.</p><div class="toolbar"><button type="button" class="btn" id="vcSaveAlias">'+icon('alias')+'<span>Guardar alias</span></button><button type="button" class="btn secondary" id="vcCopyAccountId">'+icon('copy')+'<span>Copiar ID de cuenta</span></button></div><p class="small" id="vcAliasStatus" role="status" aria-live="polite"></p>';host.querySelector('.profile-heading')?.after(section);
+ section.querySelector('#vcSaveAlias').onclick=e=>panelRun(e.currentTarget,async()=>{const alias=section.querySelector('#vcPublicAlias').value.trim();if(alias&&!/^[\p{L}\p{N}_.-]{3,32}$/u.test(alias))throw Error('Usa de 3 a 32 letras, números, puntos, guiones o guiones bajos.');if(customerSession?.user.id!==uid)throw Error('La sesión ha cambiado.');const {data,error}=await supabaseClient.auth.updateUser({data:{public_alias:alias}});if(error)throw error;if(customerSession?.user.id!==uid)return;customerSession.user=data.user;if(adminSession?.user.id===uid)adminSession.user=data.user;section.querySelector('#vcAliasStatus').textContent=alias?'Alias guardado: '+alias:'Alias retirado.';},'Alias actualizado.');section.querySelector('#vcCopyAccountId').onclick=async()=>{try{await navigator.clipboard.writeText(uid);section.querySelector('#vcAliasStatus').textContent='ID de cuenta copiado.'}catch{section.querySelector('#vcAccountUuid').select();section.querySelector('#vcAliasStatus').textContent='Selecciona y copia el ID de cuenta.'}};
+};
+/* NUEVO: filtro y plegado de categorías sin modificar las categorías guardadas. */
+let categoriesExpanded=false;
+function mountCategoryFilter(){const chips=document.getElementById('categoryChips');if(!chips)return;let controls=document.getElementById('vcCategoryControl');if(!controls){controls=document.createElement('div');controls.id='vcCategoryControl';chips.before(controls)}const options=categories().filter(cat=>cat==='Todos'||!String(cat).startsWith('_'));if(!options.includes('__vc_promotions__'))options.push('__vc_promotions__');controls.innerHTML='<label for="vcCategorySelect">Filtrar categoría</label><select class="select" id="vcCategorySelect">'+options.map(cat=>'<option value="'+esc(cat)+'"'+(cat===currentCategory?' selected':'')+'>'+esc(cat==='__vc_promotions__'?'Promociones':cat)+'</option>').join('')+'</select><button type="button" class="btn secondary" id="vcToggleCategories" aria-controls="categoryChips" aria-expanded="'+categoriesExpanded+'">'+icon('fold')+'<span>'+(categoriesExpanded?'Replegar':'Desplegar')+'</span></button>';chips.hidden=!categoriesExpanded;controls.querySelector('select').onchange=e=>{const cat=e.target.value;document.querySelector('#v12HomeNav [data-v12-view="home"]')?.click();currentCategory=cat;catalogPage=1;renderCategories();renderCatalog()};controls.querySelector('button').onclick=()=>{categoriesExpanded=!categoriesExpanded;mountCategoryFilter()};}
+const baseCategories=renderCategories;renderCategories=function(){baseCategories();mountCategoryFilter()};
+/* NUEVO: imagen y compra visibles; opiniones bajo demanda. */
+function compactViewer(){const modal=document.getElementById('productViewerModal'),body=modal?.querySelector('.modal-body');if(!body)return;const image=body.querySelector('.product-large-view');if(!image)return;modal.classList.add('vc-compact-viewer');let info=body.querySelector('.vc-viewer-info');if(!info){info=document.createElement('div');info.className='vc-viewer-info';body.append(info)}[...body.children].forEach(child=>{if(child!==image&&child!==info)info.append(child)});const reviews=info.querySelector('#v12ProductSocial');if(reviews&&reviews.parentElement.tagName!=='DETAILS'){const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Opiniones y valoración del producto';reviews.before(details);details.append(summary,reviews)}}
+const baseViewer=openProductViewer;openProductViewer=function(){const result=baseViewer.apply(this,arguments);compactViewer();setTimeout(compactViewer,0);if(result&&typeof result.then==='function')result.then(compactViewer);return result};
+/* NUEVO: respeta notas pendientes sin cambiar los registros originales. */
+let scheduled=false;
+function markPending(){scheduled=false;compactViewer();document.querySelectorAll('#adminContent .saved-address,#adminContent .billing-payment,#accountOrderList .saved-address').forEach(row=>{if(/emparejamiento por confirmar/i.test(row.textContent)&&!row.querySelector('.vc-pending-record')){const badge=document.createElement('span');badge.className='vc-pending-record';badge.textContent='Pendiente';row.append(badge)}})}
+new MutationObserver(()=>{if(!scheduled){scheduled=true;queueMicrotask(markPending)}}).observe(document.body,{childList:true,subtree:true});
+renderCategories();
 })();
 </script>
 
