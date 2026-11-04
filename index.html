@@ -623,6 +623,8 @@ function applyPublicTheme(){
     b.setAttribute('aria-label',publicThemeMode==='dark'?'Usar tema predeterminado':'Usar tema oscuro');
     if(window.innerWidth>=720)b.style.width='auto',b.style.padding='0 12px'; else b.style.width='44px',b.style.padding='0';
   }
+  /* NUEVO: recalcular contraste al personalizar o cambiar de modo. */
+  window.vcThemeContrast?.request();
 }
 function togglePublicTheme(){
   publicThemeMode=publicThemeMode==='dark'?'default':'dark';
@@ -5623,6 +5625,89 @@ new MutationObserver(schedule).observe(document.body,{childList:true,subtree:tru
 document.addEventListener('click',event=>{document.querySelectorAll('.vc-category-surface').forEach(surface=>{if(!surface.contains(event.target))surface._vcClose?.()})});
 document.addEventListener('invalid',event=>{const card=event.target.closest('.vc-module-card');if(card?.dataset.vcFolded==='true')sectionHeading(card)?.querySelector('.vc-fold-toggle')?.click()},true);
 refresh();
+})();
+</script>
+
+<!-- NUEVO: colores de texto e iconos calculados según el fondo real -->
+<style id="vc-global-adaptive-contrast">
+/* NUEVO: únicamente colores, sin alterar tamaños, estructura ni estados. */
+:root{--vc-on-primary:#fff;--vc-on-secondary:var(--text);--vc-on-card:var(--text);--vc-primary-card:var(--primary);--vc-primary-secondary:var(--primary);--vc-product-secondary:var(--product-icon-color);--vc-muted-card:var(--muted);--vc-on-danger:#fff;--vc-on-success:#fff;--vc-on-hero:#fff;--vc-disabled-bg:var(--secondary);--vc-disabled-on:var(--text)}
+body{color:var(--vc-on-card)}
+#adminModal{--primary:var(--vc-brand-primary,#c62828)!important;--product-icon-color:var(--vc-brand-icon,var(--primary))!important;color:var(--vc-on-card)}
+body .btn:not(.secondary):not(.ghost):not(.danger):not(.success),#adminModal .btn:not(.secondary):not(.ghost):not(.danger):not(.success){color:var(--vc-on-primary)!important}
+body .btn.secondary,body .icon-btn,#adminModal .btn.secondary,#adminModal .icon-btn{color:var(--vc-on-secondary)!important}
+body .btn.ghost,#adminModal .btn.ghost{color:var(--vc-on-card)!important}
+body .btn.danger,#adminModal .btn.danger{color:var(--vc-on-danger)!important}
+body .btn.success,#adminModal .btn.success{color:var(--vc-on-success)!important}
+body .qty-control .icon-btn{color:var(--vc-primary-card)!important}
+body .chip.active,body .icon-pack-btn.active,body .badge-count,body .followup-count,body .header-badge,body .checkout-step.active{color:var(--vc-on-primary)!important}
+body .tab-btn.active,body .radio-card input:checked+label,body .v12-social-btn.active{color:var(--vc-on-secondary)!important}
+body .price,body .total-line.grand,body .metric strong,body .admin-kpi strong{color:var(--vc-primary-card)!important}
+body .muted,body .brand-copy p,body .preparation-info{color:var(--vc-muted-card)!important}
+body .product-visual,body .product-large-view,body .combo-photo,body .icon-option{--product-icon-color:var(--vc-product-secondary);color:var(--vc-product-secondary)}
+body .product-large-view svg{stroke:var(--vc-product-secondary)}
+body .hero-card{color:var(--vc-on-hero)}
+body .hero-card h2,body .hero-card p{color:var(--vc-on-hero)}
+body input::placeholder,body textarea::placeholder{color:var(--vc-placeholder,var(--vc-muted-card))!important;opacity:1}
+body .vc-time-fill{background:var(--vc-primary-secondary)}
+body button:disabled,body .btn:disabled,body .icon-btn:disabled{opacity:1!important;background:var(--vc-disabled-bg)!important;color:var(--vc-disabled-on)!important}
+body #v18BusinessBack{background:var(--secondary)!important;color:var(--vc-on-secondary)!important;border-color:var(--line)!important}
+body .vc-gallery-viewer button{background:var(--secondary);color:var(--vc-on-secondary)}
+body .v13-map-popup button,body #vcMapLoadStatus button{background:var(--primary)!important;color:var(--vc-on-primary)!important}
+body .vc-pin-emoji{border-color:var(--primary)}
+body .vc-pin-svg,body .food-map-pin span{color:var(--vc-on-primary)}
+/* NUEVO: el cambio de paleta no interpola colores de contraste insuficiente. */
+body .btn,body .icon-btn,body .chip,body .tab-btn{transition-property:transform,box-shadow,border-color}
+body ::selection{background:var(--primary);color:var(--vc-on-primary)}
+body :focus-visible{outline-color:var(--vc-primary-card)}
+@media(forced-colors:active){body .btn,body .icon-btn,body .chip,body input,body select,body textarea{forced-color-adjust:auto}}
+</style>
+<script id="vc-global-adaptive-contrast-runtime">
+/* NUEVO: contraste sRGB, adaptación de estados y componentes generados por JavaScript. */
+(function(){
+'use strict';
+const LIMIT=4.5,records=new Map(),ownStyles=new WeakMap();let frame=0,full=true,busy=false,roots=new Set(),styles=new Map(),backgrounds=new Map();
+function parse(value){if(!value)return null;const v=String(value).trim().toLowerCase();if(v==='transparent')return [0,0,0,0];let m=v.match(/^#([\da-f]{3,8})$/i);if(m){let h=m[1];if(h.length===3||h.length===4)h=[...h].map(x=>x+x).join('');if(h.length!==6&&h.length!==8)return null;return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16),h.length===8?parseInt(h.slice(6,8),16)/255:1]}
+ m=v.match(/^rgba?\((.*)\)$/);if(m){const parts=m[1].replace(/,/g,' ').replace(/\//g,' ').split(/\s+/).filter(Boolean);if(parts.length<3)return null;const nums=parts.slice(0,3).map(x=>x.endsWith('%')?parseFloat(x)*2.55:parseFloat(x));nums.push(parts[3]===undefined?1:parts[3].endsWith('%')?parseFloat(parts[3])/100:parseFloat(parts[3]));return nums.every(Number.isFinite)?nums:null}
+ m=v.match(/^color\(srgb\s+(.+)\)$/);if(m){const p=m[1].replace(/\//g,' ').split(/\s+/).filter(Boolean).map(Number);if(p.length>=3&&p.every(Number.isFinite))return [p[0]*255,p[1]*255,p[2]*255,p[3]??1]}
+ const named={white:[255,255,255,1],black:[0,0,0,1],red:[255,0,0,1]};return named[v]||null;
+}
+function luminance(c){const n=c.slice(0,3).map(v=>{v=Math.max(0,Math.min(255,v))/255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4});return .2126*n[0]+.7152*n[1]+.0722*n[2]}
+function ratio(a,b){const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
+function over(f,b){const a=f[3]??1;return [f[0]*a+b[0]*(1-a),f[1]*a+b[1]*(1-a),f[2]*a+b[2]*(1-a),1]}
+function mix(a,b,t){return [0,1,2].map(i=>a[i]+(b[i]-a[i])*t).concat(1)}
+function minimum(color,bgs){return Math.min(...bgs.map(bg=>ratio(over(color,bg),bg)))}
+function readable(preferred,bgs,limit=LIMIT){const base=preferred||[0,0,0,1];if(minimum(base,bgs)>=limit)return base;let best=null,bestDistance=Infinity;for(const end of [[255,255,255,1],[0,0,0,1]]){if(minimum(end,bgs)<limit)continue;let lo=0,hi=1;for(let i=0;i<20;i++){const mid=(lo+hi)/2;if(minimum(mix(base,end,mid),bgs)>=limit+.02)hi=mid;else lo=mid}const candidate=mix(base,end,Math.min(1,hi+.002)),distance=candidate.slice(0,3).reduce((n,v,i)=>n+(v-base[i])**2,0);if(distance<bestDistance){best=candidate;bestDistance=distance}}
+ if(best)return best;return [[255,255,255,1],[0,0,0,1],base].sort((a,b)=>minimum(b,bgs)-minimum(a,bgs))[0];
+}
+function css(c){return 'rgb('+c.slice(0,3).map(v=>Math.round(Math.max(0,Math.min(255,v)))).join(', ')+')'}
+function style(el){let s=styles.get(el);if(!s){s=getComputedStyle(el);styles.set(el,s)}return s}
+function gradientColors(image){return (String(image||'').match(/rgba?\([^)]*\)|color\(srgb[^)]*\)|#[\da-f]{3,8}/gi)||[]).map(parse).filter(Boolean).slice(0,4)}
+function background(el){if(!el)return [[255,255,255,1]];if(backgrounds.has(el))return backgrounds.get(el);let bgs=background(el.parentElement);const s=style(el),color=parse(s.backgroundColor);if(color&&color[3]>0)bgs=bgs.map(bg=>over(color,bg));if(/gradient\(/.test(s.backgroundImage)){const colors=gradientColors(s.backgroundImage);if(colors.length)bgs=colors.flatMap(c=>bgs.map(bg=>over(c,bg))).slice(0,8)}backgrounds.set(el,bgs);return bgs}
+function stamp(el){ownStyles.set(el,el.getAttribute('style')||'')}
+function setProperty(el,name,value){if(el.style.getPropertyValue(name)===value&&el.style.getPropertyPriority(name)==='important')return;let item=records.get(el);if(!item){item=new Map();records.set(el,item)}if(!item.has(name))item.set(name,{value:el.style.getPropertyValue(name),priority:el.style.getPropertyPriority(name),applied:value});else item.get(name).applied=value;el.style.setProperty(name,value,'important');stamp(el)}
+function restore(targets){for(const [el,props]of records){if(!el.isConnected){records.delete(el);continue}if(targets&&!targets.some(root=>root===el||root.contains(el)))continue;for(const [name,old]of props){if(el.style.getPropertyValue(name)===old.applied){if(old.value)el.style.setProperty(name,old.value,old.priority);else el.style.removeProperty(name)}}stamp(el);records.delete(el)}}
+function token(scope,name,color){const value=Array.isArray(color)?css(color):color;if(scope.style.getPropertyValue(name)!==value){scope.style.setProperty(name,value);stamp(scope)}}
+function derive(scope,brand,art){const s=style(scope),get=(key,fallback)=>parse(s.getPropertyValue(key))||parse(fallback),card=get('--card','#fff'),secondary=get('--secondary','#fff3f3'),site=get('--site-bg','#fff'),text=get('--text','#232323'),muted=get('--muted','#6b7280'),danger=get('--danger','#b42318'),success=get('--success','#16834b'),disabled=mix(card,secondary,.5);
+ token(scope,'--vc-on-primary',readable([255,255,255,1],[brand]));token(scope,'--vc-on-secondary',readable(brand,[secondary]));token(scope,'--vc-on-card',readable(text,[card]));token(scope,'--vc-primary-card',readable(brand,[card]));token(scope,'--vc-primary-secondary',readable(brand,[secondary]));token(scope,'--vc-product-secondary',readable(art,[secondary]));token(scope,'--vc-muted-card',readable(muted,[card,site]));token(scope,'--vc-on-danger',readable([255,255,255,1],[danger]));token(scope,'--vc-on-success',readable([255,255,255,1],[success]));token(scope,'--vc-on-hero',readable([255,255,255,1],[brand,mix(brand,[17,17,17,1],.32)]));token(scope,'--vc-disabled-bg',disabled);token(scope,'--vc-disabled-on',readable(muted,[disabled]));
+}
+function ownText(el){return [...el.childNodes].some(n=>n.nodeType===3&&n.textContent.trim())}
+function monoSvg(svg){if(svg.closest('.vc-chef-avatar,#tvPreview,.ticket-canvas-preview,.ticket-preview'))return false;const literals=new Set();svg.querySelectorAll('[fill],[stroke]').forEach(n=>['fill','stroke'].forEach(k=>{const v=n.getAttribute(k);if(v&&!['none','currentColor','currentcolor','transparent'].includes(v))literals.add(v)}));return literals.size<=1}
+function audit(el){if(['SCRIPT','STYLE','LINK','META','OPTION','OPTGROUP','IMG','CANVAS','VIDEO','PICTURE','SOURCE'].includes(el.tagName)||el.closest('[hidden]')||!el.getClientRects().length)return;const svg=el.namespaceURI==='http://www.w3.org/2000/svg';if(svg&&el.tagName.toLowerCase()!=='svg')return;
+ const control=el.matches('button,input,textarea,select,a,summary,[role="button"]'),icon=svg&&monoSvg(el);if(svg&&!icon)return;if(!control&&!icon&&!ownText(el))return;const s=style(el);if(s.visibility==='hidden'||s.display==='none')return;const bgs=background(el),color=parse(s.color);if(color&&minimum(color,bgs)<LIMIT)setProperty(el,'color',css(readable(color,bgs)));
+ if(el.matches('input,textarea')){const placeholder=parse(getComputedStyle(el,'::placeholder').color)||color;if(placeholder)token(el,'--vc-placeholder',readable(placeholder,bgs))}
+ if(icon){const fill=parse(s.fill);if(fill&&fill[3]>0&&minimum(fill,bgs)<LIMIT)setProperty(el,'fill',css(readable(fill,bgs)));const stroke=parse(s.stroke);if(stroke&&stroke[3]>0&&minimum(stroke,bgs)<LIMIT)setProperty(el,'stroke',css(readable(stroke,bgs)));el.querySelectorAll('[stroke],[fill]').forEach(part=>{for(const attr of ['stroke','fill']){const value=part.getAttribute(attr);if(!value||/^(none|currentcolor|transparent)$/i.test(value))continue;const paint=parse(value);if(paint&&paint[3]>0&&minimum(paint,bgs)<LIMIT)setProperty(part,attr,css(readable(paint,bgs)))}})}
+}
+function flush(){frame=0;if(busy)return;busy=true;try{const targets=full?null:[...roots].filter(n=>n?.isConnected);restore(targets);styles=new Map();backgrounds=new Map();if(full){const design=typeof state!=='undefined'?state.config.design:null,root=style(document.body),brand=parse(design?.primary)||parse(root.getPropertyValue('--primary'))||parse('#c62828'),art=parse(design?.iconColor)||brand;token(document.body,'--vc-brand-primary',brand);token(document.body,'--vc-brand-icon',art);styles=new Map();derive(document.body,brand,art);const admin=document.getElementById('adminModal');if(admin)derive(admin,brand,art);styles=new Map();backgrounds=new Map()}
+ const elements=targets?[...new Set(targets.flatMap(root=>[root,...root.querySelectorAll('*')]))]:[document.body,...document.body.querySelectorAll('*')];for(const el of elements)audit(el);
+ }finally{full=false;roots.clear();busy=false}}
+function request(root){if(root&&root.nodeType===1)roots.add(root);else full=true;if(!frame)frame=requestAnimationFrame(flush)}
+window.vcThemeContrast={request,refresh:()=>{full=true;if(frame)cancelAnimationFrame(frame);flush()}};
+function presentation(value){return String(value||'').split(';').filter(part=>/^\s*(?:color|background(?:-color|-image)?|fill|stroke|opacity|display|visibility|--(?:primary|secondary|text|muted|card|site-bg|product-icon-color))\s*:/i.test(part)).join(';')}
+new MutationObserver(items=>{let all=false;for(const item of items){if(item.type==='childList'){for(const node of item.addedNodes){if(node.nodeType===1)roots.add(node);else if(node.nodeType===3&&item.target.nodeType===1)roots.add(item.target)}if(item.removedNodes.length&&item.target.nodeType===1)roots.add(item.target)}else if(item.attributeName==='style'){const current=item.target.getAttribute('style')||'';if(ownStyles.get(item.target)===current)continue;if(presentation(current)!==presentation(item.oldValue)){if(item.target===document.body||item.target===document.documentElement)all=true;else roots.add(item.target)}}else if(item.attributeName==='class'||item.attributeName==='hidden'||item.attributeName==='disabled'){if(item.target===document.body)all=true;else roots.add(item.target)}}if(all)full=true;if((full||roots.size)&&!frame)frame=requestAnimationFrame(flush)}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeOldValue:true,attributeFilter:['class','style','hidden','disabled']});
+for(const event of ['pointerover','pointerout','focusin','focusout'])document.addEventListener(event,e=>{const root=e.target.closest?.('button,a,input,select,textarea,.chip,.tab-btn,.icon-option,.vc-pin-choice');if(root)request(root)},true);
+window.addEventListener('pageshow',()=>request());window.addEventListener('beforeprint',()=>window.vcThemeContrast.refresh());
+request();
 })();
 </script>
 
