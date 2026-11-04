@@ -5707,12 +5707,15 @@ function derive(scope,brand,art){const s=style(scope),get=(key,fallback)=>parse(
 }
 function ownText(el){return [...el.childNodes].some(n=>n.nodeType===3&&n.textContent.trim())}
 function monoSvg(svg){if(svg.closest('.vc-chef-avatar,#tvPreview,.ticket-canvas-preview,.ticket-preview'))return false;const literals=new Set();svg.querySelectorAll('[fill],[stroke]').forEach(n=>['fill','stroke'].forEach(k=>{const v=n.getAttribute(k);if(v&&!['none','currentColor','currentcolor','transparent'].includes(v))literals.add(v)}));return literals.size<=1}
-function audit(el){if(['SCRIPT','STYLE','LINK','META','OPTION','OPTGROUP','IMG','CANVAS','VIDEO','PICTURE','SOURCE'].includes(el.tagName)||el.closest('[hidden]'))return;const svg=el.namespaceURI==='http://www.w3.org/2000/svg';if(svg&&el.tagName.toLowerCase()!=='svg')return;
- const control=el.matches('button,input,textarea,select,a,summary,[role="button"]'),icon=svg&&monoSvg(el);if(svg&&!icon)return;if(!control&&!icon&&!ownText(el))return;/* MODIFICADO: medir únicamente elementos que necesitan contraste. */if(!el.getClientRects().length)return;const s=style(el);if(s.visibility==='hidden'||s.display==='none')return;const bgs=background(el),color=parse(s.color);if(color&&minimum(color,bgs)<LIMIT)setProperty(el,'color',css(readable(color,bgs)));
+/* NUEVO: neutralizar texto decorativo sin tocar medios ni avisos de estado. */
+function neutral(c){const v=luminance(c),n=Math.round(255*(v<=.0031308?12.92*v:1.055*v**(1/2.4)-.055));return [n,n,n,c[3]??1]}
+function keepColor(el){return !!el.closest('#whatsappFab,.leaflet-container,.vc-chef-scene,.ticket-preview,#tvPreview,.ticket-canvas-preview,.btn.success,.btn.danger,.toast,.notice,.badge-count,.followup-count,.header-badge,.v18-hours-status,[role="alert"],input[type="color"]')}
+function audit(el){if(el.closest('#whatsappFab,.leaflet-container'))return;if(['SCRIPT','STYLE','LINK','META','OPTION','OPTGROUP','IMG','CANVAS','VIDEO','PICTURE','SOURCE'].includes(el.tagName)||el.closest('[hidden]'))return;const svg=el.namespaceURI==='http://www.w3.org/2000/svg';if(svg&&el.tagName.toLowerCase()!=='svg')return;
+ const control=el.matches('button,input,textarea,select,a,summary,[role="button"]'),icon=svg&&monoSvg(el);if(svg&&!icon)return;if(!control&&!icon&&!ownText(el))return;/* MODIFICADO: medir únicamente elementos que necesitan contraste. */if(!el.getClientRects().length)return;const s=style(el);if(s.visibility==='hidden'||s.display==='none')return;const bgs=background(el),original=parse(s.color),mono=document.body.classList.contains('dark-mode')&&!keepColor(el),color=mono&&original?neutral(original):original;/* MODIFICADO: gris legible en oscuro; colores originales en predeterminado. */if(color&&(mono&&css(color)!==css(original)||minimum(color,bgs)<LIMIT))setProperty(el,'color',css(readable(color,bgs)));
  if(el.matches('input,textarea')){const placeholder=parse(getComputedStyle(el,'::placeholder').color)||color;if(placeholder)token(el,'--vc-placeholder',readable(placeholder,bgs))}
- if(icon){const fill=parse(s.fill);if(fill&&fill[3]>0&&minimum(fill,bgs)<LIMIT)setProperty(el,'fill',css(readable(fill,bgs)));const stroke=parse(s.stroke);if(stroke&&stroke[3]>0&&minimum(stroke,bgs)<LIMIT)setProperty(el,'stroke',css(readable(stroke,bgs)));el.querySelectorAll('[stroke],[fill]').forEach(part=>{for(const attr of ['stroke','fill']){const value=part.getAttribute(attr);if(!value||/^(none|currentcolor|transparent)$/i.test(value))continue;const paint=parse(value);if(paint&&paint[3]>0&&minimum(paint,bgs)<LIMIT)setProperty(part,attr,css(readable(paint,bgs)))}})}
+ if(icon){const fill=mono?neutral(parse(s.fill)||[0,0,0,0]):parse(s.fill);if(fill&&fill[3]>0&&(mono||minimum(fill,bgs)<LIMIT))setProperty(el,'fill',css(readable(fill,bgs)));const stroke=mono?neutral(parse(s.stroke)||[0,0,0,0]):parse(s.stroke);if(stroke&&stroke[3]>0&&(mono||minimum(stroke,bgs)<LIMIT))setProperty(el,'stroke',css(readable(stroke,bgs)));el.querySelectorAll('[stroke],[fill]').forEach(part=>{for(const attr of ['stroke','fill']){const value=part.getAttribute(attr);if(!value||/^(none|currentcolor|transparent)$/i.test(value))continue;const paint=mono?neutral(parse(value)||[0,0,0,0]):parse(value);if(paint&&paint[3]>0&&(mono||minimum(paint,bgs)<LIMIT))setProperty(part,attr,css(readable(paint,bgs)))}})}
 }
-function flush(){frame=0;if(busy)return;busy=true;try{const targets=full?null:[...roots].filter(n=>n?.isConnected);restore(targets);styles=new Map();backgrounds=new Map();if(full){const design=typeof state!=='undefined'?state.config.design:null,root=style(document.body),brand=parse(design?.primary)||parse(root.getPropertyValue('--primary'))||parse('#c62828'),art=parse(design?.iconColor)||brand;token(document.body,'--vc-brand-primary',brand);token(document.body,'--vc-brand-icon',art);styles=new Map();derive(document.body,brand,art);const admin=document.getElementById('adminModal');if(admin)derive(admin,brand,art);styles=new Map();backgrounds=new Map()}
+function flush(){frame=0;if(busy)return;busy=true;try{const targets=full?null:[...roots].filter(n=>n?.isConnected);restore(targets);styles=new Map();backgrounds=new Map();if(full){const design=typeof state!=='undefined'?state.config.design:null,root=style(document.body),/* MODIFICADO: el modo oscuro usa la paleta neutra efectiva. */brand=parse(document.body.classList.contains('dark-mode')?root.getPropertyValue('--primary'):design?.primary)||parse(root.getPropertyValue('--primary'))||parse('#c62828'),art=parse(document.body.classList.contains('dark-mode')?root.getPropertyValue('--product-icon-color'):design?.iconColor)||brand;token(document.body,'--vc-brand-primary',brand);token(document.body,'--vc-brand-icon',art);styles=new Map();derive(document.body,brand,art);const admin=document.getElementById('adminModal');if(admin)derive(admin,brand,art);styles=new Map();backgrounds=new Map()}
  const elements=targets?[...new Set(targets.flatMap(root=>[root,...root.querySelectorAll('*')]))]:[document.body,...document.body.querySelectorAll('*')];for(const el of elements)audit(el);
  }finally{full=false;roots.clear();busy=false}}
 function request(root){if(root&&root.nodeType===1)roots.add(root);else full=true;if(!frame)frame=requestAnimationFrame(flush)}
@@ -5723,6 +5726,41 @@ new MutationObserver(items=>{let all=false;for(const item of items){if(item.type
 for(const event of ['pointerover','pointerout','focusin','focusout'])document.addEventListener(event,e=>{const root=e.target.closest?.('button,a,input,select,textarea,.chip,.tab-btn,.icon-option,.vc-pin-choice');if(root&&!root.contains(e.relatedTarget))request(root)},true);
 window.addEventListener('pageshow',()=>request());window.addEventListener('beforeprint',()=>window.vcThemeContrast.refresh());
 request();
+})();
+</script>
+
+<!-- NUEVO: paleta neutra exclusiva del modo oscuro y minimapa del local -->
+<style id="vc-neutral-dark-business-map">
+/* NUEVO: colores únicamente; el modo predeterminado conserva su personalización. */
+body.dark-mode,body.dark-mode #adminModal{--primary:#454545!important;--secondary:#292929!important;--text:#f5f5f5!important;--muted:#b5b5b5!important;--card:#1b1b1b!important;--site-bg:#101010!important;--line:#3b3b3b!important;--product-icon-color:#dedede!important;--vc-brand-primary:#454545!important;--vc-brand-icon:#dedede!important;accent-color:#dedede;color-scheme:dark}
+body.dark-mode{background:#101010!important}body.dark-mode::before{background:#101010!important}body.dark-mode .topbar{background:rgba(27,27,27,.96)!important}
+body.dark-mode .hero-card,body.dark-mode .v18-business-hero{background:linear-gradient(135deg,#3b3b3b,#191919)!important}
+body.dark-mode .input,body.dark-mode .textarea,body.dark-mode .select,body.dark-mode .search-wrap input{background:#151515!important;color:#f5f5f5!important}
+body.dark-mode #adminModal .input,body.dark-mode #adminModal .select{background:#151515!important}
+body.dark-mode #vcSubscriptionAccess .vc-access-card{background:#1b1b1b;border-color:#3b3b3b}
+body.dark-mode .vc-media-preview>span{background:rgba(20,20,20,.91)}
+body.dark-mode #v18BusinessBack{background:#292929!important;border-color:#777!important}
+body.dark-mode .vc-experience-stars,body.dark-mode .v15-stars-text,body.dark-mode .v17-stars,body.dark-mode .v16-review-stars,body.dark-mode .v12-hearts,body.dark-mode .v14-stars{color:#dedede!important}
+/* NUEVO: el minimapa conserva la cartografía original y no cambia el destino de entrega. */
+.vc-business-mini-map{height:210px;width:100%;margin-top:13px;border:1px solid var(--line);border-radius:13px;overflow:hidden;isolation:isolate;background:var(--secondary)}
+.vc-business-mini-pin{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:2px solid white;background:#454545;color:white;box-shadow:0 2px 8px #0005}.vc-business-mini-pin svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8}
+.vc-business-mini-error{margin:8px 0 0;color:var(--muted);font-size:.8rem}
+@media(max-width:650px){.vc-business-mini-map{height:180px}}
+</style>
+<script id="vc-business-minimap-runtime">
+/* NUEVO: reutiliza Leaflet y proveedores existentes; solo una ubicación confirmada. */
+(function(){
+'use strict';
+let map=null,serial=0;
+function location(){const o=state.config.origin;if(!o||o.confirmed!==true||typeof o.lat!=='number'||typeof o.lng!=='number'||!Number.isFinite(o.lat)||!Number.isFinite(o.lng)||Math.abs(o.lat)>90||Math.abs(o.lng)>180)return null;return {lat:o.lat,lng:o.lng}}
+function dispose(){if(map){map._vcTileCleanup?.();map.remove();map=null}}
+async function mount(ticket){const root=document.querySelector('#v18BusinessModal .v18-business-shell'),host=root?.querySelector('#v18BusinessDirections')?.closest('.v18-business-card'),point=location();if(!host||!point||ticket!==serial||!document.getElementById('v18BusinessModal')?.classList.contains('show'))return;
+ const canvas=document.createElement('div');canvas.id='vcBusinessMiniMap';canvas.className='vc-business-mini-map';canvas.setAttribute('role','region');canvas.setAttribute('aria-label','Ubicación confirmada del negocio');host.append(canvas);
+ try{await window.vcEnsureLeaflet();if(ticket!==serial||!canvas.isConnected)return;dispose();map=L.map(canvas,{scrollWheelZoom:false,dragging:!L.Browser?.mobile}).setView([point.lat,point.lng],16);addConfiguredTileLayer(map,canvas.id);
+ const marker=L.divIcon({className:'',html:'<div class="vc-business-mini-pin">'+window.vcBusinessAssets.icon('location')+'</div>',iconSize:[34,34],iconAnchor:[17,17]});L.marker([point.lat,point.lng],{icon:marker,draggable:false}).addTo(map).bindPopup(esc(state.config.businessName));requestAnimationFrame(()=>{if(ticket===serial&&canvas.isConnected)map?.invalidateSize({pan:false})});
+ }catch(e){if(ticket!==serial)return;dispose();canvas.remove();const note=document.createElement('p');note.className='vc-business-mini-error';note.setAttribute('role','status');note.textContent='No se pudo cargar el minimapa. Puedes utilizar Cómo llegar.';host.append(note);console.warn('Minimapa del negocio:',e.message)}
+}
+const open=window.v18OpenBusiness;window.v18OpenBusiness=async function(){const ticket=++serial;dispose();const result=await open.apply(this,arguments);if(ticket===serial)void mount(ticket);return result};
 })();
 </script>
 
