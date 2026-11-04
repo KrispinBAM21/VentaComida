@@ -4133,6 +4133,8 @@ async function openRateBusinessModal(viewOnly=false){
   openModal(m.id); await loadV16Reviews();
 }
 window.vcOpenRatings=(viewOnly=false)=>openRateBusinessModal(viewOnly);
+/* NUEVO: puente público hacia la operación existente de seguimiento. */
+window.vcToggleBusinessFollow=()=>v16Community('toggle_follow',{});
 
 function ensureBusinessTrigger(){
   const host=document.getElementById('v15Experience'); if(!host)return;
@@ -4414,8 +4416,10 @@ window.paintExperience=function(){
   h.className='container vc-experience-fixed';
   const summary=window.vcExperienceSummary?.()||{}, scores=summary.scores||{}, avg=Number(scores.overall||0);
   h.innerHTML=`<div class="vc-experience-copy"><h3>Tu experiencia importa</h3><p>Califica el negocio, servicio y comida. También puedes consultar lo que opinan otros clientes.</p><div class="vc-experience-rating"><span class="vc-experience-stars"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('ratingStrip')}</span><span>${avg?avg.toFixed(1):'Sin calificaciones'} · ${Number(scores.reviews||0)} opiniones · ${Number(summary.followers||0)} seguidores</span></div></div><div class="vc-experience-buttons"><button type="button" class="btn" id="v17KnowBusiness"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('businessIntro')} <span>Conocer el negocio</span></button><button type="button" class="btn" id="v17Rate"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('quickRate')} <span>Calificar negocio</span></button><button type="button" class="btn secondary" id="vcViewOpinions"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('opinionsDialog')}<span>Ver opiniones</span></button><button type="button" class="btn secondary" id="v17Follow"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('followRibbon')}<span>${summary.following?'Siguiendo':'Seguir'}</span></button></div>`;
-  document.getElementById('vcViewOpinions').onclick=()=>openRating(true);
-  document.getElementById('v17KnowBusiness').onclick=()=>openBusinessShowcase();document.getElementById('v17Rate').onclick=()=>openRateBusinessModal();document.getElementById('v17Follow').onclick=async e=>{if(!customerSession){renderCustomerProfile();openModal('customerProfileModal');return toast('Inicia sesión para seguir al negocio.','info')}try{const r=await v16Community('toggle_follow',{});Object.assign(window.vcExperienceSummary?.()||{}, {following:r.following,followers:r.followers});paintExperience()}catch(err){toast(err.message,'error')}};
+  /* MODIFICADO: utilizar las funciones públicas del módulo. */
+  document.getElementById('vcViewOpinions').onclick=()=>window.vcOpenRatings(true);
+  /* MODIFICADO: acciones accesibles y seguimiento sin solicitudes duplicadas. */
+  document.getElementById('v17KnowBusiness').onclick=()=>window.v18OpenBusiness();document.getElementById('v17Rate').onclick=()=>window.vcOpenRatings(false);document.getElementById('v17Follow').onclick=async e=>{if(!customerSession){renderCustomerProfile();openModal('customerProfileModal');return toast('Inicia sesión para seguir al negocio.','info')}const button=e.currentTarget;if(button.disabled)return;button.disabled=true;try{const r=await window.vcToggleBusinessFollow();Object.assign(window.vcExperienceSummary?.()||{}, {following:r.following,followers:r.followers});window.paintExperience()}catch(err){toast(err.message,'error')}finally{button.disabled=false}};
 };
 
 /* ---------- Ruta del usuario al local al pulsar el pin ---------- */
@@ -4546,15 +4550,19 @@ async function v18Community(action,payload={}){if(!supabaseClient)throw Error('C
 /* MODIFICADO: SVG distintos por función en información del negocio. */
 async function v18OpenBusiness(){
   v18Cfg();const p=v18ProfileCfg(),status=v18HoursStatus();let info={followers:0,following:false,scores:{overall:0,reviews:0},reviews:[]};
-  try{const s=await v18Community('summary',{}),r=await v18Community('reviews',{});info={...info,...s,reviews:r.reviews||[]}}catch{}
+  /* MODIFICADO: respuesta inmediata; las consultas independientes se ejecutan juntas. */
   const m=v4Modal('v18BusinessModal','Información del negocio'),body=m.querySelector('.modal-body');m.classList.add('v18-business-modal');
+  const request=m._vcBusinessRequest=(m._vcBusinessRequest||0)+1;
+  body.innerHTML='<p class="muted">Cargando…</p>';openModal(m.id);
+  try{const [s,r]=await Promise.all([v18Community('summary',{}),v18Community('reviews',{})]);info={...info,...s,reviews:r.reviews||[]}}catch{}
+  if(m._vcBusinessRequest!==request||!m.classList.contains('show'))return;
   const socials=Object.entries(p.socials||{}).filter(([,url])=>url).map(([k,url])=>`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(v18SocialLabel(k))}</a>`).join('');
   body.innerHTML=`<div class="v18-business-shell"><section class="v18-business-hero"><div class="v18-business-cover" style="${p.cover?`background-image:url('${esc(p.cover)}')`:''}"></div><div class="v18-business-overlay">${(p.avatar||state.config.logo)?`<img class="v18-business-avatar" src="${esc(p.avatar||state.config.logo)}" alt="Perfil del negocio">`:`<div class="v18-business-avatar"></div>`}<div class="v18-business-title"><h2>${esc(state.config.businessName)}</h2><p>${esc(p.bio||state.config.tagline||'')}</p><div class="v18-business-meta"><span class="v18-business-chip">${window.vcBusinessAssets.icon('location')} ${esc(v18LocationText())}</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('hours')} ${esc(status.text)}</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('medal')} ${Number(info.scores?.overall||0)?Number(info.scores.overall).toFixed(1):'Sin calificaciones'} · ${Number(info.scores?.reviews||0)} opiniones</span><span class="v18-business-chip">${window.vcBusinessAssets.icon('people')} ${Number(info.followers||0)} seguidores</span></div></div><div class="v18-business-actions"><button class="btn" id="v18BusinessRate">${window.vcBusinessAssets.icon('rate')} <span>Calificar</span></button><button class="btn secondary" id="v18BusinessFollow"><!-- MODIFICADO -->${window.vcBusinessAssets.icon('followSeal')} <span>${info.following?'Siguiendo':'Seguir'}</span></button>${/^https:\/\//i.test(p.donation_url||'')?`<a class="btn secondary" href="${esc(p.donation_url)}" target="_blank" rel="noopener noreferrer">${window.vcBusinessAssets.icon('donate')} <span>${esc(p.donation_label||'Apoyar con donación')}</span></a>`:''}<button class="btn ghost" id="v18BusinessBack">${window.vcBusinessAssets.icon('back')} <span>Menú principal</span></button></div></div></section><div class="v18-business-body"><section class="v18-business-card"><h3>Horarios</h3><div class="v18-hours-status ${status.open?'open':'closed'}">${window.vcBusinessAssets.icon('storefront')} ${esc(status.text)}</div>${v18HoursHtml()}</section><section class="v18-business-card"><h3>Ubicación y redes</h3><p>${esc(v18LocationText())}</p><div class="v18-business-socials">${socials||'<span class="small muted">Sin redes configuradas.</span>'}</div><div class="toolbar" style="margin-top:12px"><button class="btn secondary" id="v18BusinessDirections">${window.vcBusinessAssets.icon('compass')}<span>Cómo llegar</span></button></div></section><section class="v18-business-card v18-business-reviews"><h3>Comentarios recientes</h3>${(info.reviews||[]).slice(0,6).map(x=>`<article class="v18-business-review"><div class="row between"><strong>${esc(x.display_name||'Cliente')}</strong><span>${window.vcBusinessAssets.icon('review')} ${Number(x.overall_rating||5)}/5</span></div><p>${esc(x.comment||'')}</p><small class="muted">Servicio ${Number(x.service_rating||0)}/5 · Comida ${Number(x.food_rating||0)}/5</small></article>`).join('')||'<p class="small muted">Aún no hay comentarios.</p>'}</section></div></div>`;
   document.getElementById('v18BusinessBack').onclick=()=>{closeModal(m.id);window.scrollTo({top:0,behavior:'smooth'})};
   document.getElementById('v18BusinessDirections').onclick=()=>window.v17RouteToBusiness?.();
   document.getElementById('v18BusinessRate').onclick=()=>{closeModal(m.id);window.vcOpenRatings?.()};
   document.getElementById('v18BusinessFollow').onclick=async()=>{if(!customerSession){closeModal(m.id);renderCustomerProfile();openModal('customerProfileModal');return}try{await v18Community('toggle_follow',{});closeModal(m.id);window.v18OpenBusiness()}catch(e){toast(e.message,'error')}};
-  openModal(m.id);
+  /* MODIFICADO: la ventana ya está abierta; respetar su cierre durante la carga. */
 }
 window.v18OpenBusiness=v18OpenBusiness;
 
@@ -4656,28 +4664,30 @@ syncAdminVisibility=function(){
 };
 const originalPanelVerify=panelVerify;
 /* MODIFICADO: verificación única por usuario, sin ocultamiento preventivo. */
-let vcPromotionVerify=null,vcPromotionVerifyUser=null;
+/* MODIFICADO: confirmar una vez por sesión; no se guardan roles en almacenamiento local. */
+let vcPromotionVerify=null,vcPromotionVerifyUser=null,vcConfirmedAccess=null;
+const vcAccessClear=clearCustomerState;
+clearCustomerState=function(){vcConfirmedAccess=null;confirmedAdminUser=null;vcPromotionVerify=null;vcPromotionVerifyUser=null;return vcAccessClear.apply(this,arguments)};
 panelVerify=async function(){
- const uid=adminSession?.user?.id,epoch=customerSerial;
- if(!uid||!supabaseClient){confirmedAdminUser=null;panelAccess={owner:false,master:false,modules:[]};syncAdminVisibility();return false}
+ const uid=adminSession?.user?.id;
+ if(!uid||!supabaseClient){vcConfirmedAccess=null;confirmedAdminUser=null;panelAccess={owner:false,master:false,modules:[]};syncAdminVisibility();return false}
+ if(vcConfirmedAccess?.uid===uid){panelAccess={...vcConfirmedAccess.access,modules:[...vcConfirmedAccess.access.modules]};confirmedAdminUser=vcConfirmedAccess.allowed?uid:null;syncAdminVisibility();return vcConfirmedAccess.allowed}
  if(vcPromotionVerify&&vcPromotionVerifyUser===uid)return vcPromotionVerify;
+ vcConfirmedAccess=null;confirmedAdminUser=null;panelAccess={owner:false,master:false,modules:[]};syncAdminVisibility();
  vcPromotionVerifyUser=uid;
  const task=(async()=>{
   try{
-   const auth=await supabaseClient.auth.getUser();
-   if(adminSession?.user?.id!==uid||customerSerial!==epoch)return false;
-   if(auth.error||auth.data?.user?.id!==uid)throw Error('Sesión no válida');
    const res=await supabaseClient.rpc('catalog_panel',{p_action:'access',p_payload:{}});
-   if(adminSession?.user?.id!==uid||customerSerial!==epoch)return false;
-   if(res.error||res.data?.error)throw Error(res.error?.message||res.data.error);
+   if(adminSession?.user?.id!==uid||vcPromotionVerify!==task)return false;
+   if(res.error||res.data?.error||!res.data)throw Error(res.error?.message||res.data?.error||'No se pudieron consultar los permisos.');
    panelAccess={owner:false,master:false,modules:[],...res.data};
-   confirmedAdminUser=(panelAccess.master||panelAccess.owner||panelAccess.modules?.length)?uid:null;
+   panelAccess.modules=Array.isArray(panelAccess.modules)?panelAccess.modules:[];
+   const allowed=!!(panelAccess.master||panelAccess.owner||panelAccess.modules.length);
+   confirmedAdminUser=allowed?uid:null;
    if(billingAllowed()&&!panelAccess.modules.includes('subscription'))panelAccess.modules.push('subscription');
-   syncAdminVisibility();return confirmedAdminUser===uid;
-  }catch(e){
-   if(adminSession?.user?.id===uid&&customerSerial===epoch){confirmedAdminUser=null;panelAccess={owner:false,master:false,modules:[]};syncAdminVisibility()}
-   console.warn('Permisos administrativos no confirmados:',e.message);return false;
-  }
+   vcConfirmedAccess={uid,allowed,access:{...panelAccess,modules:[...panelAccess.modules]}};
+   syncAdminVisibility();return allowed;
+  }catch(e){console.warn('Permisos administrativos no confirmados:',e.message);return false}
  })();
  vcPromotionVerify=task;
  try{return await task}finally{if(vcPromotionVerify===task){vcPromotionVerify=null;vcPromotionVerifyUser=null}}
@@ -5528,7 +5538,8 @@ window.vcGallerySync={
  refresh:refreshGallery
 };
 const oldPublicLoad=loadPublicCloudState;loadPublicCloudState=async function(){const result=await oldPublicLoad.apply(this,arguments);installSync();if(!writing)paintGallery();return result};
-const oldBusiness=window.v18OpenBusiness;if(typeof oldBusiness==='function')window.v18OpenBusiness=async function(){await refreshGallery(true);const result=await oldBusiness.apply(this,arguments);viewRoot=null;paintGallery();return result};
+/* MODIFICADO: la sincronización de galería no bloquea la apertura desde el logo o los botones. */
+const oldBusiness=window.v18OpenBusiness;if(typeof oldBusiness==='function')window.v18OpenBusiness=async function(){const pending=oldBusiness.apply(this,arguments);const gallery=refreshGallery(true);const result=await pending;viewRoot=null;paintGallery();void gallery.then(()=>paintGallery()).catch(()=>{});return result};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refreshGallery()});
 setInterval(()=>{if(!document.hidden)void refreshGallery()},15000);
 setTimeout(()=>void refreshGallery(),700);
@@ -5590,6 +5601,7 @@ function parseSvg(markup){const wrap=document.createElement('span');wrap.innerHT
 function shape(svg){return svg.innerHTML.replace(/\s+/g,' ').trim()}
 function distinctIcons(){const groups=new Map();document.querySelectorAll('button,a.btn,label.btn').forEach(button=>{
  if(button.matches('.vc-refine-control,.vc-fold-toggle,.vc-category-option,.vc-category-trigger,[data-vc-section-jump],.product-visual,.product-zoom-trigger,.combo-photo,.vc-gallery-item,.vc-chef-avatar,.icon-option,.vc-pin-choice,.v14-star,[data-rate],[data-biz-rate],[data-star],[data-v14-star],[data-v15-star]')||button.closest('.ticket-preview,#tvPreview,.vc-rating-icons'))return;
+ /* MODIFICADO: conservar los SVG ya diferenciados, incluido WhatsApp. */
  const svg=[...button.children].find(n=>n.tagName.toLowerCase()==='svg');if(!svg)return;
  const root=button.closest('.product-admin,.saved-address,.cart-item,.followup-card,.v17-coupon-admin-card,.vc-media-card,.vc-promo-suggestion')||button.closest('#adminTabs,.v12-menu-list,.v12-bottom-nav,.v12-home-nav,#adminContent,.modal-body,.drawer-body,.header')||button.parentElement;
  let used=groups.get(root);if(!used){used=new Set();groups.set(root,used)}const signature=shape(svg);if(!used.has(signature)){used.add(signature);return}
@@ -5619,9 +5631,11 @@ function enhanceCategoryFilter(){const host=document.getElementById('vcCategoryC
 }
 function categoriesModal(){const host=document.querySelector('#v12CategoriesModal .modal-body'),list=host?.querySelector('.v12-menu-list');if(!list||host.querySelector('.vc-category-modal-search'))return;const input=document.createElement('input');input.type='search';input.className='input vc-category-modal-search';input.placeholder='Buscar categoría';input.setAttribute('aria-label','Buscar categoría');list.before(input);input.oninput=()=>{const q=input.value.toLocaleLowerCase('es-MX');list.querySelectorAll('button').forEach(b=>b.hidden=!b.textContent.toLocaleLowerCase('es-MX').includes(q))};list.querySelectorAll('button').forEach(b=>{const svg=[...b.children].find(n=>n.tagName.toLowerCase()==='svg');if(svg){const node=parseSvg(categoryMark(b.textContent));for(const a of svg.attributes)if(a.name!=='viewBox')node.setAttribute(a.name,a.value);svg.replaceWith(node)}})}
 function categoryManager(){const lists=[...document.querySelectorAll('#v14CategoryAdmin,.v15-category-table')];if(typeof activeAdmin!=='undefined'&&activeAdmin==='categories'){document.querySelectorAll('#adminContent>.section-card').forEach(card=>{const h=sectionHeading(card);if(h&&/Asignar productos/i.test(h.textContent))lists.push(card)})}lists.forEach(list=>{const holder=list.classList.contains('section-card')?list:list.parentElement;if(holder.querySelector('.vc-admin-category-find'))return;const input=document.createElement('input');input.type='search';input.className='input vc-admin-category-find';input.placeholder='Filtrar categorías y productos';input.setAttribute('aria-label','Filtrar categorías y productos');if(list===holder)sectionHeading(holder)?.after(input);else list.before(input);input.oninput=()=>{const query=input.value.toLocaleLowerCase('es-MX');list.querySelectorAll('[data-v14-cat],.v15-category-row,.product-admin').forEach(card=>card.hidden=!(card.matches('.product-admin')?((card.querySelector('strong')?.textContent||'')+' '+(card.querySelector('select')?.value||'')):card.textContent).toLocaleLowerCase('es-MX').includes(query))}})}
-function refresh(){queued=false;adminSearch();compactModules();enhanceCategoryFilter();categoriesModal();categoryManager();distinctIcons()}
-function schedule(){if(!queued){queued=true;queueMicrotask(refresh)}}
-new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
+/* MODIFICADO: agrupar cambios y evitar que el refinamiento se observe a sí mismo. */
+const refinementObserver=new MutationObserver(schedule);
+function refresh(){queued=false;refinementObserver.disconnect();try{adminSearch();compactModules();enhanceCategoryFilter();categoriesModal();categoryManager();distinctIcons()}finally{refinementObserver.observe(document.body,{childList:true,subtree:true})}}
+function schedule(){if(!queued){queued=true;requestAnimationFrame(refresh)}}
+refinementObserver.observe(document.body,{childList:true,subtree:true});
 document.addEventListener('click',event=>{document.querySelectorAll('.vc-category-surface').forEach(surface=>{if(!surface.contains(event.target))surface._vcClose?.()})});
 document.addEventListener('invalid',event=>{const card=event.target.closest('.vc-module-card');if(card?.dataset.vcFolded==='true')sectionHeading(card)?.querySelector('.vc-fold-toggle')?.click()},true);
 refresh();
@@ -5693,8 +5707,8 @@ function derive(scope,brand,art){const s=style(scope),get=(key,fallback)=>parse(
 }
 function ownText(el){return [...el.childNodes].some(n=>n.nodeType===3&&n.textContent.trim())}
 function monoSvg(svg){if(svg.closest('.vc-chef-avatar,#tvPreview,.ticket-canvas-preview,.ticket-preview'))return false;const literals=new Set();svg.querySelectorAll('[fill],[stroke]').forEach(n=>['fill','stroke'].forEach(k=>{const v=n.getAttribute(k);if(v&&!['none','currentColor','currentcolor','transparent'].includes(v))literals.add(v)}));return literals.size<=1}
-function audit(el){if(['SCRIPT','STYLE','LINK','META','OPTION','OPTGROUP','IMG','CANVAS','VIDEO','PICTURE','SOURCE'].includes(el.tagName)||el.closest('[hidden]')||!el.getClientRects().length)return;const svg=el.namespaceURI==='http://www.w3.org/2000/svg';if(svg&&el.tagName.toLowerCase()!=='svg')return;
- const control=el.matches('button,input,textarea,select,a,summary,[role="button"]'),icon=svg&&monoSvg(el);if(svg&&!icon)return;if(!control&&!icon&&!ownText(el))return;const s=style(el);if(s.visibility==='hidden'||s.display==='none')return;const bgs=background(el),color=parse(s.color);if(color&&minimum(color,bgs)<LIMIT)setProperty(el,'color',css(readable(color,bgs)));
+function audit(el){if(['SCRIPT','STYLE','LINK','META','OPTION','OPTGROUP','IMG','CANVAS','VIDEO','PICTURE','SOURCE'].includes(el.tagName)||el.closest('[hidden]'))return;const svg=el.namespaceURI==='http://www.w3.org/2000/svg';if(svg&&el.tagName.toLowerCase()!=='svg')return;
+ const control=el.matches('button,input,textarea,select,a,summary,[role="button"]'),icon=svg&&monoSvg(el);if(svg&&!icon)return;if(!control&&!icon&&!ownText(el))return;/* MODIFICADO: medir únicamente elementos que necesitan contraste. */if(!el.getClientRects().length)return;const s=style(el);if(s.visibility==='hidden'||s.display==='none')return;const bgs=background(el),color=parse(s.color);if(color&&minimum(color,bgs)<LIMIT)setProperty(el,'color',css(readable(color,bgs)));
  if(el.matches('input,textarea')){const placeholder=parse(getComputedStyle(el,'::placeholder').color)||color;if(placeholder)token(el,'--vc-placeholder',readable(placeholder,bgs))}
  if(icon){const fill=parse(s.fill);if(fill&&fill[3]>0&&minimum(fill,bgs)<LIMIT)setProperty(el,'fill',css(readable(fill,bgs)));const stroke=parse(s.stroke);if(stroke&&stroke[3]>0&&minimum(stroke,bgs)<LIMIT)setProperty(el,'stroke',css(readable(stroke,bgs)));el.querySelectorAll('[stroke],[fill]').forEach(part=>{for(const attr of ['stroke','fill']){const value=part.getAttribute(attr);if(!value||/^(none|currentcolor|transparent)$/i.test(value))continue;const paint=parse(value);if(paint&&paint[3]>0&&minimum(paint,bgs)<LIMIT)setProperty(part,attr,css(readable(paint,bgs)))}})}
 }
@@ -5705,7 +5719,8 @@ function request(root){if(root&&root.nodeType===1)roots.add(root);else full=true
 window.vcThemeContrast={request,refresh:()=>{full=true;if(frame)cancelAnimationFrame(frame);flush()}};
 function presentation(value){return String(value||'').split(';').filter(part=>/^\s*(?:color|background(?:-color|-image)?|fill|stroke|opacity|display|visibility|--(?:primary|secondary|text|muted|card|site-bg|product-icon-color))\s*:/i.test(part)).join(';')}
 new MutationObserver(items=>{let all=false;for(const item of items){if(item.type==='childList'){for(const node of item.addedNodes){if(node.nodeType===1)roots.add(node);else if(node.nodeType===3&&item.target.nodeType===1)roots.add(item.target)}if(item.removedNodes.length&&item.target.nodeType===1)roots.add(item.target)}else if(item.attributeName==='style'){const current=item.target.getAttribute('style')||'';if(ownStyles.get(item.target)===current)continue;if(presentation(current)!==presentation(item.oldValue)){if(item.target===document.body||item.target===document.documentElement)all=true;else roots.add(item.target)}}else if(item.attributeName==='class'||item.attributeName==='hidden'||item.attributeName==='disabled'){if(item.target===document.body)all=true;else roots.add(item.target)}}if(all)full=true;if((full||roots.size)&&!frame)frame=requestAnimationFrame(flush)}).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeOldValue:true,attributeFilter:['class','style','hidden','disabled']});
-for(const event of ['pointerover','pointerout','focusin','focusout'])document.addEventListener(event,e=>{const root=e.target.closest?.('button,a,input,select,textarea,.chip,.tab-btn,.icon-option,.vc-pin-choice');if(root)request(root)},true);
+/* MODIFICADO: ignorar movimientos entre hijos del mismo control. */
+for(const event of ['pointerover','pointerout','focusin','focusout'])document.addEventListener(event,e=>{const root=e.target.closest?.('button,a,input,select,textarea,.chip,.tab-btn,.icon-option,.vc-pin-choice');if(root&&!root.contains(e.relatedTarget))request(root)},true);
 window.addEventListener('pageshow',()=>request());window.addEventListener('beforeprint',()=>window.vcThemeContrast.refresh());
 request();
 })();
