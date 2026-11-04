@@ -4,7 +4,29 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Las más buscadas</title>
-<script id="vc-v33-early-brand">(function(){try{const saved=JSON.parse(localStorage.getItem('foodCatalogApp_v1')||'null');const name=saved?.config?.businessName;if(name&&typeof name==='string'){document.title=name;window.__vcEarlyBrand=name}}catch(e){}})();</script>
+<!-- MODIFICADO: aplicar la personalización antes del primer contenido visible. -->
+<script id="vc-v33-early-brand">
+(function(){
+'use strict';
+const root=document.documentElement;let cached=false,timer=null;
+function valid(d){return !!d&&typeof d.primary==='string'&&CSS.supports('color',d.primary)}
+function paint(d){const colors={primary:'--primary',secondary:'--secondary',accent:'--accent',text:'--text',card:'--card',siteBg:'--site-bg',iconColor:'--product-icon-color'};for(const [key,name] of Object.entries(colors))if(typeof d[key]==='string'&&CSS.supports('color',d[key]))root.style.setProperty(name,d[key]);root.style.setProperty('--vc-brand-primary',d.primary);if(d.iconColor&&CSS.supports('color',d.iconColor))root.style.setProperty('--vc-brand-icon',d.iconColor)}
+function failure(){if(!root.classList.contains('vc-theme-pending'))return;const text=document.getElementById('vcThemeBootText'),retry=document.getElementById('vcThemeBootRetry');if(text)text.textContent='No se pudo obtener la personalización. Comprueba tu conexión y vuelve a intentar.';if(retry)retry.hidden=false}
+function ready(d){if(!valid(d)){failure();return}paint(d);clearTimeout(timer);root.classList.remove('vc-theme-pending')}
+try{const saved=JSON.parse(localStorage.getItem('foodCatalogApp_v1')||'null'),name=saved?.config?.businessName;if(name&&typeof name==='string'){document.title=name;window.__vcEarlyBrand=name}if(valid(saved?.config?.design)){paint(saved.config.design);cached=true}}catch(e){}
+try{window.__vcEarlyThemeDark=localStorage.getItem('foodCatalogThemeMode')==='dark'}catch(e){}
+if(!cached){root.classList.add('vc-theme-pending');timer=setTimeout(failure,12000)}
+window.vcThemeBoot={ready,failure};
+})();
+</script>
+<!-- NUEVO: carga neutra únicamente cuando aún no se conoce la personalización. -->
+<style id="vc-theme-boot-style">
+html.vc-theme-pending,html.vc-theme-pending body{background:#171717!important}
+html.vc-theme-pending body>:not(#vcThemeBoot),html.vc-theme-pending body>:not(#vcThemeBoot) *{visibility:hidden!important}
+#vcThemeBoot{display:none}
+html.vc-theme-pending #vcThemeBoot{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;background:#171717;color:#f5f5f5;text-align:center;font:500 16px/1.5 system-ui,sans-serif;box-sizing:border-box}
+#vcThemeBootRetry{background:#3c3c3c;color:#fff;border:1px solid #8c8c8c;border-radius:10px;padding:10px 18px;font:inherit;cursor:pointer}#vcThemeBootRetry[hidden]{display:none}
+</style>
 
 <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
 <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
@@ -283,6 +305,11 @@ window.vcRefineIcons={icon,rating,repeated,pinLabel,pinSvg,context};
 
 </head>
 <body>
+<!-- NUEVO: restaurar el modo antes de construir la interfaz. -->
+<script>if(window.__vcEarlyThemeDark)document.body.classList.add('dark-mode');</script>
+<!-- NUEVO: carga inicial neutra, sin cambiar el contenido del negocio. -->
+<div id="vcThemeBoot" role="status" aria-live="polite"><span id="vcThemeBootText">Cargando personalización del negocio…</span><button type="button" id="vcThemeBootRetry" hidden>Reintentar</button></div>
+<script>/* NUEVO */document.getElementById('vcThemeBootRetry').onclick=()=>location.reload();</script>
 <div class="topbar"><div class="container header">
   <div class="brand">
     <div class="brand-logo" id="brandLogo"></div>
@@ -535,6 +562,8 @@ async function loadPublicCloudState(){
   if(settings?.data)state.config=merge(defaults.config,settings.data);
   if(Array.isArray(products))state.products=products.map(rowToProduct);
   saveLocal();applyDesign();renderHeader();renderCategories();renderCatalog();
+  /* NUEVO: mostrar el sitio solo después de aplicar la personalización recibida. */
+  window.vcThemeBoot?.ready(settings?.data?.design);
 }
 async function syncAdminStateToCloud(){
   if(!supabaseClient||!adminSession)return;
