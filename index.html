@@ -5766,5 +5766,27 @@ const open=window.v18OpenBusiness;window.v18OpenBusiness=async function(){const 
 })();
 </script>
 
+<!-- NUEVO: acciones relevantes con el color principal en ambos modos -->
+<style id="vc-relevant-primary-actions">
+/* NUEVO: solo colores; conservar dimensiones, eventos y estado deshabilitado. */
+body .btn:is(#vcViewOpinions,#v17Follow,#foodNewAddress,#foodSearchDestination,#foodGpsDestination,#foodCalculate,#addressGps,#addressFind,#foodOriginGps,#cartAddressGps,#geocodeClient):not(:disabled):not([aria-disabled="true"]),
+body .btn[data-vc-primary-action="true"]:not(:disabled):not([aria-disabled="true"]),
+#adminModal .btn[data-vc-primary-action="true"]:not(:disabled):not([aria-disabled="true"]){background:var(--primary)!important;color:var(--vc-on-primary,#fff)!important;opacity:1!important}
+</style>
+<script id="vc-relevant-primary-actions-runtime">
+/* NUEVO: incluir guardar, confirmar y continuar, también si se generan por JavaScript. */
+(function(){
+'use strict';
+const explicit=new Set(['vcViewOpinions','v17Follow','foodNewAddress','foodSearchDestination','foodGpsDestination','foodCalculate','addressGps','addressFind','foodOriginGps','cartAddressGps','geocodeClient']);
+let queued=false;const roots=new Set();
+function relevant(button){if(explicit.has(button.id))return true;if(button.matches('.danger,.success'))return false;const copy=button.cloneNode(true);copy.querySelectorAll('svg').forEach(svg=>svg.remove());const label=(copy.textContent||button.value||button.getAttribute('aria-label')||'').replace(/\s+/g,' ').trim();return /^(ver opiniones|seguir|siguiendo|guardar|confirmar|continuar|buscar|mi ubicaci[oó]n|actualizar recorrido)\b/i.test(label)}
+function paint(button){const active=relevant(button),marked=button.getAttribute('data-vc-primary-action')==='true';if(active===marked)return;if(active)button.setAttribute('data-vc-primary-action','true');else button.removeAttribute('data-vc-primary-action');window.vcThemeContrast?.request(button)}
+function flush(){queued=false;const buttons=new Set();for(const root of roots){if(!root.isConnected)continue;if(root.matches?.('.btn'))buttons.add(root);const parent=root.closest?.('.btn');if(parent)buttons.add(parent);root.querySelectorAll?.('.btn').forEach(button=>buttons.add(button))}roots.clear();buttons.forEach(paint)}
+function schedule(root){if(root?.nodeType!==1)return;roots.add(root);if(!queued){queued=true;queueMicrotask(flush)}}
+new MutationObserver(items=>{for(const item of items){if(item.type==='characterData'){schedule(item.target.parentElement);continue}schedule(item.target.closest?.('.btn'));for(const node of item.addedNodes){if(node.nodeType===1)schedule(node);else schedule(node.parentElement)}}}).observe(document.body,{childList:true,subtree:true,characterData:true});
+schedule(document.body);
+})();
+</script>
+
 </body>
 </html>
