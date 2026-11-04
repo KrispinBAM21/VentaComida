@@ -1195,7 +1195,7 @@ panelVerify=async function(){panelAccess={owner:false,master:false,modules:[]};s
 const v4Can=panelCan;panelCan=function(id){if(id==='subscription')return !!adminSession&&!!panelAccess.master;return v4Can(id)};
 adminTabs.push(['subscription','Sitio y suscripción',UI.business]);
 function renderAccountButton(){let b=document.getElementById('customerAccountBtn');if(!b){b=document.createElement('button');b.id='customerAccountBtn';b.className='icon-btn';document.getElementById('adminBtn').before(b);b.onclick=()=>{renderCustomerProfile();openModal('customerProfileModal')}}b.title=customerSession?'Mi cuenta':'Iniciar sesión o crear cuenta';b.setAttribute('aria-label',b.title);b.innerHTML=customerProfile?.avatar?`<img class="customer-avatar" src="${esc(customerProfile.avatar)}" alt="Perfil">`:CUSTOMER_ICON;syncAdminVisibility()}
-async function customerAuthChanged(session){const serial=++customerSerial,previous=customerSession?.user.id;customerSession=session||null;adminSession=session||null;if(!session){clearCustomerState();return}if(previous&&previous!==session.user.id){state.orders=[];customerProfile=null;customerAddresses=[];checkout.address='';checkout.lat=checkout.lng=null;orderRequestId='';sessionStorage.removeItem('foodCatalog.orderRequestId')}panelAccess={owner:false,master:false,modules:[]};renderAccountButton();try{await panelVerify();if(serial!==customerSerial)return;await refreshSiteStatus();if(serial!==customerSerial)return;const r=await customerRpc('me');if(serial!==customerSerial)return;customerProfile=r.profile;customerAddresses=r.addresses||[];avatarDraft=customerProfile.avatar||'';accountError='';checkout.name=customerProfile.full_name||session.user.user_metadata?.full_name||session.user.user_metadata?.name||'';checkout.phone=customerProfile.phone||'';checkout.callPhone=customerProfile.call_phone||'';}catch(e){if(serial!==customerSerial)return;accountError=e.message}if(serial!==customerSerial)return;renderAccountButton();renderSavedAddressShortcut();if(document.getElementById('customerProfileModal')?.classList.contains('show'))renderCustomerProfile();}
+async function customerAuthChanged(session){const serial=++customerSerial,previous=customerSession?.user.id;customerSession=session||null;adminSession=session||null;if(!session){clearCustomerState();return}if(previous&&previous!==session.user.id){state.orders=[];customerProfile=null;customerAddresses=[];checkout.address='';checkout.lat=checkout.lng=null;orderRequestId='';sessionStorage.removeItem('foodCatalog.orderRequestId')}/* MODIFICADO: no vaciar permisos al reconfirmar al mismo usuario. */ if(previous!==session.user.id)panelAccess={owner:false,master:false,modules:[]};renderAccountButton();try{await panelVerify();if(serial!==customerSerial)return;await refreshSiteStatus();if(serial!==customerSerial)return;const r=await customerRpc('me');if(serial!==customerSerial)return;customerProfile=r.profile;customerAddresses=r.addresses||[];avatarDraft=customerProfile.avatar||'';accountError='';checkout.name=customerProfile.full_name||session.user.user_metadata?.full_name||session.user.user_metadata?.name||'';checkout.phone=customerProfile.phone||'';checkout.callPhone=customerProfile.call_phone||'';}catch(e){if(serial!==customerSerial)return;accountError=e.message}if(serial!==customerSerial)return;renderAccountButton();renderSavedAddressShortcut();if(document.getElementById('customerProfileModal')?.classList.contains('show'))renderCustomerProfile();}
 const v4Header=renderHeader;renderHeader=function(){v4Header();renderAccountButton()};
 const v4Init=initSupabase;initSupabase=async function(){await v4Init();if(!supabaseClient)return;supabaseClient.auth.onAuthStateChange((event,session)=>{if(!session||event==='SIGNED_OUT'){clearCustomerState();return}setTimeout(()=>{if(event==='PASSWORD_RECOVERY'){customerAuthView='update';customerSession=session;adminSession=session;renderCustomerProfile();openModal('customerProfileModal')}else customerAuthChanged(session)},0)});const {data}=await supabaseClient.auth.getSession();await customerAuthChanged(data?.session);await refreshSiteStatus();};
 openAdmin=async function(){if(await panelVerify()){renderAdmin();openModal('adminModal')}else{customerAuthView='login';renderCustomerProfile();openModal('customerProfileModal')}};
@@ -1272,7 +1272,7 @@ async function refreshFoodOffers(){if(!supabaseClient)return;const{data,error}=a
 function offerForProduct(p){const time=Date.now()+offerClockOffset;return foodOffers.filter(o=>o.product_ids.includes(p.id)&&(!o.starts_at||new Date(o.starts_at).getTime()<=time)&&(!o.ends_at||new Date(o.ends_at).getTime()>time)).sort((a,b)=>b.percent-a.percent)[0]}
 function productPrice(p){const o=offerForProduct(p);return o?Math.round(p.price*(1-o.percent/100)*100)/100:p.price}
 subtotal=function(){return cartItems().reduce((s,x)=>s+x.qty*productPrice(x.p),0)};
-renderCatalog=function(){const grid=document.getElementById('catalogGrid');if(siteStatus&&!siteStatus.active&&!siteStatus.master){grid.replaceChildren();return}const arr=state.products.filter(p=>p.active&&(currentCategory==='Todos'||p.category===currentCategory)&&(`${p.name} ${p.description}`.toLowerCase().includes(searchTerm.toLowerCase())));grid.innerHTML=arr.map(p=>{const q=state.cart[p.id]||0,o=offerForProduct(p);return `<article class="product-card"><button type="button" class="product-visual product-zoom-trigger" data-view-product="${esc(p.id)}" aria-label="Ver ${esc(p.name)} en grande">${productVisual(p)}<span class="product-zoom-label">${UI.search}<span>Ver producto</span></span></button><div class="product-body"><div class="product-head"><h3 class="product-name">${esc(p.name)}</h3><div class="price">${o?`<del>${money(p.price)}</del>`:''}${money(productPrice(p))}</div></div>${o?`<div class="offer-badge">${esc(o.title)} · ${o.percent}%${o.ends_at?`<small>Hasta ${esc(new Date(o.ends_at).toLocaleString('es-MX'))}</small>`:''}</div>`:''}<p class="desc">${esc(p.description)}</p><div class="meta"><span>${esc(p.category)}</span><span>Stock: ${p.stock}</span></div><div class="qty-row">${p.stock<=0?'<span class="stock-out">Agotado</span>':`<div class="qty-control"><button class="icon-btn" data-dec="${esc(p.id)}" aria-label="Quitar cantidad" ${q<=0?'disabled':''}>${UI.minus}</button><span class="qty-value">${q}</span><button class="icon-btn" data-inc="${esc(p.id)}" aria-label="Agregar cantidad" ${q>=p.stock?'disabled':''}>${UI.plus}</button></div>`}<button class="btn secondary" data-inc="${esc(p.id)}" ${p.stock<=0||q>=p.stock?'disabled':''}>${UI.cart}<span>Agregar</span></button></div></div></article>`}).join('')||'<div class="section-card">No hay productos para mostrar.</div>';grid.querySelectorAll('[data-view-product]').forEach(b=>b.onclick=()=>openProductViewer(b.dataset.viewProduct,b));updateCartCount()};
+renderCatalog=function(){const grid=document.getElementById('catalogGrid');if(siteStatus&&!siteStatus.active&&!siteStatus.master){grid.replaceChildren();return}/* MODIFICADO: categoría virtual; no altera categorías guardadas. */ const arr=state.products.filter(p=>p.active&&(currentCategory==='__vc_promotions__'?!!offerForProduct(p):(currentCategory==='Todos'||p.category===currentCategory))&&(`${p.name} ${p.description}`.toLowerCase().includes(searchTerm.toLowerCase())));grid.innerHTML=arr.map(p=>{const q=state.cart[p.id]||0,o=offerForProduct(p);return `<article class="product-card"><button type="button" class="product-visual product-zoom-trigger" data-view-product="${esc(p.id)}" aria-label="Ver ${esc(p.name)} en grande">${productVisual(p)}<span class="product-zoom-label">${UI.search}<span>Ver producto</span></span></button><div class="product-body"><div class="product-head"><h3 class="product-name">${esc(p.name)}</h3><div class="price">${o?`<del>${money(p.price)}</del>`:''}${money(productPrice(p))}</div></div>${o?`<div class="offer-badge">${esc(o.title)} · ${o.percent}%${o.ends_at?`<small>Hasta ${esc(new Date(o.ends_at).toLocaleString('es-MX'))}</small>`:''}</div>`:''}<p class="desc">${esc(p.description)}</p><div class="meta"><span>${esc(p.category)}</span><span>Stock: ${p.stock}</span></div><div class="qty-row">${p.stock<=0?'<span class="stock-out">Agotado</span>':`<div class="qty-control"><button class="icon-btn" data-dec="${esc(p.id)}" aria-label="Quitar cantidad" ${q<=0?'disabled':''}>${UI.minus}</button><span class="qty-value">${q}</span><button class="icon-btn" data-inc="${esc(p.id)}" aria-label="Agregar cantidad" ${q>=p.stock?'disabled':''}>${UI.plus}</button></div>`}<button class="btn secondary" data-inc="${esc(p.id)}" ${p.stock<=0||q>=p.stock?'disabled':''}>${UI.cart}<span>Agregar</span></button></div></div></article>`}).join('')||'<div class="section-card">No hay productos para mostrar.</div>';grid.querySelectorAll('[data-view-product]').forEach(b=>b.onclick=()=>openProductViewer(b.dataset.viewProduct,b));updateCartCount()};
 function openProductViewer(id,focus){const p=state.products.find(p=>p.id===id);if(!p)return;productFocus=focus;const m=v4Modal('productViewerModal',p.name),body=m.querySelector('.modal-body');m.classList.add('product-viewer');m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');m.querySelector('.modal-head strong').textContent=p.name;body.innerHTML=`<div class="product-large-view"><div id="productZoomImage">${productVisual(p)}</div></div><label class="field">Ampliar imagen<input id="productZoomRange" type="range" min="100" max="250" value="100" aria-label="Ampliar imagen del producto"></label><h3>${esc(p.name)} · ${money(productPrice(p))}</h3><p>${esc(p.description)}</p><p class="small">${p.stock} disponibles</p>${panelButton('productViewerAdd','Agregar al pedido',UI.cart,'full')}`;body.querySelector('#productZoomRange').oninput=e=>body.querySelector('#productZoomImage').style.width=e.target.value+'%';body.querySelector('#productViewerAdd').disabled=p.stock<=0||(state.cart[id]||0)>=p.stock;body.querySelector('#productViewerAdd').onclick=()=>{changeQty(id,1);body.querySelector('#productViewerAdd').disabled=(state.cart[id]||0)>=p.stock;toast('Producto agregado.','ok')};openModal(m.id);m.querySelector('[data-close-modal]').focus()}
 const v5CloseModal=closeModal;closeModal=function(id){v5CloseModal(id);if(id==='productViewerModal')productFocus?.focus()};
 const v5Load=loadPublicCloudState;loadPublicCloudState=async function(){await v5Load();await refreshFoodOffers()};
@@ -4495,26 +4495,32 @@ syncAdminVisibility=function(){
   btn.tabIndex=permitted?0:-1;
 };
 const originalPanelVerify=panelVerify;
+/* MODIFICADO: verificación única por usuario, sin ocultamiento preventivo. */
+let vcPromotionVerify=null,vcPromotionVerifyUser=null;
 panelVerify=async function(){
-  confirmedAdminUser=null;
-  syncAdminVisibility();
-  const allowed=await originalPanelVerify();
-  if(!allowed||!supabaseClient||!adminSession){syncAdminVisibility();return false}
-  const uid=adminSession.user.id;
+ const uid=adminSession?.user?.id,epoch=customerSerial;
+ if(!uid||!supabaseClient){confirmedAdminUser=null;panelAccess={owner:false,master:false,modules:[]};syncAdminVisibility();return false}
+ if(vcPromotionVerify&&vcPromotionVerifyUser===uid)return vcPromotionVerify;
+ vcPromotionVerifyUser=uid;
+ const task=(async()=>{
   try{
-    const auth=await supabaseClient.auth.getUser();
-    if(auth.error||auth.data?.user?.id!==uid)throw Error('Sesión no válida');
-    const res=await supabaseClient.rpc('catalog_panel',{p_action:'access',p_payload:{}});
-    if(res.error||res.data?.error||adminSession?.user?.id!==uid)throw Error('No se pudieron verificar los permisos');
-    panelAccess={owner:false,master:false,modules:[],...res.data};
-    if(panelAccess.master||panelAccess.owner||panelAccess.modules?.length)confirmedAdminUser=uid;
+   const auth=await supabaseClient.auth.getUser();
+   if(adminSession?.user?.id!==uid||customerSerial!==epoch)return false;
+   if(auth.error||auth.data?.user?.id!==uid)throw Error('Sesión no válida');
+   const res=await supabaseClient.rpc('catalog_panel',{p_action:'access',p_payload:{}});
+   if(adminSession?.user?.id!==uid||customerSerial!==epoch)return false;
+   if(res.error||res.data?.error)throw Error(res.error?.message||res.data.error);
+   panelAccess={owner:false,master:false,modules:[],...res.data};
+   confirmedAdminUser=(panelAccess.master||panelAccess.owner||panelAccess.modules?.length)?uid:null;
+   if(billingAllowed()&&!panelAccess.modules.includes('subscription'))panelAccess.modules.push('subscription');
+   syncAdminVisibility();return confirmedAdminUser===uid;
   }catch(e){
-    confirmedAdminUser=null;
-    panelAccess={owner:false,master:false,modules:[]};
-    console.warn('Permisos administrativos no confirmados:',e.message);
+   if(adminSession?.user?.id===uid&&customerSerial===epoch){confirmedAdminUser=null;panelAccess={owner:false,master:false,modules:[]};syncAdminVisibility()}
+   console.warn('Permisos administrativos no confirmados:',e.message);return false;
   }
-  syncAdminVisibility();
-  return !!confirmedAdminUser;
+ })();
+ vcPromotionVerify=task;
+ try{return await task}finally{if(vcPromotionVerify===task){vcPromotionVerify=null;vcPromotionVerifyUser=null}}
 };
 syncAdminVisibility();
 // The single menu entry lets visitors read opinions AND submit a rating.
@@ -5111,5 +5117,113 @@ setInterval(()=>{if(!document.hidden){dailyNotice();openAccess()}},60000);
 @media(max-width:1150px){#v15Experience.vc-experience-fixed{grid-template-columns:minmax(0,1fr)}#v15Experience .vc-experience-buttons{justify-content:flex-start}}
 @media(max-width:799px){#v15Experience.vc-experience-fixed{width:calc(100% - 24px);padding:13px 14px}#v15Experience .vc-experience-buttons>.btn{flex:1 1 150px;white-space:normal}}
 </style>
+<!-- NUEVO: promociones, barra sincronizada y ajustes visuales solicitados -->
+<style id="vc-promotion-styles">
+/* NUEVO */
+#catalogPreparation{margin:8px auto;box-sizing:border-box;line-height:1.6}
+#v18BusinessBack{color:#fff;background:#172033;border-color:#d9e2f2}
+#v18BusinessBack:hover,#v18BusinessBack:focus-visible{background:#293b58;color:#fff;outline:2px solid #fff;outline-offset:2px}
+body.dark-mode #v18BusinessBack{background:#26364d;color:#fff;border-color:#c0cce0}
+.vc-time-track{display:block;flex:1 0 100%;height:10px;border-radius:99px;overflow:hidden;background:var(--secondary);border:1px solid var(--line);box-sizing:border-box}
+.vc-time-fill{display:block;height:100%;width:0;background:var(--primary);border-radius:inherit}
+.offer-countdown-row:has(.vc-time-track){display:flex;flex-wrap:wrap;width:100%;gap:7px}
+.vc-offer-time{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-variant-numeric:tabular-nums;color:var(--text)}
+.vc-promo-suggestions{border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;background:var(--card);color:var(--text)}
+.vc-promo-suggestions h3{margin:0 0 12px}.vc-promo-suggestion{padding:12px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.vc-promo-suggestion p{margin:5px 0}.vc-promo-suggestions .btn{background:var(--primary);color:#fff}
+.vc-match-pending{display:inline-flex;padding:5px 9px;background:var(--secondary);color:var(--text);border:1px solid var(--primary);border-radius:8px;font-weight:700}
+.vc-duration-fields{display:flex;gap:10px;flex-wrap:wrap}.vc-duration-fields>.field{flex:1 1 170px}
+#whatsappFab{perspective:650px}#whatsappFab svg{animation:vc-whatsapp-turn 7s infinite;transform-origin:center}
+@keyframes vc-whatsapp-turn{0%,70%{transform:rotateY(0deg) scaleX(1)}78%{transform:rotateY(90deg) scaleX(1)}78.01%{transform:rotateY(90deg) scaleX(-1)}85%,100%{transform:rotateY(180deg) scaleX(-1)}}
+@media(prefers-reduced-motion:reduce){#whatsappFab svg{animation:none}}
+</style>
+<script id="vc-promotion-enhancements">
+/* NUEVO: conserva el API y los registros existentes. */
+(function(){
+'use strict';
+const promoIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 4h10l8 8-9 9-9-9Z"/><circle cx="7.5" cy="8" r="1.5"/><path d="m12 9 4 7m-4-3h.01M16 12h.01"/></svg>';
+const oldCan=panelCan;
+panelCan=function(id){if(id==='promotions')return !!adminSession&&(!!panelAccess.master||!!panelAccess.owner||panelAccess.modules?.includes('products')||panelAccess.modules?.includes('promotions'));return oldCan(id)};
+const tab=adminTabs.find(t=>t[0]==='promotions');if(tab){tab[1]='Promociones por tiempo';tab[2]=promoIcon}
+const oldPane=renderAdminPane;
+renderAdminPane=async function(id){
+ if(id!=='promotions')return oldPane(id);
+ if(!panelCan(id))return toast('Necesitas permiso de Productos.','error');
+ if(pendingCloudModules.size){clearTimeout(cloudSyncTimer);await syncAdminStateToCloud()}
+ activeAdmin=id;const epoch=++panelEpoch,host=document.getElementById('adminContent');
+ document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));host.innerHTML='<p role="status">Cargando promociones…</p>';
+ try{await renderMarketing(host,id,epoch)}catch(e){if(epoch===panelEpoch)host.innerHTML='<div class="notice">'+esc(e.message)+'</div>'}
+};
+const oldMarketing=renderMarketing;
+renderMarketing=async function(host,mode,epoch,editing){
+ await oldMarketing(host,mode,epoch,editing);
+ if(mode!=='promotions'||epoch!==panelEpoch||!host.querySelector('#marketingSave'))return;
+ const end=host.querySelector('#marketingEnd'),start=host.querySelector('#marketingStart');
+ const fields=document.createElement('div');fields.className='vc-duration-fields';
+ fields.innerHTML='<label class="field">Programación<select class="select" id="vcPromotionTiming"><option value="dates">Por fecha y hora</option><option value="duration">Por duración</option></select></label><label class="field" id="vcPromotionDurationField" hidden>Duración en minutos<input class="input" id="vcPromotionDuration" type="number" min="1" step="1" placeholder="Escribe la duración"></label>';
+ start.closest('.admin-grid').before(fields);
+ const timing=fields.querySelector('select'),duration=fields.querySelector('input');
+ timing.onchange=()=>{fields.querySelector('#vcPromotionDurationField').hidden=timing.value!=='duration';end.readOnly=timing.value==='duration'};
+ const save=host.querySelector('#marketingSave'),oldSave=save.onclick;
+ save.onclick=e=>{
+  if(timing.value==='duration'){
+   const minutes=Number(duration.value);if(!Number.isInteger(minutes)||minutes<1)return toast('Escribe una duración válida en minutos.','error');
+   const begin=start.value?new Date(start.value):new Date(Date.now()+offerClockOffset);
+   if(!Number.isFinite(begin.getTime()))return toast('Revisa la fecha de inicio.','error');
+   if(!start.value)start.value=localDateInput(begin.toISOString());
+   end.value=localDateInput(new Date(new Date(start.value).getTime()+minutes*60000).toISOString());
+  }
+  if(!end.value)return toast('Indica la fecha final o una duración para esta promoción por tiempo.','error');
+  const begin=start.value?new Date(start.value):new Date(Date.now()+offerClockOffset),finish=new Date(end.value);
+  if(!Number.isFinite(finish.getTime())||finish<=begin||finish.getTime()<=Date.now()+offerClockOffset)return toast('La finalización debe ser posterior al inicio y a la hora actual.','error');
+  if(!host.querySelector('#marketingName').value.trim())return toast('Escribe el nombre de la promoción.','error');
+  const pct=Number(host.querySelector('#marketingPercent').value);
+  if(!Number.isFinite(pct)||pct<=0||pct>100)return toast('El descuento debe ser mayor que 0 y hasta 100%.','error');
+  if(!host.querySelector('[data-marketing-product]:checked'))return toast('Selecciona al menos un producto.','error');
+  if(!start.value)start.value=localDateInput(begin.toISOString());
+  return oldSave(e);
+ };
+ // La nota se conserva; únicamente se añade su estado visible.
+ host.querySelectorAll('.saved-address').forEach(row=>{if(/emparejamiento por confirmar/i.test(row.textContent))row.insertAdjacentHTML('beforeend','<span class="vc-match-pending">Pendiente</span>')});
+};
+const oldCategories=renderCategories;
+renderCategories=function(){oldCategories();const host=document.getElementById('categoryChips');if(!host||host.querySelector('[data-vc-promotion-category]'))return;const b=document.createElement('button');b.className='chip';b.dataset.vcPromotionCategory='true';b.innerHTML='<span>Promociones</span>';b.classList.toggle('active',currentCategory==='__vc_promotions__');b.onclick=()=>{currentCategory='__vc_promotions__';document.querySelector('#v12HomeNav [data-v12-view="home"]')?.click();catalogPage=1;renderCategories();renderCatalog()};host.append(b)};
+const oldOpenCategories=v12OpenCategories;
+v12OpenCategories=function(){oldOpenCategories();const host=document.querySelector('#v12CategoriesModal .v12-menu-list');if(!host)return;const b=document.createElement('button');b.className='v12-menu-item';b.innerHTML='<span>Promociones vigentes</span>';b.onclick=()=>{currentCategory='__vc_promotions__';document.querySelector('#v12HomeNav [data-v12-view="home"]')?.click();catalogPage=1;renderCategories();renderCatalog();closeModal('v12CategoriesModal')};host.append(b)};
+const oldNav=v12HomeNav;
+v12HomeNav=function(){const host=oldNav();if(!host.querySelector('[data-vc-promotion-nav]')){const b=document.createElement('button');b.className='chip';b.dataset.vcPromotionNav='true';b.textContent='Promociones';b.onclick=()=>{currentCategory='__vc_promotions__';document.querySelector('#v12HomeNav [data-v12-view="home"]')?.click();catalogPage=1;renderCategories();renderCatalog()};host.append(b)}return host};
+// Un único instante alimenta barra y texto. No se inventa un inicio para registros antiguos.
+function timeState(o,now){
+ const start=o.starts_at?new Date(o.starts_at).getTime():NaN,end=o.ends_at?new Date(o.ends_at).getTime():NaN;
+ const future=Number.isFinite(start)&&now<start,expired=Number.isFinite(end)&&now>=end;
+ const target=future?start:end,seconds=Number.isFinite(target)?Math.max(0,Math.ceil((target-now)/1000)):null;
+ const progress=expired?100:future?0:Number.isFinite(start)&&Number.isFinite(end)&&end>start?Math.max(0,Math.min(100,(now-start)/(end-start)*100)):null;
+ return {future,expired,seconds,progress};
+}
+function remaining(s){const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return d+' días '+String(h).padStart(2,'0')+' h '+String(m).padStart(2,'0')+' min '+String(s%60).padStart(2,'0')+' s'}
+function paintTime(el,o,now){
+ const t=timeState(o,now);el.textContent=t.expired?'Oferta finalizada':t.seconds===null?'Sin fecha límite':(t.future?'Comienza en ':'Termina en ')+remaining(t.seconds);
+ const row=el.parentElement;row.classList.add('vc-offer-time');row.querySelectorAll('.offer-progress,.offer-clock-icon').forEach(x=>x.remove());
+ let track=row.querySelector('.vc-time-track');
+ if(t.progress!==null){if(!track){track=document.createElement('span');track.className='vc-time-track';track.setAttribute('role','progressbar');track.setAttribute('aria-label','Tiempo transcurrido de la promoción');track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax','100');track.innerHTML='<span class="vc-time-fill"></span>';row.append(track)}track.setAttribute('aria-valuenow',t.progress.toFixed(2));track.firstElementChild.style.width=t.progress+'%'}else track?.remove();
+ if(t.expired)row.closest('.flash-offer')?.querySelector('[data-open-combo]')?.setAttribute('disabled','');
+}
+function updateTimes(){const now=Date.now()+offerClockOffset;document.querySelectorAll('[data-flash-id]').forEach(el=>{const o=foodOffers.find(x=>x.id===el.dataset.flashId);if(o)paintTime(el,o,now)});document.querySelectorAll('[data-offer-end]').forEach(el=>{const card=el.closest('.product-card'),id=card?.querySelector('[data-view-product]')?.dataset.viewProduct,o=foodOffers.find(x=>x.ends_at===el.dataset.offerEnd&&x.product_ids?.some(v=>String(v)===String(id)));if(o)paintTime(el,o,now)});}
+const oldTick=tickFlashOffers;tickFlashOffers=function(){oldTick();updateTimes()};
+const oldProductTick=tickOfferCountdown;tickOfferCountdown=function(){oldProductTick();updateTimes()};
+function suggestions(){
+ const host=document.getElementById('cartBody');if(!host)return;host.querySelector('#vcPromotionSuggestions')?.remove();
+ if(v6Pending||siteStatus?.active===false)return;
+ const products=state.products.filter(p=>p.active&&p.stock>0&&!v12IsInternalProduct(p)&&offerForProduct(p)&&(state.cart[p.id]||0)<p.stock);
+ if(!products.length)return;const section=document.createElement('section');section.id='vcPromotionSuggestions';section.className='vc-promo-suggestions';
+ section.innerHTML='<h3>Aprovecha estas promociones</h3>'+products.map(p=>{const o=offerForProduct(p);return '<article class="vc-promo-suggestion"><div><strong>'+esc(p.name)+'</strong><p>'+esc(o.title)+' · '+o.percent+'% · '+money(productPrice(p))+'</p></div><button type="button" class="btn" data-vc-promotion-add="'+esc(p.id)+'">'+(v10IsFood(p)?'Personalizar y agregar':'Agregar')+'</button></article>'}).join('');
+ section.querySelectorAll('[data-vc-promotion-add]').forEach(b=>b.onclick=()=>{const p=state.products.find(x=>x.id===b.dataset.vcPromotionAdd);if(!p||!offerForProduct(p)||!p.active||(state.cart[p.id]||0)>=p.stock){suggestions();return toast('La promoción o las existencias ya no están disponibles.','info')}if(v10IsFood(p)){openProductViewer(p.id,b);return}changeQty(p.id,1);renderCart()});host.append(section);
+}
+const oldCart=renderCart;renderCart=function(){const result=oldCart();suggestions();return result};
+const oldCatalog=renderCatalog;renderCatalog=function(){const result=oldCatalog();updateTimes();if(document.getElementById('cartDrawer')?.classList.contains('show'))suggestions();return result};
+renderCategories();v12HomeNav();updateTimes();
+})();
+</script>
+
 </body>
 </html>
